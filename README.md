@@ -1,2 +1,2 @@
-# nutrition_app
+# Nutrition App
 Nutrition pack recommendation system! 
