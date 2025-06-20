@@ -2,6 +2,16 @@ from sqlalchemy import Column, Integer, String, Float, Boolean, JSON, DateTime
 from sqlalchemy.sql import func
 from app.db.session import Base
 
+"""
+
+SQLAlchemy models for the database
+
+- Product: Represents a snack/product
+- UserInput: Represents a user's input
+- RecommendationResponse: Represents the response from the recommendation system
+
+"""
+
 class Product(Base):
     __tablename__ = "products"
     

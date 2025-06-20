@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from typing import List
 
+"""
+Contains pydantic models (data validation/serialization)
+"""
+
 class UserInput(BaseModel):
     description: str
 
