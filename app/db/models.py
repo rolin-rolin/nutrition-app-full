@@ -62,6 +62,8 @@ class UserInput(Base):
     # Timing context
     timing = Column(String)  # 'pre-workout', 'post-workout', 'general'
     
+    preferences = Column(JSON, nullable=True)  # User preferences for recommendations
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships

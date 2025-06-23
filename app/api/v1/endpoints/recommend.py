@@ -6,5 +6,5 @@ router = APIRouter()
 
 @router.post("/", response_model=RecommendationResponse)
 async def recommend(input: UserInput):
-    recommendations = await get_recommendations(input.description)
+    recommendations = await get_recommendations(input.description, input.preferences)
     return recommendations 
