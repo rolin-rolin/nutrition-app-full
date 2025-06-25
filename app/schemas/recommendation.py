@@ -1,14 +1,29 @@
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
+from .product import Product
 
 """
 Contains pydantic models (data validation/serialization)
 """
 
-class UserInput(BaseModel):
-    description: str
+class RecommendationRequest(BaseModel):
+    """Request model for getting a full snack recommendation."""
+    user_query: str
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    sex: Optional[str] = None
+    exercise_type: Optional[str] = None
+    exercise_duration_minutes: Optional[int] = None
+    exercise_intensity: Optional[str] = None
+    timing: Optional[str] = None
     preferences: Optional[Dict[str, Any]] = None
 
+    class Config:
+        orm_mode = True
+
 class RecommendationResponse(BaseModel):
-    snacks: List[str]
-    reasoning: str 
+    recommended_products: List[Product]
+    reasoning: str
+
+    class Config:
+        orm_mode = True 
