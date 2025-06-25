@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from .product import Product
+from .macro_target import MacroTargetResponse
 
 """
 Contains pydantic models (data validation/serialization)
@@ -23,6 +24,7 @@ class RecommendationRequest(BaseModel):
 
 class RecommendationResponse(BaseModel):
     recommended_products: List[Product]
+    macro_targets: MacroTargetResponse
     reasoning: str
 
     class Config:
