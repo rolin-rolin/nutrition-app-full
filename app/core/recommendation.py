@@ -2,6 +2,7 @@ import os
 from typing import List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 import itertools
+import re
 
 from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
 from app.schemas.product import Product as ProductSchema
@@ -88,37 +89,60 @@ def _find_optimal_snack_combination(products: List[Product], macro_targets: Macr
     
     return best_combination or products[:min_snacks]
 
+def extract_soft_guidance(context: str) -> str:
+    """Extract soft guidance lines from the RAG context."""
+    # Simple heuristic: lines that start with advice verbs
+    advice_verbs = [
+        r"prioritize", r"favor", r"choose", r"avoid", r"prefer", r"focus on", r"look for", r"select"
+    ]
+    pattern = re.compile(rf"^({'|'.join(advice_verbs)})", re.IGNORECASE)
+    lines = context.splitlines()
+    guidance_lines = [line.strip() for line in lines if pattern.match(line.strip())]
+    # Fallback: if nothing found, use the first 2 lines
+    if not guidance_lines:
+        guidance_lines = lines[:2]
+    return " ".join(guidance_lines)
+
 async def get_recommendations(request: RecommendationRequest, db: Session) -> RecommendationResponse:
     preferences = request.preferences or {}
     
-    # 1. Get Macro Targets
+    # 1. Get RAG Context and Macro Targets (Unified)
     macro_targeting_service = MacroTargetingService(openai_api_key=os.getenv("OPENAI_API_KEY"))
     user_input_db = UserInput(**request.dict())
-    macro_target = macro_targeting_service.generate_macro_targets(user_input_db)
+    context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
     
-    reasoning_steps = [f"Generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs."]
+    reasoning_steps = [f"Retrieved RAG context and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs."]
     
-    # 2. Augment Query (Soft Preferences)
-    soft_preferences = {
-        key: preferences.get(key) for key in 
-        ["flavor_preferences", "texture_preferences", "flavor_exclusions"] if preferences.get(key)
-    }
-    augmented_query = _build_augmented_query(macro_target, soft_preferences)
-    reasoning_steps.append(f"Augmented search query with soft preferences: '{augmented_query}'")
+    # 2. Extract Soft Guidance from Context
+    soft_guidance = extract_soft_guidance(context)
+    reasoning_steps.append(f"Extracted soft guidance from context: '{soft_guidance}'")
     
-    # 3. Vector Search (Simulated)
+    # 3. Build Vector Search Query (Soft Guidance + User Soft Preferences)
+    user_soft_prefs = []
+    if preferences.get("flavor_preferences"):
+        user_soft_prefs.append(f"flavor: {'/'.join(preferences['flavor_preferences'])}")
+    if preferences.get("texture_preferences"):
+        user_soft_prefs.append(f"texture: {'/'.join(preferences['texture_preferences'])}")
+    if preferences.get("flavor_exclusions"):
+        user_soft_prefs.append(f"not: {'/'.join(preferences['flavor_exclusions'])}")
+    vector_query = f"{soft_guidance} {' '.join(user_soft_prefs)}"
+    reasoning_steps.append(f"Built vector search query: '{vector_query}'")
+    
+    # 4. Retrieve Snacks Using Vector Query (Simulated)
+    # TODO: Replace with real vector search
     all_products = db.query(Product).all()
-    reasoning_steps.append(f"Simulating vector search with augmented query. Starting with {len(all_products)} total products.")
+    candidate_snacks = all_products  # Simulate: use all products for now
+    reasoning_steps.append(f"Simulated vector search. {len(candidate_snacks)} candidate snacks.")
     
-    # 4. Apply Hard Filters
+    # 5. Apply Hard Filters
     hard_constraints = {
         key: preferences.get(key) for key in 
         ["dietary_restrictions", "ingredient_exclusions"] if preferences.get(key)
     }
-    filtered_products = _apply_hard_filters(all_products, hard_constraints)
+    filtered_products = _apply_hard_filters(candidate_snacks, hard_constraints)
     reasoning_steps.append(f"Applied hard filters for {list(hard_constraints.keys())}. {len(filtered_products)} products remaining.")
 
-    # 5. Find Optimal Combination (5-10 snacks)
+    # 6. Find Optimal Combination (5-10 snacks)
     final_recommendations = _find_optimal_snack_combination(filtered_products, macro_target, min_snacks=5, max_snacks=10)
     
     # Calculate actual totals from the combination

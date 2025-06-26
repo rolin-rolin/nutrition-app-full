@@ -254,6 +254,19 @@ class MacroTargetingService:
             db.refresh(macro_target)
             return macro_target
 
+    def get_context_and_macro_targets(self, user_input: UserInput):
+        """
+        Retrieve the RAG context and compute macro targets for a user input.
+        Returns (context, macro_target)
+        """
+        # Build user query from context
+        user_query = self._build_user_query(user_input)
+        # Retrieve relevant context
+        context = self.retrieve_context(user_query)
+        # Generate macro targets as before
+        macro_target = self.generate_macro_targets(user_input)
+        return context, macro_target
+
 
 # Example usage function
 def get_macro_targets(
