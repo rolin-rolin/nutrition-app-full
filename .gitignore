@@ -41,5 +41,8 @@ ENV/
 # Logs
 *.log 
 
+# Unnecessary Metadata
+.DS_Store
+
 #Rag readme
 RAG_PIPELINE_README.md
