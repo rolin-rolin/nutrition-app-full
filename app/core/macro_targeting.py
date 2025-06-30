@@ -10,9 +10,8 @@ Handles document loading, vector store management, and GPT interactions
 import os
 import json
 from typing import Dict, Optional, Tuple
-from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_chroma import Chroma
 from langchain.schema import SystemMessage, HumanMessage
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
