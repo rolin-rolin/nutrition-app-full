@@ -3,6 +3,8 @@ from typing import List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 import itertools
 import re
+from dotenv import load_dotenv
+load_dotenv()
 
 from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
 from app.schemas.product import Product as ProductSchema

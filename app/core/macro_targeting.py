@@ -16,13 +16,15 @@ from langchain.schema import SystemMessage, HumanMessage
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
 
 from app.db.models import UserInput, MacroTarget
 from app.db.session import get_db
 
+load_dotenv()
 
 class MacroTargetingService:
-    def __init__(self, openai_api_key: str, rag_store_path: str = "./rag_store"):
+    def __init__(self, openai_api_key: Optional[str] = None, rag_store_path: str = "./rag_store"):
         """
         Initialize the macro targeting service with RAG capabilities.
         
@@ -30,13 +32,14 @@ class MacroTargetingService:
             openai_api_key: OpenAI API key for embeddings and chat
             rag_store_path: Path to store Chroma vector database
         """
+        if openai_api_key is None:
+            openai_api_key = os.getenv("OPENAI_API_KEY")
         self.openai_api_key = openai_api_key
         self.rag_store_path = rag_store_path
-        os.environ["OPENAI_API_KEY"] = openai_api_key
         
-        # Initialize components
-        self.embeddings = OpenAIEmbeddings()
-        self.llm = ChatOpenAI(model="gpt-4", temperature=0.4)
+        # Initialize components with explicit API key
+        self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
+        self.llm = ChatOpenAI(model="gpt-4", temperature=0.4, openai_api_key=self.openai_api_key)
         
         # Initialize vector store
         self._initialize_vectorstore()

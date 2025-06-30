@@ -21,9 +21,6 @@ from app.schemas.recommendation import RecommendationRequest
 def test_recommendation_pipeline():
     """Test the full recommendation pipeline."""
     
-    # Set a dummy OpenAI API key for testing (need real one for full functionality)
-    os.environ["OPENAI_API_KEY"] = "sk-test-key-for-testing"
-    
     # Create test requests
     test_cases = [
         {
