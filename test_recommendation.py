@@ -8,6 +8,8 @@ import os
 import sys
 import asyncio
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 # Add the app directory to the Python path
 sys.path.append(str(Path(__file__).parent))
