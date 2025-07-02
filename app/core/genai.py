@@ -17,7 +17,7 @@ def filter_products_with_genai(products: List[Product], user_query: str, example
     from app.core.nlp import construct_prompt
     prompt = construct_prompt(user_query, examples)
     # Add product info to the prompt (simplified)
-    prompt += f"\nProducts: {[p.dict() for p in products]}\nFiltered Recommendations:"
+    prompt += f"\nProducts: {[p.model_dump() for p in products]}\nFiltered Recommendations:"
     # Call LLM
     response = call_llm(prompt)
     # TODO: Parse response and map back to Product objects
