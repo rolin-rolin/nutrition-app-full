@@ -42,7 +42,7 @@ class Product(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # We'll add embedding storage later
+    # We'll add embedding storage later 
 
 
 class UserInput(Base):

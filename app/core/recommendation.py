@@ -5,7 +5,6 @@ import itertools
 import re
 from dotenv import load_dotenv
 load_dotenv()
-
 from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
 from app.schemas.product import Product as ProductSchema
 from app.schemas.macro_target import MacroTargetResponse
@@ -110,7 +109,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     
     # 1. Get RAG Context and Macro Targets (Unified)
     macro_targeting_service = MacroTargetingService(openai_api_key=os.getenv("OPENAI_API_KEY"))
-    user_input_db = UserInput(**request.dict())
+    user_input_db = UserInput(**request.model_dump())
     context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
     
     reasoning_steps = [f"Retrieved RAG context and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs."]
@@ -155,7 +154,8 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     
     reasoning_steps.append(f"Found optimal combination of {len(final_recommendations)} snacks that provides: {total_protein:.1f}g protein, {total_carbs:.1f}g carbs, {total_fat:.1f}g fat, {total_calories:.0f} calories.")
 
-    response_products = [ProductSchema.from_orm(p) for p in final_recommendations]
+    response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
+
     
     # Convert MacroTarget to MacroTargetResponse for the API response
     macro_target_response = MacroTargetResponse(

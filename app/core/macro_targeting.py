@@ -13,7 +13,7 @@ from typing import Dict, Optional, Tuple
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_chroma import Chroma
 from langchain.schema import SystemMessage, HumanMessage
-from langchain.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv

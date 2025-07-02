@@ -9,6 +9,7 @@ from app.core.recommendation import (
 from app.schemas.recommendation import RecommendationRequest
 from app.db.models import Product, MacroTarget, UserInput
 from app.core.macro_targeting import MacroTargetingService
+import datetime
 
 # 1. Test soft guidance extraction
 def test_extract_soft_guidance():
@@ -59,15 +60,23 @@ async def test_get_recommendations(
 ):
     # Mock macro target and context
     macro_target = MacroTarget(
-        target_protein=20, target_carbs=30, target_fat=10, target_calories=250, target_electrolytes=1
+        target_protein=20, target_carbs=30, target_fat=10, target_calories=250, target_electrolytes=1,
+        reasoning="Test reasoning",
+        rag_context="Test context",
+        created_at=datetime.datetime.now()
     )
     mock_get_context_and_targets.return_value = (
         "Prioritize snacks with more protein than fiber.", macro_target
     )
-    # Mock filtered products and combo
+    # Use SQLAlchemy Product model for test products
+    now_iso = datetime.datetime.now().isoformat()
     products = [
-        Product(name="A", protein=10, carbs=10, fat=5, calories=100),
-        Product(name="B", protein=5, carbs=20, fat=5, calories=150),
+        Product(
+            id=1, name="A", protein=10, carbs=10, fat=5, calories=100, verified=True, description="desc", categories=[], dietary_flags=[], timing_suitability=[], brand="", serving_size="", fiber=0, sugar=0, source="", created_at=now_iso, updated_at=now_iso
+        ),
+        Product(
+            id=2, name="B", protein=5, carbs=20, fat=5, calories=150, verified=True, description="desc", categories=[], dietary_flags=[], timing_suitability=[], brand="", serving_size="", fiber=0, sugar=0, source="", created_at=now_iso, updated_at=now_iso
+        ),
     ]
     mock_hard_filters.return_value = products
     mock_find_combo.return_value = products
@@ -97,26 +106,18 @@ def test_generate_macro_targets_parses_gpt_json():
     )
 
     # Simulate a GPT JSON response
-    fake_gpt_response = MagicMock()
-    fake_gpt_response.content = '''
-    {
-        "target_calories": 400,
-        "target_protein": 30,
-        "target_carbs": 60,
-        "target_fat": 10,
-        "target_electrolytes": 2.5
-    }
-    '''
+    class FakeResponse:
+        def __init__(self, content):
+            self.content = content
+    fake_gpt_response = FakeResponse('{"target_calories": 400, "target_protein": 30, "target_carbs": 60, "target_fat": 10, "target_electrolytes": 2.5}')
 
-    # Patch ChatOpenAI to return the fake response
-    with patch("app.core.macro_targeting.ChatOpenAI") as MockLLM, \
-         patch("app.core.macro_targeting.OpenAIEmbeddings"):
-        mock_llm_instance = MockLLM.return_value
-        mock_llm_instance.__call__.return_value = fake_gpt_response
-
+    # Patch OpenAIEmbeddings to avoid real API call
+    with patch("app.core.macro_targeting.OpenAIEmbeddings"):
         service = MacroTargetingService(openai_api_key="sk-fake")
         # Patch retrieve_context to avoid vectorstore call
         service.retrieve_context = MagicMock(return_value="context")
+        # Patch llm to return our fake response
+        service.llm = lambda *a, **kw: fake_gpt_response
 
         macro_target = service.generate_macro_targets(user_input)
 

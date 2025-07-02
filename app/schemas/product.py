@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional
 
 class ProductBase(BaseModel):
@@ -19,9 +19,10 @@ class ProductBase(BaseModel):
 class ProductCreate(ProductBase):
     source: str
     
-class Product(ProductBase):
+class Product(BaseModel):
     id: int
     verified: bool
-    
-    class Config:
-        orm_mode = True 
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True) 

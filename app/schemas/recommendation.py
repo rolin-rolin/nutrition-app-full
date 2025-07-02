@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional, Dict, Any
 from .product import Product
 from .macro_target import MacroTargetResponse
@@ -19,13 +19,11 @@ class RecommendationRequest(BaseModel):
     timing: Optional[str] = None
     preferences: Optional[Dict[str, Any]] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RecommendationResponse(BaseModel):
     recommended_products: List[Product]
     macro_targets: MacroTargetResponse
-    reasoning: str
+    reasoning: str 
 
-    class Config:
-        orm_mode = True 
+    model_config = ConfigDict(from_attributes=True)
