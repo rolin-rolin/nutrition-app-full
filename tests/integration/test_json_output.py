@@ -5,6 +5,11 @@ Test script to demonstrate JSON output from GPT for macro targeting.
 This script shows how GPT now returns structured JSON instead of free text.
 """
 
+import pytest
+
+# Mark all tests in this file as integration tests
+pytestmark = pytest.mark.integration
+
 import os
 import json
 import sys

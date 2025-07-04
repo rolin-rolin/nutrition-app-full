@@ -70,38 +70,59 @@ class MacroTargetingService:
         self.vectorstore.persist()
     
     def _load_documents(self):
-        """Load nutrition guideline documents."""
+        """Load nutrition guideline documents from the nutrition_guidelines directory."""
         documents = []
-        guidelines_dir = "guidelines"  # Adjust path as needed
+        guidelines_dir = "nutrition_guidelines"  # Path to the nutrition guidelines directory
         
-        # List of guideline files to load
-        guideline_files = [
-            "carbohydrate_guidelines.md",
-            "protein_guidelines.md", 
-            "fat_guidelines.md",
-            "post_workout_nutrition.md",
-            "pre_workout_nutrition.md"
-        ]
+        # Age groups and their corresponding directories
+        age_groups = ["age6-11", "age12-18", "age19-59"]
         
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         
-        for filename in guideline_files:
+        for age_group in age_groups:
+            age_group_path = os.path.join(guidelines_dir, age_group)
+            if not os.path.exists(age_group_path):
+                print(f"Warning: Age group directory {age_group_path} does not exist")
+                continue
+                
+            # Load all .md files in the age group directory
             try:
-                filepath = os.path.join(guidelines_dir, filename)
-                if os.path.exists(filepath):
-                    loader = TextLoader(filepath)
-                    docs = loader.load()
-                    documents.extend(splitter.split_documents(docs))
+                for filename in os.listdir(age_group_path):
+                    if filename.endswith('.md'):
+                        filepath = os.path.join(age_group_path, filename)
+                        try:
+                            loader = TextLoader(filepath)
+                            docs = loader.load()
+                            # Add metadata to help with retrieval
+                            for doc in docs:
+                                doc.metadata.update({
+                                    'age_group': age_group,
+                                    'filename': filename,
+                                    'filepath': filepath
+                                })
+                            documents.extend(splitter.split_documents(docs))
+                            print(f"Loaded: {filepath}")
+                        except Exception as e:
+                            print(f"Warning: Could not load {filepath}: {e}")
             except Exception as e:
-                print(f"Warning: Could not load {filename}: {e}")
+                print(f"Warning: Could not access directory {age_group_path}: {e}")
         
+        print(f"Total documents loaded: {len(documents)}")
         return documents
     
     def retrieve_context(self, user_query: str, k: int = 3) -> str:
         """Retrieve relevant context from the vector store."""
         retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
         results = retriever.invoke(user_query)
-        return "\n\n".join([doc.page_content for doc in results])
+        
+        # Format results with metadata information for better context
+        formatted_results = []
+        for doc in results:
+            # Add metadata information to help with context
+            metadata_info = f"[Source: {doc.metadata.get('age_group', 'Unknown')} - {doc.metadata.get('filename', 'Unknown')}]"
+            formatted_results.append(f"{metadata_info}\n{doc.page_content}")
+        
+        return "\n\n".join(formatted_results)
     
     def _extract_macro_values_from_json(self, response_text: str) -> Dict[str, Any]:
         """Extract macro values and timing breakdown from GPT JSON response."""
@@ -216,11 +237,23 @@ class MacroTargetingService:
         """Build a natural language query from user input context."""
         query_parts = []
         
-        if user_input.age and user_input.weight_kg and user_input.sex:
-            query_parts.append(f"I'm a {user_input.age}-year-old {user_input.sex}, {user_input.weight_kg} kg.")
+        # Add age-specific information to help with retrieval
+        if user_input.age:
+            if user_input.age <= 11:
+                age_group = "6-11 years old child"
+            elif user_input.age <= 18:
+                age_group = "12-18 years old adolescent"
+            else:
+                age_group = "19-59 years old adult"
+            query_parts.append(f"I'm a {age_group}.")
         
+        if user_input.weight_kg and user_input.sex:
+            query_parts.append(f"I'm a {user_input.sex}, {user_input.weight_kg} kg.")
+        
+        # Add exercise type and duration with duration classification
         if user_input.exercise_type and user_input.exercise_duration_minutes:
-            query_parts.append(f"I'm planning to do {user_input.exercise_duration_minutes} minutes of {user_input.exercise_type}.")
+            duration_type = "short session" if user_input.exercise_duration_minutes < 60 else "long session"
+            query_parts.append(f"I'm planning to do {user_input.exercise_duration_minutes} minutes of {user_input.exercise_type} ({duration_type}).")
         
         if user_input.exercise_intensity:
             query_parts.append(f"The exercise intensity will be {user_input.exercise_intensity}.")

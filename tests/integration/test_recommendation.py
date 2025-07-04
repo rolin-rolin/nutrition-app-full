@@ -4,6 +4,11 @@ Test script for the recommendation pipeline.
 Tests the full flow from user input to snack recommendations.
 """
 
+import pytest
+
+# Mark all tests in this file as integration tests
+pytestmark = pytest.mark.integration
+
 import os
 import sys
 import asyncio

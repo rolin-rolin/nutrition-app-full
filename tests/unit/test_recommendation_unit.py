@@ -1,5 +1,8 @@
 import pytest
 from unittest.mock import patch, MagicMock
+
+# Mark all tests in this file as unit tests
+pytestmark = pytest.mark.unit
 from app.core.recommendation import (
     extract_soft_guidance,
     _apply_hard_filters,
