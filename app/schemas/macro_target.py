@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 """
@@ -24,6 +24,12 @@ class MacroTargetResponse(BaseModel):
     target_carbs: Optional[float] = None
     target_fat: Optional[float] = None
     target_electrolytes: Optional[float] = None
+    
+    # Timing breakdown
+    pre_workout_macros: Optional[Dict[str, Any]] = None
+    during_workout_macros: Optional[Dict[str, Any]] = None
+    post_workout_macros: Optional[Dict[str, Any]] = None
+    
     reasoning: str
     rag_context: str
     confidence_score: Optional[float] = None

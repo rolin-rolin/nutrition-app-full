@@ -77,12 +77,17 @@ class MacroTarget(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_input_id = Column(Integer, ForeignKey("user_inputs.id"), nullable=False)
     
-    # Target macro values (in grams)
+    # Overall target macro values (in grams)
     target_calories = Column(Float)
     target_protein = Column(Float)
     target_carbs = Column(Float)
     target_fat = Column(Float)
     target_electrolytes = Column(Float)  # Added electrolytes
+    
+    # Timing breakdown (stored as JSON)
+    pre_workout_macros = Column(JSON)  # {carbs: float, protein: float, fat: float, calories: float}
+    during_workout_macros = Column(JSON)  # {carbs: float, protein: float, electrolytes: float}
+    post_workout_macros = Column(JSON)  # {carbs: float, protein: float, fat: float, calories: float}
     
     # RAG context and reasoning
     rag_context = Column(Text)  # The retrieved context used
