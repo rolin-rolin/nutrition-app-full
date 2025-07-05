@@ -18,7 +18,7 @@ from pathlib import Path
 # Add the app directory to the Python path
 sys.path.append(str(Path(__file__).parent))
 
-from app.core.macro_targeting import MacroTargetingService
+from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput
 from app.db.session import get_db
 
@@ -33,7 +33,7 @@ def test_json_output():
     
     # Initialize the service
     print("Testing JSON Output from GPT...")
-    service = MacroTargetingService(openai_api_key=openai_api_key)
+    service = MacroTargetingServiceLocal(openai_api_key=openai_api_key)
     
     # Create a test user input
     user_input = UserInput(

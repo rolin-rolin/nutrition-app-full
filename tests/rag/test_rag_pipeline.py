@@ -16,7 +16,7 @@ from pathlib import Path
 # Add the app directory to the Python path
 sys.path.append(str(Path(__file__).parent))
 
-from app.core.macro_targeting import MacroTargetingService
+from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput
 
 def test_rag_pipeline():
@@ -25,7 +25,7 @@ def test_rag_pipeline():
     print("Testing RAG pipeline with nutrition guidelines...")
     
     # Initialize the service
-    service = MacroTargetingService()
+    service = MacroTargetingServiceLocal()
     
     # Test cases with different age groups and exercise types
     test_cases = [

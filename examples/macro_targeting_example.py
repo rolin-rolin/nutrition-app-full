@@ -16,7 +16,7 @@ from pathlib import Path
 # Add the app directory to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from app.core.macro_targeting import MacroTargetingService
+from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput, MacroTarget
 from app.db.session import get_db
 
@@ -31,7 +31,7 @@ def main():
     
     # Initialize the service
     print("Initializing Macro Targeting Service...")
-    service = MacroTargetingService(openai_api_key=openai_api_key)
+    service = MacroTargetingServiceLocal(openai_api_key=openai_api_key)
     
     # Get database session
     db = next(get_db())

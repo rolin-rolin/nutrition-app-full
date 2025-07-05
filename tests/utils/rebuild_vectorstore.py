@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-Script to rebuild the vector store with updated nutrition guidelines.
-This will clear the existing vector store and recreate it with the new documents.
+Utility script to rebuild the vector store from nutrition guidelines.
+
+This script can be used to:
+1. Clear the existing vector store
+2. Reload all nutrition guideline documents
+3. Rebuild the embeddings and metadata
 """
 
 import os
@@ -10,34 +14,26 @@ import shutil
 from pathlib import Path
 
 # Add the app directory to the Python path
-sys.path.append(str(Path(__file__).parent))
+sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from app.core.macro_targeting import MacroTargetingService
+from app.core.macro_targeting_local import MacroTargetingServiceLocal
 
-def rebuild_vectorstore():
-    """Rebuild the vector store with updated nutrition guidelines."""
+def rebuild_vectorstore(rag_store_path: str = "./rag_store"):
+    """Rebuild the vector store from scratch."""
     
-    print("Starting vector store rebuild...")
-    
-    # Path to the vector store
-    rag_store_path = "./rag_store"
+    print(f"Rebuilding vector store at: {rag_store_path}")
     
     # Remove existing vector store if it exists
     if os.path.exists(rag_store_path):
-        print(f"Removing existing vector store at {rag_store_path}")
+        print(f"Removing existing vector store: {rag_store_path}")
         shutil.rmtree(rag_store_path)
     
-    # Initialize the macro targeting service (this will create a new vector store)
-    print("Initializing MacroTargetingService...")
-    service = MacroTargetingService(rag_store_path=rag_store_path)
+    # Initialize service to rebuild vector store
+    print("Initializing MacroTargetingServiceLocal...")
+    service = MacroTargetingServiceLocal(rag_store_path=rag_store_path)
     
-    # The service will automatically load documents and create the vector store
-    print("Vector store rebuild completed successfully!")
-    
-    # Skip testing due to potential API quota issues
-    print("Vector store rebuild completed successfully!")
-    print("Note: Skipping test retrieval due to potential API quota limitations.")
-    print("The vector store has been rebuilt with the new nutrition guidelines documents.")
+    print("Vector store rebuilt successfully!")
+    print(f"Vector store location: {rag_store_path}")
 
 if __name__ == "__main__":
     rebuild_vectorstore() 

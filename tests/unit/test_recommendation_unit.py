@@ -11,7 +11,7 @@ from app.core.recommendation import (
 )
 from app.schemas.recommendation import RecommendationRequest
 from app.db.models import Product, MacroTarget, UserInput
-from app.core.macro_targeting import MacroTargetingService
+from app.core.macro_targeting_local import MacroTargetingServiceLocal
 import datetime
 from app.core.genai import extract_user_input_fields_llm
 
@@ -56,7 +56,7 @@ def test_find_optimal_snack_combination():
 
 # 4. Test end-to-end recommendation with all external calls mocked
 @pytest.mark.asyncio
-@patch("app.core.macro_targeting.MacroTargetingService.get_context_and_macro_targets")
+@patch("app.core.macro_targeting_local.MacroTargetingServiceLocal.get_context_and_macro_targets")
 @patch("app.core.recommendation._apply_hard_filters")
 @patch("app.core.recommendation._find_optimal_snack_combination")
 async def test_get_recommendations(
@@ -116,10 +116,10 @@ def test_generate_macro_targets_parses_gpt_json():
     fake_gpt_response = FakeResponse('{"target_calories": 400, "target_protein": 30, "target_carbs": 60, "target_fat": 10, "target_electrolytes": 2.5}')
 
     # Patch OpenAIEmbeddings to avoid real API call
-    with patch("app.core.macro_targeting.OpenAIEmbeddings"):
-        service = MacroTargetingService(openai_api_key="sk-fake")
-        # Patch retrieve_context to avoid vectorstore call
-        service.retrieve_context = MagicMock(return_value="context")
+    with patch("app.core.macro_targeting_local.SentenceTransformer"):
+        service = MacroTargetingServiceLocal(openai_api_key="sk-fake")
+        # Patch retrieve_context_by_metadata to avoid vectorstore call
+        service.retrieve_context_by_metadata = MagicMock(return_value="context")
         # Patch llm to return our fake response
         service.llm = lambda *a, **kw: fake_gpt_response
 

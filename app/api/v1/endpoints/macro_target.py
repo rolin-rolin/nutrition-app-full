@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import os
 
 from app.schemas.macro_target import MacroTargetRequest, MacroTargetResponse
-from app.core.macro_targeting import MacroTargetingService
+from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput, MacroTarget
 from app.db.session import get_db
 
@@ -15,13 +15,13 @@ def get_macro_targeting_service():
     if not openai_api_key:
         raise HTTPException(status_code=500, detail="OpenAI API key not configured")
     
-    return MacroTargetingService(openai_api_key=openai_api_key)
+    return MacroTargetingServiceLocal(openai_api_key=openai_api_key)
 
 @router.post("/", response_model=MacroTargetResponse)
 async def get_macro_targets(
     request: MacroTargetRequest,
     db: Session = Depends(get_db),
-    service: MacroTargetingService = Depends(get_macro_targeting_service)
+    service: MacroTargetingServiceLocal = Depends(get_macro_targeting_service)
 ):
     """
     Get macro targets based on user input using RAG pipeline.

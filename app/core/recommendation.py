@@ -8,7 +8,7 @@ load_dotenv()
 from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
 from app.schemas.product import Product as ProductSchema
 from app.schemas.macro_target import MacroTargetResponse
-from app.core.macro_targeting import MacroTargetingService
+from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput, Product, MacroTarget
 
 def _build_augmented_query(macro_target: MacroTarget, preferences: Dict[str, Any]) -> str:
@@ -108,7 +108,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     preferences = request.preferences or {}
     
     # 1. Get RAG Context and Macro Targets (Unified)
-    macro_targeting_service = MacroTargetingService(openai_api_key=os.getenv("OPENAI_API_KEY"))
+    macro_targeting_service = MacroTargetingServiceLocal(openai_api_key=os.getenv("OPENAI_API_KEY"))
     user_input_db = UserInput(**request.model_dump())
     context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
     
