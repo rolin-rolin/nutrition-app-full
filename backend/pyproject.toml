@@ -1,0 +1,43 @@
+[project]
+name = "nutrition-app"
+version = "0.1.0"
+description = "Nutrition pack recommendation system"
+authors = [
+    {name = "rolin-rolin",email = "rolin71110@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = "^3.12"
+dependencies = [
+    "fastapi (>=0.115.12,<0.116.0)",
+    "uvicorn (>=0.34.2,<0.35.0)",
+    "transformers (>=4.51.3,<5.0.0)",
+    "pandas (>=2.2.3,<3.0.0)",
+    "numpy (>=2.2.6,<3.0.0)",
+    "scikit-learn (>=1.6.1,<2.0.0)",
+    "openai (>=1.79.0,<2.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "scrapy (>=2.13.0,<3.0.0)",
+    "beautifulsoup4 (>=4.13.4,<5.0.0)",
+    "lxml (>=5.4.0,<6.0.0)",
+    "sqlalchemy (>=2.0.41,<3.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "alembic (>=1.15.2,<2.0.0)",
+    "pydantic (>=2.11.4,<3.0.0)",
+    "langchain (>=0.3.26,<0.4.0)",
+    "chromadb (>=1.0.13,<2.0.0)",
+    "tiktoken (>=0.9.0,<0.10.0)",
+    "langchain-community (>=0.3.26,<0.4.0)",
+    "langchain-openai (>=0.3.27,<0.4.0)",
+    "langchain-chroma (>=0.2.4,<0.3.0)",
+    "sentence-transformers (>=3.0.0,<4.0.0)",
+    "pytest (>=8.4.1,<9.0.0)",
+    "pytest-asyncio (>=1.0.0,<2.0.0)",
+    "pyyaml (>=6.0.2,<7.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
