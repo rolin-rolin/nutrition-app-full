@@ -11,11 +11,7 @@ router = APIRouter()
 
 def get_macro_targeting_service():
     """Dependency to get macro targeting service"""
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        raise HTTPException(status_code=500, detail="OpenAI API key not configured")
-    
-    return MacroTargetingServiceLocal(openai_api_key=openai_api_key)
+    return MacroTargetingServiceLocal()
 
 @router.post("/", response_model=MacroTargetResponse)
 async def get_macro_targets(

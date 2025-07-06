@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, JSON, DateTime, Text, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from app.db.session import Base
+from .session import Base
 
 """
 

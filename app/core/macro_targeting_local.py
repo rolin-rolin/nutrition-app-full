@@ -25,25 +25,17 @@ from app.db.session import get_db
 load_dotenv()
 
 class MacroTargetingServiceLocal:
-    def __init__(self, openai_api_key: Optional[str] = None, rag_store_path: str = "./rag_store"):
+    def __init__(self, rag_store_path: str = "./rag_store"):
         """
         Initialize the macro targeting service with local RAG capabilities.
         
         Args:
-            openai_api_key: OpenAI API key for chat (not embeddings)
             rag_store_path: Path to store Chroma vector database
         """
-        if openai_api_key is None:
-            openai_api_key = os.getenv("OPENAI_API_KEY")
-        self.openai_api_key = openai_api_key
         self.rag_store_path = rag_store_path
         
         # Initialize local embeddings
         self.embeddings = SentenceTransformer('all-MiniLM-L6-v2')
-        
-        # Initialize LLM for chat (still using OpenAI for now)
-        from langchain_openai import ChatOpenAI
-        self.llm = ChatOpenAI(model="gpt-4", temperature=0.4, openai_api_key=self.openai_api_key)
         
         # Initialize vector store
         self._initialize_vectorstore()
@@ -301,46 +293,75 @@ class MacroTargetingServiceLocal:
         
         return "\n\n".join(formatted_results)
     
-    def _extract_macro_values_from_json(self, response_text: str) -> Dict[str, Any]:
-        """Extract macro values and timing breakdown from GPT JSON response."""
+    def _extract_macro_values_from_context(self, context: str, user_input: UserInput) -> Dict[str, Any]:
+        """Extract macro values from context using rule-based approach."""
         macro_values = {
-            'target_calories': None,
-            'target_protein': None,
-            'target_carbs': None,
-            'target_fat': None,
-            'target_electrolytes': None,
-            'pre_workout_macros': None,
-            'during_workout_macros': None,
-            'post_workout_macros': None
+            'target_calories': 500.0,  # Default values
+            'target_protein': 25.0,
+            'target_carbs': 75.0,
+            'target_fat': 15.0,
+            'target_electrolytes': 1.0,
+            'pre_workout_macros': {
+                'carbs': 30.0,
+                'protein': 10.0,
+                'fat': 5.0,
+                'calories': 200.0
+            },
+            'during_workout_macros': {
+                'carbs': 20.0,
+                'protein': 0.0,
+                'electrolytes': 0.5
+            },
+            'post_workout_macros': {
+                'carbs': 25.0,
+                'protein': 15.0,
+                'fat': 10.0,
+                'calories': 300.0
+            }
         }
         
-        try:
-            # Try to find JSON in the response
-            if "```json" in response_text:
-                json_start = response_text.find("```json") + 7
-                json_end = response_text.find("```", json_start)
-                json_str = response_text[json_start:json_end].strip()
-            else:
-                json_str = response_text.strip()
-            
-            # Parse JSON
-            parsed_data = json.loads(json_str)
-            
-            # Extract overall values
-            macro_values['target_calories'] = parsed_data.get('target_calories') or parsed_data.get('calories')
-            macro_values['target_protein'] = parsed_data.get('target_protein') or parsed_data.get('protein')
-            macro_values['target_carbs'] = parsed_data.get('target_carbs') or parsed_data.get('carbs') or parsed_data.get('carbohydrates')
-            macro_values['target_fat'] = parsed_data.get('target_fat') or parsed_data.get('fat')
-            macro_values['target_electrolytes'] = parsed_data.get('target_electrolytes') or parsed_data.get('electrolytes')
-            
-            # Extract timing breakdown
-            macro_values['pre_workout_macros'] = parsed_data.get('pre_workout_macros') or parsed_data.get('pre_workout')
-            macro_values['during_workout_macros'] = parsed_data.get('during_workout_macros') or parsed_data.get('during_workout')
-            macro_values['post_workout_macros'] = parsed_data.get('post_workout_macros') or parsed_data.get('post_workout')
-            
-        except (json.JSONDecodeError, KeyError) as e:
-            print(f"Warning: Could not parse JSON from GPT response: {e}")
-            print(f"Response text: {response_text[:200]}...")
+        # Adjust based on exercise duration
+        duration_factor = user_input.exercise_duration_minutes / 60.0 if user_input.exercise_duration_minutes else 1.0
+        
+        # Adjust based on exercise type
+        if user_input.exercise_type and 'cardio' in user_input.exercise_type.lower():
+            macro_values['target_carbs'] *= 1.2  # More carbs for cardio
+            macro_values['target_protein'] *= 0.8  # Less protein for cardio
+        elif user_input.exercise_type and 'strength' in user_input.exercise_type.lower():
+            macro_values['target_protein'] *= 1.3  # More protein for strength
+            macro_values['target_carbs'] *= 0.9  # Slightly fewer carbs for strength
+        
+        # Adjust based on age
+        if user_input.age:
+            if user_input.age <= 11:  # Children
+                macro_values['target_calories'] *= 0.7
+                macro_values['target_protein'] *= 0.8
+                macro_values['target_carbs'] *= 0.8
+                macro_values['target_fat'] *= 0.8
+            elif user_input.age <= 18:  # Adolescents
+                macro_values['target_calories'] *= 1.1
+                macro_values['target_protein'] *= 1.1
+                macro_values['target_carbs'] *= 1.1
+                macro_values['target_fat'] *= 1.1
+            # Adults (19-59) use default values
+        
+        # Apply duration factor to all values
+        for key in ['target_calories', 'target_protein', 'target_carbs', 'target_fat', 'target_electrolytes']:
+            macro_values[key] *= duration_factor
+        
+        # Update timing breakdowns
+        macro_values['pre_workout_macros']['carbs'] *= duration_factor
+        macro_values['pre_workout_macros']['protein'] *= duration_factor
+        macro_values['pre_workout_macros']['fat'] *= duration_factor
+        macro_values['pre_workout_macros']['calories'] *= duration_factor
+        
+        macro_values['during_workout_macros']['carbs'] *= duration_factor
+        macro_values['during_workout_macros']['electrolytes'] *= duration_factor
+        
+        macro_values['post_workout_macros']['carbs'] *= duration_factor
+        macro_values['post_workout_macros']['protein'] *= duration_factor
+        macro_values['post_workout_macros']['fat'] *= duration_factor
+        macro_values['post_workout_macros']['calories'] *= duration_factor
         
         return macro_values
     
@@ -357,37 +378,8 @@ class MacroTargetingServiceLocal:
         # Retrieve relevant context using metadata-based filtering
         context = self.retrieve_context_by_metadata(user_input)
         
-        # Build user query from context
-        user_query = self._build_user_query(user_input)
-        
-        # Build system messages with JSON output requirement
-        messages = [
-            SystemMessage(content=(
-                "You are a certified sports nutrition expert. "
-                "Use the retrieved evidence below to recommend how many grams of carbohydrates, protein, fat, and electrolytes a person "
-                "should consume for their entire workout session. Also provide total calories and a breakdown by timing (pre-workout, during-workout, post-workout). "
-                "Tailor your response to their weight, sex, duration, and exercise type. "
-                "IMPORTANT: You must respond with ONLY a valid JSON object containing the following keys:\n"
-                "- target_calories (float, total calories for entire session)\n"
-                "- target_protein (float, total grams of protein for entire session)\n"
-                "- target_carbs (float, total grams of carbohydrates for entire session)\n"
-                "- target_fat (float, total grams of fat for entire session)\n"
-                "- target_electrolytes (float, total grams of electrolytes for entire session)\n"
-                "- pre_workout_macros (object with carbs, protein, fat, calories for pre-workout)\n"
-                "- during_workout_macros (object with carbs, protein, electrolytes for during-workout)\n"
-                "- post_workout_macros (object with carbs, protein, fat, calories for post-workout)\n"
-                "Do not include any explanatory text outside the JSON. Do not make up facts not in the context."
-            )),
-            SystemMessage(content=f"Retrieved context:\n{context}"),
-            HumanMessage(content=user_query)
-        ]
-        
-        # Get response from GPT
-        response = self.llm(messages)
-        response_text = response.content
-        
-        # Extract macro values from JSON
-        macro_values = self._extract_macro_values_from_json(response_text)
+        # Extract macro recommendations from context using rule-based approach
+        macro_values = self._extract_macro_values_from_context(context, user_input)
         
         # Create MacroTarget object
         macro_target = MacroTarget(
@@ -401,7 +393,7 @@ class MacroTargetingServiceLocal:
             during_workout_macros=macro_values['during_workout_macros'],
             post_workout_macros=macro_values['post_workout_macros'],
             rag_context=context,
-            reasoning=response_text
+            reasoning=f"Generated from local RAG context: {context[:200]}..."
         )
         
         return macro_target
