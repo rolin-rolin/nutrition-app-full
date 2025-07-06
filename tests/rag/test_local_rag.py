@@ -7,8 +7,8 @@ import os
 import sys
 from pathlib import Path
 
-# Add the app directory to the Python path
-sys.path.append(str(Path(__file__).parent))
+# Add the app directory to the Python path (go up 3 levels: tests/rag/ -> tests/ -> nutrition_app/ -> nutrition_app/)
+sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput

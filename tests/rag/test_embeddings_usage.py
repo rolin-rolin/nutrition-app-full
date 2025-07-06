@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 # Add the app directory to the Python path
-sys.path.append(str(Path(__file__).parent))
+sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput
