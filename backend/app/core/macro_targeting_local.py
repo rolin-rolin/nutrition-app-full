@@ -185,11 +185,11 @@ class MacroTargetingServiceLocal:
     def _get_age_group_from_age(self, age: int) -> str:
         """Map user age to age group directory."""
         if age <= 11:
-            return "age6-11"
+            return "6-11"
         elif age <= 18:
-            return "age12-18"
+            return "12-18"
         else:
-            return "age19-59"
+            return "19-59"
     
     def _get_duration_type(self, duration_minutes: int) -> str:
         """Map exercise duration to duration type."""

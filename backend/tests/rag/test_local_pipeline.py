@@ -29,7 +29,7 @@ def test_local_pipeline():
     
     # Initialize the local service
     print("Initializing MacroTargetingServiceLocal...")
-    service = MacroTargetingServiceLocal(openai_api_key=openai_api_key)
+    service = MacroTargetingServiceLocal()
     
     # Test document loading and metadata retrieval
     print("\n=== Testing Metadata-Based Retrieval ===")
