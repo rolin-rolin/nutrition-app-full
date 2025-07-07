@@ -11,7 +11,7 @@ router = APIRouter()
 
 def get_macro_targeting_service():
     """Dependency to get macro targeting service"""
-    return MacroTargetingServiceLocal()
+    return MacroTargetingServiceLocal(rag_store_path="../rag_store")
 
 @router.post("/", response_model=MacroTargetResponse)
 async def get_macro_targets(

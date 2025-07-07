@@ -25,7 +25,7 @@ from app.db.session import get_db
 load_dotenv()
 
 class MacroTargetingServiceLocal:
-    def __init__(self, rag_store_path: str = "./rag_store"):
+    def __init__(self, rag_store_path: str = "../rag_store"):
         """
         Initialize the macro targeting service with local RAG capabilities.
         
