@@ -30,7 +30,7 @@ def rebuild_vectorstore(rag_store_path: str = "../rag_store"):
     
     # Initialize service to rebuild vector store
     print("Initializing MacroTargetingServiceLocal...")
-    service = MacroTargetingServiceLocal(rag_store_path=rag_store_path)
+    service = MacroTargetingServiceLocal(rag_store_path=rag_store_path, force_rebuild=True)
     
     print("Vector store rebuilt successfully!")
     print(f"Vector store location: {rag_store_path}")

@@ -25,7 +25,8 @@ from app.db.session import get_db
 load_dotenv()
 
 class MacroTargetingServiceLocal:
-    def __init__(self, rag_store_path: str = "../rag_store"):
+    def __init__(self, rag_store_path: str = "../rag_store", force_rebuild: bool = False):
+        print(f"[DEBUG] MacroTargetingServiceLocal __init__ called with rag_store_path={rag_store_path}, force_rebuild={force_rebuild}")
         """
         Initialize the macro targeting service with local RAG capabilities.
         
@@ -38,17 +39,25 @@ class MacroTargetingServiceLocal:
         self.embeddings = SentenceTransformer('all-MiniLM-L6-v2')
         
         # Initialize vector store
-        self._initialize_vectorstore()
+        if force_rebuild:
+            print("[DEBUG] Forcing rebuild of vector store...")
+            self._create_vectorstore()
+        else:
+            self._initialize_vectorstore()
     
     def _initialize_vectorstore(self):
         """Initialize the vector store with nutrition guidelines."""
         try:
+            print("[DEBUG] Attempting to load existing Chroma vector store...")
             # Try to load existing vector store
             self.vectorstore = Chroma(
                 persist_directory=self.rag_store_path,
                 embedding_function=self._get_embedding_function()
             )
-        except:
+            print("[DEBUG] Loaded existing Chroma vector store.")
+        except Exception as e:
+            print(f"[DEBUG] Failed to load existing Chroma vector store: {e}")
+            print("[DEBUG] Creating new vector store from documents...")
             # If it doesn't exist, create it from documents
             self._create_vectorstore()
     
@@ -73,7 +82,8 @@ class MacroTargetingServiceLocal:
     def _load_documents(self):
         """Load nutrition guideline documents with enhanced metadata."""
         documents = []
-        guidelines_dir = "nutrition_guidelines"
+        guidelines_dir = "nutrition_guidelines"  # Corrected path
+        print(f"[DEBUG] Looking for guidelines in: {os.path.abspath(guidelines_dir)}")
         
         # Age groups and their corresponding directories
         age_groups = ["age6-11", "age12-18", "age19-59"]
@@ -124,7 +134,7 @@ class MacroTargetingServiceLocal:
         return documents
 
     def _create_vectorstore(self):
-        """Create vector store from nutrition guideline documents."""
+        print("[DEBUG] _create_vectorstore called. Loading documents and creating Chroma store...")
         # Load documents from guidelines directory
         documents = self._load_documents()
         
@@ -134,7 +144,7 @@ class MacroTargetingServiceLocal:
             embedding=self._get_embedding_function(), 
             persist_directory=self.rag_store_path
         )
-        self.vectorstore.persist()
+        # self.vectorstore.persist()  # No longer needed
         # Debug: Check what is in the vector store after creation
         try:
             all_results = self.vectorstore.get(include=["documents", "metadatas"])
