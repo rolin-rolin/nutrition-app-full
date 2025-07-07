@@ -36,7 +36,6 @@ def test_local_pipeline():
     
     # Create a test user input that should match exact metadata
     user_input = UserInput(
-        id=1,
         user_query="What should I eat for my cardio workout?",
         age=25,  # Maps to age19-59
         weight_kg=70.0,

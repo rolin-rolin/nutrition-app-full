@@ -97,7 +97,7 @@ def test_embeddings_usage():
     try:
         # This will use sentence-transformers to embed the query and find similar documents
         retriever = service.vectorstore.as_retriever(search_kwargs={"k": 1})
-        results = retriever.get_relevant_documents("cardio exercise nutrition guidelines")
+        results = retriever.invoke("cardio exercise nutrition guidelines")
         
         if results:
             print(f"   ✓ Vector search found document: {len(results[0].page_content)} characters")

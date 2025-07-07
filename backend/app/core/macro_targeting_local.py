@@ -283,7 +283,7 @@ class MacroTargetingServiceLocal:
         
         # Use vector search
         retriever = self.vectorstore.as_retriever(search_kwargs={"k": 1})
-        results = retriever.get_relevant_documents(query)
+        results = retriever.invoke(query)
         
         if results:
             return results[0].page_content
