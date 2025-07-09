@@ -56,19 +56,19 @@ export default function Home() {
     return (
         <main className="scroll-smooth">
             {/* Hero Section */}
-            <section
-                className="flex flex-col items-center justify-center min-h-screen w-full text-center"
-                style={{ minHeight: "100vh" }}
-            >
-                <SparklesText text="Personalized Nutrition Guidance" className="mb-4" />
+            <section className="flex flex-col items-center justify-center min-h-screen w-full text-center bg-gradient-to-br from-blue-50 via-white to-purple-100 px-4">
+                <SparklesText
+                    text="Personalized Nutrition Guidance"
+                    className="text-5xl md:text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mb-4"
+                />
                 <p
-                    className="text-lg md:text-2xl mb-8 text-blue-700 max-w-2xl mx-auto"
+                    className="text-lg md:text-2xl mb-8 text-blue-800 max-w-2xl mx-auto"
                     style={{ fontFamily: "var(--font-open-sans), sans-serif" }}
                 >
                     Get science-backed macro recommendations for your next workout.
                 </p>
                 <a href="#recommendation-form" className="inline-block">
-                    <button className="px-8 py-3 rounded-lg bg-white text-blue-800 font-semibold shadow-lg hover:bg-blue-100 transition border border-blue-200">
+                    <button className="px-8 py-3 rounded-xl bg-white text-blue-800 font-semibold shadow-xl hover:bg-blue-100 transition border border-blue-200">
                         Get Started
                     </button>
                 </a>
