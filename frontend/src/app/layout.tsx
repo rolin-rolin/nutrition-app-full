@@ -1,7 +1,7 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Open_Sans } from "next/font/google";
-import "./globals.css";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -27,13 +27,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body
-                className={
-                    openSans.variable + " min-h-screen bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600"
-                }
-            >
-                {children}
-            </body>
+            <body className="min-h-screen">{children}</body>
         </html>
     );
 }
