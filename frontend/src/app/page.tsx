@@ -1,55 +1,65 @@
-"use client";
-
-import { useState } from "react";
-import { NutritionForm } from "@/components/NutritionForm";
-import { NutritionResults } from "@/components/NutritionResults";
-import { getMacroTargets, ApiError } from "@/lib/api";
-import { MacroTargetRequest, MacroTargetResponse, NutritionFormData } from "@/types/nutrition";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { SparklesText } from "@/components/ui/sparkles-text";
+import Image from "next/image";
+import styles from "./page.module.css";
+import { text } from "stream/consumers";
 
 export default function Home() {
     return (
-        <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-100 flex flex-col">
-            {/* Hero Section */}
-            <section className="flex flex-col items-center justify-center flex-1 text-center px-4">
-                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-gray-950 mb-6 leading-tight">
-                    Personalized Nutrition <br className="hidden md:inline" />
-                    <span className="text-blue-600">Guidance</span>
-                </h1>
-                <p className="text-lg md:text-2xl text-gray-700 mb-8 max-w-2xl">
-                    Get science-backed macro recommendations for your next workout. Built for athletes, fitness
-                    enthusiasts, and anyone who wants to optimize their nutrition.
-                </p>
-                <a href="#recommendation-form">
-                    <button className="px-8 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition-colors text-lg">
-                        Get Started
-                    </button>
+        <div className={styles.page}>
+            <main className={styles.main}>
+                <Image className={styles.logo} src="/next.svg" alt="Next.js logo" width={180} height={38} priority />
+                <ol>
+                    <li>
+                        Get started by editing <code>src/app/page.tsx</code>.
+                    </li>
+                    <li>Save and see your changes instantly.</li>
+                </ol>
+
+                <div className={styles.ctas}>
+                    <a
+                        className={styles.primary}
+                        href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Image className={styles.logo} src="/vercel.svg" alt="Vercel logomark" width={20} height={20} />
+                        Deploy now
+                    </a>
+                    <a
+                        href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.secondary}
+                    >
+                        Read our docs
+                    </a>
+                </div>
+            </main>
+            <footer className={styles.footer}>
+                <a
+                    href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
+                    Learn
                 </a>
-            </section>
-
-            {/* Features Section */}
-            <section className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 py-16 px-4">
-                <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <span className="text-4xl mb-4">🎯</span>
-                    <h3 className="font-bold text-xl mb-2">Personalized</h3>
-                    <p className="text-gray-600">Recommendations tailored to your age, weight, and workout type.</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <span className="text-4xl mb-4">🧠</span>
-                    <h3 className="font-bold text-xl mb-2">AI-Powered</h3>
-                    <p className="text-gray-600">Advanced AI analyzes your needs using scientific guidelines.</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <span className="text-4xl mb-4">⚡</span>
-                    <h3 className="font-bold text-xl mb-2">Instant</h3>
-                    <p className="text-gray-600">Get detailed recommendations in seconds, not hours.</p>
-                </div>
-            </section>
-
-            {/* (Optional) Add more sections here, such as testimonials, logos, or a footer */}
-        </main>
+                <a
+                    href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
+                    Examples
+                </a>
+                <a
+                    href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
+                    Go to nextjs.org →
+                </a>
+            </footer>
+        </div>
     );
 }

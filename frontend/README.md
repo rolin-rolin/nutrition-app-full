@@ -1,80 +1,36 @@
-# Nutrition App Frontend
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A web application for AI-powered nutrition recommendations built with Next.js, Tailwind CSS, and shadcn/ui.
+## Getting Started
 
-## Features
+First, run the development server:
 
--   **Personalized Recommendations**: Get nutrition advice tailored to your age, weight, and workout type
--   **AI-Powered**: Advanced AI analyzes your needs using scientific nutrition guidelines
--   **Instant Results**: Get detailed recommendations in seconds
--   **Mobile-Friendly**: Responsive design that works on all devices
--   **Modern UI**: Clean, intuitive interface built with shadcn/ui components
-
-## Tech Stack
-
--   **Framework**: Next.js 14 with App Router
--   **Styling**: Tailwind CSS
--   **Components**: shadcn/ui
--   **Language**: TypeScript
--   **State Management**: React hooks
--   **API**: FastAPI backend integration
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── globals.css          # Global styles
-│   ├── layout.tsx           # Root layout
-│   └── page.tsx             # Main page
-├── components/
-│   ├── ui/                  # shadcn/ui components
-│   ├── NutritionForm.tsx    # Form component
-│   └── NutritionResults.tsx # Results display
-├── lib/
-│   ├── api.ts              # API service functions
-│   └── utils.ts            # Utility functions
-└── types/
-    └── nutrition.ts        # TypeScript interfaces
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## API Integration
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The frontend communicates with the FastAPI backend through the following endpoints:
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
--   `POST /api/v1/macro-targets/` - Get nutrition recommendations
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### Request Format
+## Learn More
 
-```typescript
-interface MacroTargetRequest {
-    user_query: string;
-    age?: number;
-    weight_kg?: number;
-    sex?: "male" | "female";
-    exercise_type?: string;
-    exercise_duration_minutes?: number;
-    exercise_intensity?: "low" | "moderate" | "high";
-    timing?: "pre-workout" | "during-workout" | "post-workout" | "general";
-}
-```
+To learn more about Next.js, take a look at the following resources:
 
-### Response Format
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-```typescript
-interface MacroTargetResponse {
-  target_calories: number;
-  target_protein: number;
-  target_carbs: number;
-  target_fat: number;
-  target_electrolytes: number;
-  pre_workout_macros?: {...};
-  during_workout_macros?: {...};
-  post_workout_macros?: {...};
-  rag_context: string;
-  reasoning: string;
-  created_at: string;
-}
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-This project is licensed under the MIT License.
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
