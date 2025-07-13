@@ -16,6 +16,11 @@
     font-family: var(--font-geist-sans);
 }
 
+.page > header {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+}
+
 @media (prefers-color-scheme: dark) {
     .page {
         --gray-rgb: 255, 255, 255;
