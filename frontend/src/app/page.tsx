@@ -1,38 +1,11 @@
 import Image from "next/image";
 import styles from "./page.module.css";
+import Header from "./Header";
 
 export default function Home() {
     return (
         <div className={styles.page}>
-            {/* Navbar/Header */}
-            <nav className={styles.navbar}>
-                <div className={styles.navLeft}>
-                    <Image src="/apple.svg" alt="NutriBox AI Logo" width={40} height={40} className={styles.navLogo} />
-                    <span className={styles.navBrand}>NutriBox AI</span>
-                </div>
-                <div className={styles.navLinks}>
-                    <a href="#features" className={styles.navLink}>
-                        Features
-                    </a>
-                    <a href="#how" className={styles.navLink}>
-                        How It Works
-                    </a>
-                    <a href="#pricing" className={styles.navLink}>
-                        Pricing
-                    </a>
-                    <a href="#contact" className={styles.navLink}>
-                        Contact
-                    </a>
-                </div>
-                <div className={styles.navAuth}>
-                    <button className={styles.navLogin}>Log In</button>
-                    <button className={styles.navSignUp}>Sign Up</button>
-                    <button className={styles.navDarkToggle} aria-label="Toggle dark mode">
-                        🌙
-                    </button>
-                </div>
-            </nav>
-
+            <Header />
             {/* Hero Section */}
             <section className={styles.hero}>
                 <div className={styles.heroContent}>
