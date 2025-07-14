@@ -91,6 +91,18 @@ export default function OARecsLanding() {
                     </div>
                 </div>
             </section>
+
+            {/* How It Works Section */}
+            <section className="py-20 bg-white">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">How It Works</h2>
+                        <p className="text-xl text-gray-600">
+                            Three simple steps to get your personalized nutrition recommendations
+                        </p>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }
