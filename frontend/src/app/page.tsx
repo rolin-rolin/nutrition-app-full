@@ -94,7 +94,7 @@ export default function OARecsLanding() {
 
             {/* How It Works Section */}
             <section className="py-20 bg-white">
-                <div className="max-w-8xl mx-auto px-10">
+                <div className="max-w-8xl mx-auto px-12">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">How It Works</h2>
                         <p className="text-xl text-gray-600">
@@ -104,7 +104,7 @@ export default function OARecsLanding() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Step 1 */}
-                        <div className="bg-gray-50 rounded-lg p-8 text-center">
+                        <div className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center">
                             <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <span className="text-white font-bold text-xl">1</span>
                             </div>
@@ -119,7 +119,7 @@ export default function OARecsLanding() {
                             </div>
                         </div>
                         {/* Step 2 */}
-                        <div className="bg-gray-50 rounded-lg p-8 text-center">
+                        <div className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center">
                             <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <span className="text-white font-bold text-xl">2</span>
                             </div>
@@ -139,7 +139,7 @@ export default function OARecsLanding() {
                             </div>
                         </div>
                         {/* Step 3 */}
-                        <div className="bg-gray-50 rounded-lg p-8 text-center">
+                        <div className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center">
                             <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <span className="text-white font-bold text-xl">3</span>
                             </div>
@@ -157,6 +157,113 @@ export default function OARecsLanding() {
                     </div>
                 </div>
             </section>
+
+            {/* Get Your Personalized Recommendation Section */}
+            <section className="py-20 bg-gray-50">
+                <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">
+                            Get Your Personalized Recommendation
+                        </h2>
+                        <p className="text-xl text-gray-600 mb-8">
+                            Tell me about you and your next workout! Include information about:
+                        </p>
+
+                        <div className="flex flex-col items-center text-center gap-4 md:grid md:grid-cols-2 md:text-left md:items-start max-w-2xl mx-auto mb-12">
+                            <div className="flex items-center space-x-3">
+                                <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                                <span className="text-gray-700">What workout/exercise you're doing</span>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                                <span className="text-gray-700">Duration of workout</span>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                                <span className="text-gray-700">Age and Bodyweight</span>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                                <span className="text-gray-700">Dietary restrictions or taste preferences</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <label className="block text-gray-700 text-lg font-semibold mb-4">
+                            Describe your workout routine:
+                        </label>
+                        <textarea
+                            className="w-full h-40 p-4 border border-gray-300 rounded-lg resize-none text-black focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-gray-400"
+                            placeholder="I do strength training 3 times a week focusing on upper body and legs. I also run 5km twice a week and practice yoga on Sundays..."
+                        />
+
+                        <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                            <button className="bg-purple-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-800 transition-colors flex items-center justify-center">
+                                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                                Generate Recommendation
+                            </button>
+                            <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center">
+                                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-gray-800 text-white py-12">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="text-center">
+                        <div className="flex items-center justify-center space-x-2 mb-4">
+                            <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center">
+                                <div className="w-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                            <span className="text-xl font-semibold">OA Recs</span>
+                        </div>
+                        <p className="text-gray-400 mb-8">
+                            AI-powered nutrition recommendations for your fitness goals.
+                        </p>
+                    </div>
+
+                    <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
+                        <p>&copy; 2025 OA Recs. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
