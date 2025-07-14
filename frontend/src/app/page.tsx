@@ -1,6 +1,44 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 
 export default function OARecsLanding() {
+    // State for textarea, loading, error, and result
+    const [userQuery, setUserQuery] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [result, setResult] = useState<any>(null);
+
+    // Handler for Generate Recommendation
+    const handleGenerate = async () => {
+        setLoading(true);
+        setError(null);
+        setResult(null);
+        try {
+            const response = await fetch("http://localhost:8000/api/v1/macro-targets/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_query: userQuery }),
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || "Failed to get recommendation");
+            }
+            const data = await response.json();
+            setResult(data);
+        } catch (err: any) {
+            setError(err.message || "Unknown error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Handler for Clear
+    const handleClear = () => {
+        setUserQuery("");
+        setResult(null);
+        setError(null);
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-700 to-purple-900">
             {/* Hero Section */}
@@ -220,16 +258,26 @@ export default function OARecsLanding() {
                         <textarea
                             className="w-full h-40 p-4 border border-gray-300 rounded-lg resize-none text-black focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-gray-400"
                             placeholder="I do strength training 3 times a week focusing on upper body and legs. I also run 5km twice a week and practice yoga on Sundays..."
+                            value={userQuery}
+                            onChange={(e) => setUserQuery(e.target.value)}
                         />
 
                         <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                            <button className="bg-purple-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-800 transition-colors flex items-center justify-center">
+                            <button
+                                className="bg-purple-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-800 transition-colors flex items-center justify-center disabled:opacity-60"
+                                onClick={handleGenerate}
+                                disabled={loading || !userQuery.trim()}
+                            >
                                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                 </svg>
-                                Generate Recommendation
+                                {loading ? "Generating..." : "Generate Recommendation"}
                             </button>
-                            <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center">
+                            <button
+                                className="border border-gray-300 text-gray-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center"
+                                onClick={handleClear}
+                                disabled={loading && !userQuery}
+                            >
                                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path
                                         fillRule="evenodd"
@@ -240,6 +288,54 @@ export default function OARecsLanding() {
                                 Clear
                             </button>
                         </div>
+
+                        {/* Error Message */}
+                        {error && <div className="mt-6 text-red-600 font-semibold text-center">{error}</div>}
+
+                        {/* Result Display */}
+                        {result && (
+                            <div className="mt-10 p-6 rounded-lg bg-purple-50 border border-purple-200">
+                                <h3 className="text-2xl font-bold text-purple-700 mb-4">Your Macro Recommendation</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <div className="font-semibold">Calories:</div>
+                                        <div>{result.target_calories ?? "-"} kcal</div>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold">Protein:</div>
+                                        <div>{result.target_protein ?? "-"} g</div>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold">Carbs:</div>
+                                        <div>{result.target_carbs ?? "-"} g</div>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold">Fat:</div>
+                                        <div>{result.target_fat ?? "-"} g</div>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold">Electrolytes:</div>
+                                        <div>{result.target_electrolytes ?? "-"} g</div>
+                                    </div>
+                                </div>
+                                {result.reasoning && (
+                                    <div className="mt-4">
+                                        <div className="font-semibold mb-1">Reasoning:</div>
+                                        <div className="text-gray-700 whitespace-pre-line text-sm">
+                                            {result.reasoning}
+                                        </div>
+                                    </div>
+                                )}
+                                {result.rag_context && (
+                                    <div className="mt-4">
+                                        <div className="font-semibold mb-1">Context Used:</div>
+                                        <div className="text-gray-600 whitespace-pre-line text-xs">
+                                            {result.rag_context}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
