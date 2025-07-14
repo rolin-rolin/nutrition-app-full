@@ -36,7 +36,7 @@ export default function OARecsLanding() {
                 </div>
             </main>
 
-            {/* Why Choose OA Packs AI Section */}
+            {/* Why Choose OA Recs Section */}
             <section className="py-20 bg-gray-50">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="text-center mb-16">
