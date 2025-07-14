@@ -102,6 +102,7 @@ export default function OARecsLanding() {
                         </p>
                     </div>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Step 1 */}
                     <div className="bg-gray-50 rounded-lg p-8 text-center">
@@ -143,9 +144,9 @@ export default function OARecsLanding() {
                         <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
                             <span className="text-white font-bold text-xl">3</span>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Get Your NutriBox</h3>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Get Your Snack Recommendations</h3>
                         <p className="text-gray-600 leading-relaxed mb-6">
-                            Receive your personalized nutrition box with all the snacks you want.
+                            Get an assortment of snacks that hit your macronutrient targets and fit your preferences!
                         </p>
                         <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
                             <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
