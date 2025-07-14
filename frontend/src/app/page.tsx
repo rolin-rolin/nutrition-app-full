@@ -102,6 +102,21 @@ export default function OARecsLanding() {
                         </p>
                     </div>
                 </div>
+                {/* Step 1 */}
+                <div className="bg-gray-50 rounded-lg p-8 text-center">
+                    <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-white font-bold text-xl">1</span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">Smart Consultation</h3>
+                    <p className="text-gray-600 leading-relaxed mb-6">
+                        Tell us about yourself, your workout routine, and preferences for snacks.
+                    </p>
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
+                        <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                    </div>
+                </div>
             </section>
         </div>
     );
