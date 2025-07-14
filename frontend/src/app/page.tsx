@@ -102,54 +102,56 @@ export default function OARecsLanding() {
                         </p>
                     </div>
                 </div>
-                {/* Step 1 */}
-                <div className="bg-gray-50 rounded-lg p-8 text-center">
-                    <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span className="text-white font-bold text-xl">1</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Step 1 */}
+                    <div className="bg-gray-50 rounded-lg p-8 text-center">
+                        <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span className="text-white font-bold text-xl">1</span>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Smart Consultation</h3>
+                        <p className="text-gray-600 leading-relaxed mb-6">
+                            Tell us about yourself, your workout routine, and preferences for snacks.
+                        </p>
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
+                            <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                        </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-4">Smart Consultation</h3>
-                    <p className="text-gray-600 leading-relaxed mb-6">
-                        Tell us about yourself, your workout routine, and preferences for snacks.
-                    </p>
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
-                        <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
+                    {/* Step 2 */}
+                    <div className="bg-gray-50 rounded-lg p-8 text-center">
+                        <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span className="text-white font-bold text-xl">2</span>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Macronutrient Targets</h3>
+                        <p className="text-gray-600 leading-relaxed mb-6">
+                            Our AI analyzes your input and generates Macronutrient Targets for you to hit.
+                        </p>
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
+                            <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13 7H7v6h6V7z" />
+                                <path
+                                    fillRule="evenodd"
+                                    d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5v10h10V5H5z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        </div>
                     </div>
-                </div>
-                {/* Step 2 */}
-                <div className="bg-gray-50 rounded-lg p-8 text-center">
-                    <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span className="text-white font-bold text-xl">2</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-4">AI Analysis</h3>
-                    <p className="text-gray-600 leading-relaxed mb-6">
-                        Our AI analyzes your workout data and generates personalized nutrition recommendations.
-                    </p>
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
-                        <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M13 7H7v6h6V7z" />
-                            <path
-                                fillRule="evenodd"
-                                d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5v10h10V5H5z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                    </div>
-                </div>
-                {/* Step 3 */}
-                <div className="bg-gray-50 rounded-lg p-8 text-center">
-                    <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span className="text-white font-bold text-xl">3</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-4">Get Your NutriBox</h3>
-                    <p className="text-gray-600 leading-relaxed mb-6">
-                        Receive your personalized nutrition box with all the supplements and ingredients you need.
-                    </p>
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
-                        <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M5 4a2 2 0 00-2 2v1h14V6a2 2 0 00-2-2H5zM3 9v6a2 2 0 002 2h10a2 2 0 002-2V9H3z" />
-                        </svg>
+                    {/* Step 3 */}
+                    <div className="bg-gray-50 rounded-lg p-8 text-center">
+                        <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span className="text-white font-bold text-xl">3</span>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Get Your NutriBox</h3>
+                        <p className="text-gray-600 leading-relaxed mb-6">
+                            Receive your personalized nutrition box with all the snacks you want.
+                        </p>
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
+                            <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M5 4a2 2 0 00-2 2v1h14V6a2 2 0 00-2-2H5zM3 9v6a2 2 0 002 2h10a2 2 0 002-2V9H3z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </section>
