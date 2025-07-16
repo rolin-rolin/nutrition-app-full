@@ -296,7 +296,7 @@ export default function OARecsLanding() {
                         {result && (
                             <div className="mt-10 p-6 rounded-lg bg-purple-50 border border-purple-200">
                                 <h3 className="text-2xl font-bold text-purple-700 mb-4">Your Macro Recommendation</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-gray-950">
                                     <div>
                                         <div className="font-semibold">Calories:</div>
                                         <div>{result.target_calories ?? "-"} kcal</div>
@@ -319,19 +319,15 @@ export default function OARecsLanding() {
                                     </div>
                                 </div>
                                 {result.reasoning && (
-                                    <div className="mt-4">
+                                    <div className="mt-4 text-gray-950">
                                         <div className="font-semibold mb-1">Reasoning:</div>
-                                        <div className="text-gray-700 whitespace-pre-line text-sm">
-                                            {result.reasoning}
-                                        </div>
+                                        <div className="whitespace-pre-line text-sm">{result.reasoning}</div>
                                     </div>
                                 )}
                                 {result.rag_context && (
-                                    <div className="mt-4">
+                                    <div className="mt-4 text-gray-950">
                                         <div className="font-semibold mb-1">Context Used:</div>
-                                        <div className="text-gray-600 whitespace-pre-line text-xs">
-                                            {result.rag_context}
-                                        </div>
+                                        <div className="whitespace-pre-line text-xs">{result.rag_context}</div>
                                     </div>
                                 )}
                             </div>
