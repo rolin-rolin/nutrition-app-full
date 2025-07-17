@@ -30,11 +30,25 @@ class Product(Base):
     fat = Column(Float)
     fiber = Column(Float)
     sugar = Column(Float)
+    electrolytes_mg = Column(Float)  # Added electrolytes
+    
+    # Enhanced metadata for vector search
+    flavor = Column(String, index=True)  # chocolate, vanilla, berry, etc.
+    texture = Column(String, index=True)  # chewy, crunchy, smooth, etc.
+    form = Column(String, index=True)  # bar, drink, gel, powder
+    price_usd = Column(Float)
     
     # Classifications
     categories = Column(JSON)  # Store as JSON for flexibility
     dietary_flags = Column(JSON)  # vegan, keto, etc.
     timing_suitability = Column(JSON)  # pre-workout, post-workout
+    tags = Column(JSON)  # recovery, energy, etc.
+    allergens = Column(JSON)  # nuts, soy, dairy, etc.
+    diet = Column(JSON)  # vegan, keto, paleo, etc.
+    
+    # External links
+    link = Column(String)  # Product page URL
+    image_url = Column(String)  # Product image URL
     
     # Metadata
     source = Column(String)  # Where this was scraped from
@@ -42,7 +56,9 @@ class Product(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # We'll add embedding storage later 
+    # Embedding storage for vector search
+    embedding = Column(JSON)  # Store embedding as JSON array
+    embedding_text = Column(Text)  # The text used to generate the embedding
 
 
 class UserInput(Base):
