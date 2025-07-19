@@ -84,7 +84,7 @@ class ProductVectorStore:
         # Generate embedding
         embedding = self.embeddings.encode([embedding_text])
 
-        # Create metadata for filtering
+        # Create metadata for filtering (convert lists to strings for Chroma compatibility)
         metadata = {
             'product_id': product.id,
             'name': product.name,
@@ -93,18 +93,19 @@ class ProductVectorStore:
             'texture': product.texture,
             'form': product.form,
             'price_usd': product.price_usd,
-            'dietary_flags': product.dietary_flags or [],
-            'tags': product.tags or [],
-            'allergens': product.allergens or [],
-            'timing_suitability': product.timing_suitability or []
+            'dietary_flags': ', '.join(product.dietary_flags or []),
+            'tags': ', '.join(product.tags or []),
+            'allergens': ', '.join(product.allergens or []),
+            'timing_suitability': ', '.join(product.timing_suitability or [])
         }
 
         # Add to vector store
-        self.vectorstore.add_documents(
-            documents=[embedding_text],
-            metadatas=[metadata],
-            ids=[f"product_{product.id}"]
+        from langchain.schema import Document
+        doc = Document(
+            page_content=embedding_text,
+            metadata=metadata
         )
+        self.vectorstore.add_documents([doc])
 
         # Update product with embedding info
         product.embedding = embedding.tolist()[0]
@@ -131,47 +132,50 @@ class ProductVectorStore:
         Returns:
             List of product results with scores
         """
-        # Build metadata filter for hard constraints
-        where_clause = []
-        if hard_filters:
-            for key, value in hard_filters.items():
-                if isinstance(value, list):
-                    # For list fields, check if any value matches
-                    where_clause.append({key: {"$in": value}})
-                else:
-                    where_clause.append({key: {"$eq": value}})
-
-        # Retrieve candidates
-        if where_clause:
-            results = self.vectorstore.get(
-                where=where_clause,
-                include=["documents", "metadatas", "distances"]
-            )
-        else:
-            # No hard filters, use similarity search
-            results = self.vectorstore.similarity_search_with_score(
-                query,
-                k=top_k * 2  # Get more candidates for MMR
-            )
-            # Convert to same format as get()
-            documents = [doc.page_content for doc, score in results]
-            metadatas = [doc.metadata for doc, score in results]
-            distances = [score for doc, score in results]
-            results = {
-                'documents': documents,
-                'metadatas': metadatas,
-                'distances': distances
-            }
-
-        # Convert to list of results
+        # Retrieve candidates using similarity search first
+        results = self.vectorstore.similarity_search_with_score(
+            query,
+            k=top_k * 3  # Get more candidates for filtering and MMR
+        )
+        
+        # Convert to candidates with similarity scores
         candidates = []
-        for i in range(len(results['documents'])):
+        for doc, score in results:
             candidates.append({
-                'product_id': results['metadatas'][i]['product_id'],
-                'metadata': results['metadatas'][i],
-                'score': results['distances'][i] if 'distances' in results else 0.0,
-                'text': results['documents'][i]
+                'product_id': doc.metadata['product_id'],
+                'metadata': doc.metadata,
+                'score': score,
+                'text': doc.page_content
             })
+        
+        # Apply hard filters in Python if specified
+        if hard_filters:
+            filtered_candidates = []
+            for candidate in candidates:
+                matches_all_filters = True
+                for key, value in hard_filters.items():
+                    if key == "dietary_flags" and isinstance(value, list):
+                        # Check if any dietary flag is in the comma-separated string
+                        stored_flags = candidate['metadata'].get(key, "").split(", ")
+                        if not any(flag in stored_flags for flag in value):
+                            matches_all_filters = False
+                            break
+                    elif isinstance(value, list):
+                        # For other list fields, check exact match
+                        stored_value = candidate['metadata'].get(key, "")
+                        if stored_value not in value:
+                            matches_all_filters = False
+                            break
+                    else:
+                        # For single values, check exact match
+                        if candidate['metadata'].get(key) != value:
+                            matches_all_filters = False
+                            break
+                
+                if matches_all_filters:
+                    filtered_candidates.append(candidate)
+            
+            candidates = filtered_candidates
 
         # Apply MMR if requested
         if use_mmr and len(candidates) > 1:
@@ -230,7 +234,7 @@ class ProductVectorStore:
             # Select item with highest MMR score
             mmr_scores.sort(key=lambda x: x[0], reverse=True)
             selected.append(mmr_scores[0][1])
-            remaining = [item for item in mmr_scores[1:]]
+            remaining = [item[1] for item in mmr_scores[1:]]
 
         return selected
 
