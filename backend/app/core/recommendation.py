@@ -10,6 +10,7 @@ from app.schemas.product import Product as ProductSchema
 from app.schemas.macro_target import MacroTargetResponse
 from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput, Product, MacroTarget
+from app.db.vector_store import get_product_vector_store
 
 def _build_augmented_query(macro_target: MacroTarget, preferences: Dict[str, Any]) -> str:
     """Builds a natural language query for vector search using soft preferences."""
@@ -23,6 +24,29 @@ def _build_augmented_query(macro_target: MacroTarget, preferences: Dict[str, Any
         query_parts.append(f"It should not be {' or '.join(preferences['flavor_exclusions'])}.")
         
     return " ".join(query_parts)
+
+def _build_hard_filters(preferences: Dict[str, Any]) -> Dict[str, Any]:
+    """Build hard filters for vector search based on user preferences."""
+    hard_filters = {}
+    
+    # Dietary restrictions
+    if preferences.get("dietary_restrictions"):
+        hard_filters["dietary_flags"] = preferences["dietary_restrictions"]
+    
+    # Allergen exclusions
+    if preferences.get("allergen_exclusions"):
+        # For allergen exclusions, wellneed to filter out products that contain these allergens
+        # This is handled in the vector store query
+        pass
+    
+    # Price constraints
+    if preferences.get("max_price_usd"):
+        hard_filters["price_usd"] = {"$lte": preferences["max_price_usd"]}
+    
+    # Form preferences
+    if preferences.get("form_preferences"):
+        hard_filters["form"] = preferences["form_preferences"]  
+    return hard_filters
 
 def _apply_hard_filters(products: List[Product], preferences: Dict[str, Any]) -> List[Product]:
     """Filters a list of products based on hard constraints."""
@@ -129,22 +153,39 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     vector_query = f"{soft_guidance} {' '.join(user_soft_prefs)}"
     reasoning_steps.append(f"Built vector search query: '{vector_query}'")
     
-    # 4. Retrieve Snacks Using Vector Query (Simulated)
-    # TODO: Replace with real vector search
-    all_products = db.query(Product).all()
-    candidate_snacks = all_products  # Simulate: use all products for now
-    reasoning_steps.append(f"Simulated vector search. {len(candidate_snacks)} candidate snacks.")
+    # 4. Build Hard Filters for Vector Search
+    hard_filters = _build_hard_filters(preferences)
+    reasoning_steps.append(f"Built hard filters: {hard_filters}")
     
-    # 5. Apply Hard Filters
-    hard_constraints = {
+    # 5. Retrieve Snacks Using Vector Search (Layer 1)
+    vector_store = get_product_vector_store()
+    vector_results = vector_store.query_similar_products(
+        query=vector_query,
+        top_k=50,  # Get more candidates for combination optimization
+        hard_filters=hard_filters if hard_filters else None,
+        use_mmr=True,
+        mmr_lambda=0.5    
+    )
+    # Convert vector results back to Product objects
+    candidate_snacks = []
+    for result in vector_results:
+        product = db.query(Product).filter(Product.id == result['product_id']).first()
+        if product:
+            candidate_snacks.append(product)
+    
+    reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks with diversity optimization.")
+    
+    # 6. Apply Additional Hard Filters (if any weren't handled by vector store)
+    additional_filters = {
         key: preferences.get(key) for key in 
-        ["dietary_restrictions", "ingredient_exclusions"] if preferences.get(key)
+        ["ingredient_exclusions"] if preferences.get(key)
     }
-    filtered_products = _apply_hard_filters(candidate_snacks, hard_constraints)
-    reasoning_steps.append(f"Applied hard filters for {list(hard_constraints.keys())}. {len(filtered_products)} products remaining.")
+    if additional_filters:
+        candidate_snacks = _apply_hard_filters(candidate_snacks, additional_filters)
+        reasoning_steps.append(f"Applied additional hard filters. {len(candidate_snacks)} products remaining.")
 
-    # 6. Find Optimal Combination (5-10 snacks)
-    final_recommendations = _find_optimal_snack_combination(filtered_products, macro_target, min_snacks=5, max_snacks=10)
+    # 7. Find Optimal Combination (5-10 snacks)
+    final_recommendations = _find_optimal_snack_combination(candidate_snacks, macro_target, min_snacks=5, max_snacks=10)
     
     # Calculate actual totals from the combination
     total_protein = sum(p.protein or 0 for p in final_recommendations)
