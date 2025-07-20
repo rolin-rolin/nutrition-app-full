@@ -9,6 +9,7 @@ from app.schemas.recommendation import RecommendationRequest, RecommendationResp
 from app.schemas.product import Product as ProductSchema
 from app.schemas.macro_target import MacroTargetResponse
 from app.core.macro_targeting_local import MacroTargetingServiceLocal
+from app.core.layer2_macro_optimization import optimize_macro_combination
 from app.db.models import UserInput, Product, MacroTarget
 from app.db.vector_store import get_product_vector_store
 
@@ -71,48 +72,7 @@ def _apply_hard_filters(products: List[Product], preferences: Dict[str, Any]) ->
         
     return filtered_products
 
-def _calculate_combination_score(combination: List[Product], macro_targets: MacroTarget) -> float:
-    """Calculate how well a combination of snacks matches the macro targets."""
-    total_protein = sum(p.protein or 0 for p in combination)
-    total_carbs = sum(p.carbs or 0 for p in combination)
-    total_fat = sum(p.fat or 0 for p in combination)
-    total_calories = sum(p.calories or 0 for p in combination)
-    
-    # Calculate percentage differences from targets
-    protein_diff = abs(total_protein - (macro_targets.target_protein or 0)) / max(macro_targets.target_protein or 1, 1)
-    carbs_diff = abs(total_carbs - (macro_targets.target_carbs or 0)) / max(macro_targets.target_carbs or 1, 1)
-    fat_diff = abs(total_fat - (macro_targets.target_fat or 0)) / max(macro_targets.target_fat or 1, 1)
-    calories_diff = abs(total_calories - (macro_targets.target_calories or 0)) / max(macro_targets.target_calories or 1, 1)
-    
-    # Lower score is better (closer to targets)
-    total_score = protein_diff + carbs_diff + fat_diff + calories_diff
-    
-    # Penalize combinations that are too far from targets
-    if total_score > 2.0:  # More than 200% off target
-        total_score *= 2
-    
-    return total_score
 
-def _find_optimal_snack_combination(products: List[Product], macro_targets: MacroTarget, 
-                                   min_snacks: int = 5, max_snacks: int = 10) -> List[Product]:
-    """Find the best combination of 5-10 snacks that collectively meet macro targets."""
-    if len(products) < min_snacks:
-        return products[:min_snacks] if len(products) >= min_snacks else products
-    
-    best_combination = None
-    best_score = float('inf')
-    
-    # Try combinations of different sizes
-    for combo_size in range(min_snacks, min(max_snacks + 1, len(products) + 1)):
-        # Use itertools to generate combinations efficiently
-        for combination in itertools.combinations(products, combo_size):
-            score = _calculate_combination_score(list(combination), macro_targets)
-            
-            if score < best_score:
-                best_score = score
-                best_combination = list(combination)
-    
-    return best_combination or products[:min_snacks]
 
 def extract_soft_guidance(context: str) -> str:
     """Extract soft guidance lines from the RAG context."""
@@ -184,16 +144,24 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         candidate_snacks = _apply_hard_filters(candidate_snacks, additional_filters)
         reasoning_steps.append(f"Applied additional hard filters. {len(candidate_snacks)} products remaining.")
 
-    # 7. Find Optimal Combination (5-10 snacks)
-    final_recommendations = _find_optimal_snack_combination(candidate_snacks, macro_target, min_snacks=5, max_snacks=10)
+    # 7. Layer 2: Macro Optimization with Randomization (4-8 snacks)
+    optimization_result = optimize_macro_combination(
+        products=candidate_snacks,
+        macro_targets=macro_target,
+        min_snacks=4,
+        max_snacks=8,
+        max_candidates=10,
+        score_threshold=1.5
+    )
     
-    # Calculate actual totals from the combination
-    total_protein = sum(p.protein or 0 for p in final_recommendations)
-    total_carbs = sum(p.carbs or 0 for p in final_recommendations)
-    total_fat = sum(p.fat or 0 for p in final_recommendations)
-    total_calories = sum(p.calories or 0 for p in final_recommendations)
-    
-    reasoning_steps.append(f"Found optimal combination of {len(final_recommendations)} snacks that provides: {total_protein:.1f}g protein, {total_carbs:.1f}g carbs, {total_fat:.1f}g fat, {total_calories:.0f} calories.")
+    if optimization_result:
+        final_recommendations = optimization_result.products
+        reasoning_steps.append(f"Layer 2 optimization selected {len(final_recommendations)} snacks with score {optimization_result.score:.3f} and {optimization_result.target_match_percentage:.1f}% target match.")
+        reasoning_steps.append(f"Combination provides: {optimization_result.total_protein:.1f}g protein, {optimization_result.total_carbs:.1f}g carbs, {optimization_result.total_fat:.1f}g fat, {optimization_result.total_electrolytes:.0f}mg electrolytes, {optimization_result.total_calories:.0f} calories.")
+    else:
+        # Fallback to top candidates if optimization fails
+        final_recommendations = candidate_snacks[:6]
+        reasoning_steps.append(f"Layer 2 optimization failed, using top {len(final_recommendations)} candidates as fallback.")
 
     response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
 
