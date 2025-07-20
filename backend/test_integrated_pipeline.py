@@ -26,47 +26,41 @@ async def test_integrated_pipeline():
         # Test scenarios
         test_scenarios = [
             {
-                "name": "Pre-Workout Energy Boost",
+                "name": "High Protein Sweet Snack",
                 "request": RecommendationRequest(
-                    user_query="I need a pre-workout snack that gives me energy and protein for my strength training session",
+                    user_query="I want a sweet high protein snack like a protein bar or yogurt",
                     preferences={
-                        "dietary_restrictions": [],
-                        "flavor_preferences": ["sweet", "chocolate"],
-                        "texture_preferences": ["crunchy"],
-                        "max_price_usd": 5.0
+                        "flavor_preferences": ["sweet"],
+                        "dietary_restrictions": ["high-protein"]
                     }
                 )
             },
             {
-                "name": "Post-Workout Recovery",
+                "name": "Vegan Post-Workout",
                 "request": RecommendationRequest(
-                    user_query="I just finished a long cardio session and need snacks to help with muscle recovery",
+                    user_query="I need a vegan snack for after my workout, maybe trail mix or hummus",
                     preferences={
                         "dietary_restrictions": ["vegan"],
-                        "flavor_preferences": ["savory"],
-                        "texture_preferences": ["smooth", "creamy"]
+                        "timing_suitability": ["post-workout"]
                     }
                 )
             },
             {
-                "name": "Low Carb Weight Loss",
+                "name": "Low Carb Crunchy Snack",
                 "request": RecommendationRequest(
-                    user_query="I'm trying to lose weight and need low carb high protein snacks",
+                    user_query="Looking for a low carb, crunchy snack like almonds or trail mix",
                     preferences={
-                        "dietary_restrictions": [],
-                        "flavor_preferences": ["savory"],
-                        "ingredient_exclusions": ["sugar", "artificial sweeteners"]
+                        "flavor_preferences": ["savory", "crunchy"],
+                        "ingredient_exclusions": ["sugar"]
                     }
                 )
             },
             {
-                "name": "Electrolyte Replenishment",
+                "name": "Pre-Workout Carbs",
                 "request": RecommendationRequest(
-                    user_query="I need snacks with electrolytes for hydration after my workout",
+                    user_query="I need a snack with carbs for pre-workout, like banana or oatmeal",
                     preferences={
-                        "dietary_restrictions": [],
-                        "flavor_preferences": ["fruity", "citrus"],
-                        "form_preferences": ["liquid", "smoothie"]
+                        "timing_suitability": ["pre-workout"]
                     }
                 )
             }
@@ -83,9 +77,12 @@ async def test_integrated_pipeline():
             print(f"\n  Results:")
             print(f"    Selected {len(response.recommended_products)} snacks:")
             for i, product in enumerate(response.recommended_products):
-                print(f"      {i+1}. {product.name}")
-                print(f"         Protein: {product.protein}g, Carbs: {product.carbs}g, "
-                      f"Fat: {product.fat}g, Electrolytes: {product.electrolytes_mg}mg")
+                pd = product.model_dump()
+                if i == 0:
+                    print(f"      [DEBUG] Product model_dump: {pd}")
+                print(f"      {i+1}. {pd.get('name', '[no name]')}")
+                print(f"         Protein: {pd.get('protein')}g, Carbs: {pd.get('carbs')}g, "
+                      f"Fat: {pd.get('fat')}g, Electrolytes: {pd.get('electrolytes_mg', '[n/a]')}mg")
             
             # Show macro targets
             if response.macro_targets:
@@ -108,10 +105,10 @@ async def test_integrated_pipeline():
         print(f"Running the same query 3 times to test variety...")
         
         test_request = RecommendationRequest(
-            user_query="I need a pre-workout snack with protein and carbs for energy",
+            user_query="I want a sweet high protein snack like a protein bar or yogurt",
             preferences={
-                "dietary_restrictions": [],
-                "flavor_preferences": ["sweet"]
+                "flavor_preferences": ["sweet"],
+                "dietary_restrictions": ["high-protein"]
             }
         )
         
@@ -120,7 +117,7 @@ async def test_integrated_pipeline():
             print(f"\n  Run {run + 1}:")
             response = await get_recommendations(test_request, db)
             
-            product_names = [p.name for p in response.recommended_products]
+            product_names = [p.model_dump().get('name', '[no name]') for p in response.recommended_products]
             print(f"    Selected: {', '.join(product_names)}")
             
             results.append({

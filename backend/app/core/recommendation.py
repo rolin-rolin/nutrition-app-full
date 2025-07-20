@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 import itertools
 import re
 from dotenv import load_dotenv
+from datetime import datetime
 load_dotenv()
 from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
 from app.schemas.product import Product as ProductSchema
@@ -12,6 +13,7 @@ from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.core.layer2_macro_optimization import optimize_macro_combination
 from app.db.models import UserInput, Product, MacroTarget
 from app.db.vector_store import get_product_vector_store
+from sqlalchemy.orm import load_only
 
 def _build_augmented_query(macro_target: MacroTarget, preferences: Dict[str, Any]) -> str:
     """Builds a natural language query for vector search using soft preferences."""
@@ -92,7 +94,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     preferences = request.preferences or {}
     
     # 1. Get RAG Context and Macro Targets (Unified)
-    macro_targeting_service = MacroTargetingServiceLocal(openai_api_key=os.getenv("OPENAI_API_KEY"))
+    macro_targeting_service = MacroTargetingServiceLocal()
     user_input_db = UserInput(**request.model_dump())
     context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
     
@@ -129,8 +131,14 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     # Convert vector results back to Product objects
     candidate_snacks = []
     for result in vector_results:
-        product = db.query(Product).filter(Product.id == result['product_id']).first()
+        product = (
+            db.query(Product)
+            .options(load_only(*(getattr(Product, c.name) for c in Product.__table__.columns)))
+            .filter(Product.id == result['product_id'])
+            .first()
+        )
         if product:
+            print(f"[DEBUG] Product loaded: {vars(product)}")
             candidate_snacks.append(product)
     
     reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks with diversity optimization.")
@@ -163,10 +171,12 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         final_recommendations = candidate_snacks[:6]
         reasoning_steps.append(f"Layer 2 optimization failed, using top {len(final_recommendations)} candidates as fallback.")
 
+    # Convert ORM Product objects to ProductSchema using from_attributes=True (datetimes handled automatically)
     response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
 
     
     # Convert MacroTarget to MacroTargetResponse for the API response
+    macro_target_created_at = macro_target.created_at or datetime.utcnow()
     macro_target_response = MacroTargetResponse(
         target_calories=macro_target.target_calories,
         target_protein=macro_target.target_protein,
@@ -179,7 +189,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         reasoning=macro_target.reasoning,
         rag_context=macro_target.rag_context,
         confidence_score=macro_target.confidence_score,
-        created_at=macro_target.created_at
+        created_at=macro_target_created_at
     )
     
     return RecommendationResponse(
