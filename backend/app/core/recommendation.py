@@ -92,43 +92,71 @@ def extract_soft_guidance(context: str) -> str:
 
 async def get_recommendations(request: RecommendationRequest, db: Session) -> RecommendationResponse:
     preferences = request.preferences or {}
-    
-    # 1. Get RAG Context and Macro Targets (Unified)
-    macro_targeting_service = MacroTargetingServiceLocal()
-    user_input_db = UserInput(**request.model_dump())
-    context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
-    
-    reasoning_steps = [f"Retrieved RAG context and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs."]
-    
-    # 2. Extract Soft Guidance from Context
-    soft_guidance = extract_soft_guidance(context)
-    reasoning_steps.append(f"Extracted soft guidance from context: '{soft_guidance}'")
-    
-    # 3. Build Vector Search Query (Soft Guidance + User Soft Preferences)
-    user_soft_prefs = []
-    if preferences.get("flavor_preferences"):
-        user_soft_prefs.append(f"flavor: {'/'.join(preferences['flavor_preferences'])}")
-    if preferences.get("texture_preferences"):
-        user_soft_prefs.append(f"texture: {'/'.join(preferences['texture_preferences'])}")
-    if preferences.get("flavor_exclusions"):
-        user_soft_prefs.append(f"not: {'/'.join(preferences['flavor_exclusions'])}")
-    vector_query = f"{soft_guidance} {' '.join(user_soft_prefs)}"
-    reasoning_steps.append(f"Built vector search query: '{vector_query}'")
-    
-    # 4. Build Hard Filters for Vector Search
+    reasoning_steps = []
+
+    # --- 1. Parse user query and preferences for available info ---
+    has_activity_info = all([
+        request.age is not None,
+        request.exercise_type is not None,
+        request.exercise_duration_minutes is not None
+    ])
+    has_flavor_info = bool(preferences.get("flavor_preferences") or preferences.get("texture_preferences"))
+    calorie_cap = None
+    if preferences.get("calorie_cap"):
+        try:
+            calorie_cap = float(preferences["calorie_cap"])
+        except (ValueError, TypeError):
+            calorie_cap = None
+
+    # --- 2. If activity info is present, generate macro targets ---
+    macro_target = None
+    context = ""
+    if has_activity_info:
+        macro_targeting_service = MacroTargetingServiceLocal()
+        user_input_db = UserInput(**request.model_dump())
+        context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
+        reasoning_steps.append(f"Retrieved RAG context and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs.")
+    else:
+        reasoning_steps.append("No activity info detected; skipping macro targeting and optimization.")
+
+    # --- 3. Build vector search query ---
+    if has_activity_info and macro_target:
+        # Use macro targets to build query
+        soft_guidance = extract_soft_guidance(context)
+        user_soft_prefs = []
+        if preferences.get("flavor_preferences"):
+            user_soft_prefs.append(f"flavor: {'/'.join(preferences['flavor_preferences'])}")
+        if preferences.get("texture_preferences"):
+            user_soft_prefs.append(f"texture: {'/'.join(preferences['texture_preferences'])}")
+        if preferences.get("flavor_exclusions"):
+            user_soft_prefs.append(f"not: {'/'.join(preferences['flavor_exclusions'])}")
+        vector_query = f"{soft_guidance} {' '.join(user_soft_prefs)}"
+        reasoning_steps.append(f"Built vector search query: '{vector_query}'")
+    elif has_flavor_info:
+        # Use only flavor/texture info
+        vector_query = " ".join([
+            f"flavor: {'/'.join(preferences['flavor_preferences'])}" if preferences.get("flavor_preferences") else "",
+            f"texture: {'/'.join(preferences['texture_preferences'])}" if preferences.get("texture_preferences") else ""
+        ]).strip()
+        reasoning_steps.append(f"Built vector search query (flavor/texture only): '{vector_query}'")
+    else:
+        # Fallback to user_query
+        vector_query = request.user_query
+        reasoning_steps.append(f"Built vector search query (fallback to user_query): '{vector_query}'")
+
+    # --- 4. Build hard filters ---
     hard_filters = _build_hard_filters(preferences)
     reasoning_steps.append(f"Built hard filters: {hard_filters}")
-    
-    # 5. Retrieve Snacks Using Vector Search (Layer 1)
+
+    # --- 5. Vector search (Layer 1) ---
     vector_store = get_product_vector_store()
     vector_results = vector_store.query_similar_products(
         query=vector_query,
-        top_k=50,  # Get more candidates for combination optimization
+        top_k=50,
         hard_filters=hard_filters if hard_filters else None,
         use_mmr=True,
-        mmr_lambda=0.5    
+        mmr_lambda=0.5
     )
-    # Convert vector results back to Product objects
     candidate_snacks = []
     for result in vector_results:
         product = (
@@ -138,60 +166,71 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             .first()
         )
         if product:
-            print(f"[DEBUG] Product loaded: {vars(product)}")
             candidate_snacks.append(product)
-    
     reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks with diversity optimization.")
-    
-    # 6. Apply Additional Hard Filters (if any weren't handled by vector store)
+
+    # --- 6. Apply additional hard filters (ingredient exclusions) ---
     additional_filters = {
-        key: preferences.get(key) for key in 
-        ["ingredient_exclusions"] if preferences.get(key)
+        key: preferences.get(key) for key in ["ingredient_exclusions"] if preferences.get(key)
     }
     if additional_filters:
         candidate_snacks = _apply_hard_filters(candidate_snacks, additional_filters)
         reasoning_steps.append(f"Applied additional hard filters. {len(candidate_snacks)} products remaining.")
 
-    # 7. Layer 2: Macro Optimization with Randomization (4-8 snacks)
-    optimization_result = optimize_macro_combination(
-        products=candidate_snacks,
-        macro_targets=macro_target,
-        min_snacks=4,
-        max_snacks=8,
-        max_candidates=10,
-        score_threshold=1.5
-    )
-    
-    if optimization_result:
-        final_recommendations = optimization_result.products
-        reasoning_steps.append(f"Layer 2 optimization selected {len(final_recommendations)} snacks with score {optimization_result.score:.3f} and {optimization_result.target_match_percentage:.1f}% target match.")
-        reasoning_steps.append(f"Combination provides: {optimization_result.total_protein:.1f}g protein, {optimization_result.total_carbs:.1f}g carbs, {optimization_result.total_fat:.1f}g fat, {optimization_result.total_electrolytes:.0f}mg electrolytes, {optimization_result.total_calories:.0f} calories.")
+    # --- 7. Macro optimization (Layer 2) if activity info is present ---
+    if has_activity_info and macro_target:
+        optimization_result = optimize_macro_combination(
+            products=candidate_snacks,
+            macro_targets=macro_target,
+            min_snacks=4,
+            max_snacks=8,
+            max_candidates=10,
+            score_threshold=1.5,
+            calorie_cap=calorie_cap
+        )
+        if optimization_result:
+            final_recommendations = optimization_result.products
+            reasoning_steps.append(f"Layer 2 optimization selected {len(final_recommendations)} snacks with score {optimization_result.score:.3f} and {optimization_result.target_match_percentage:.1f}% target match.")
+            reasoning_steps.append(f"Combination provides: {optimization_result.total_protein:.1f}g protein, {optimization_result.total_carbs:.1f}g carbs, {optimization_result.total_fat:.1f}g fat, {optimization_result.total_electrolytes:.0f}mg electrolytes, {optimization_result.total_calories:.0f} calories.")
+        else:
+            final_recommendations = candidate_snacks[:6]
+            reasoning_steps.append(f"Layer 2 optimization failed, using top {len(final_recommendations)} candidates as fallback.")
     else:
-        # Fallback to top candidates if optimization fails
-        final_recommendations = candidate_snacks[:6]
-        reasoning_steps.append(f"Layer 2 optimization failed, using top {len(final_recommendations)} candidates as fallback.")
+        # No macro optimization, just return top vector search results (apply calorie cap if present)
+        if calorie_cap is not None:
+            filtered = []
+            total_cal = 0.0
+            for p in candidate_snacks:
+                if (total_cal + (p.calories or 0)) <= calorie_cap:
+                    filtered.append(p)
+                    total_cal += (p.calories or 0)
+            final_recommendations = filtered
+            reasoning_steps.append(f"Applied calorie cap in filtering layer. Total calories: {total_cal:.0f}.")
+        else:
+            final_recommendations = candidate_snacks[:6]
+            reasoning_steps.append(f"No macro optimization or calorie cap; returning top {len(final_recommendations)} vector search results.")
 
-    # Convert ORM Product objects to ProductSchema using from_attributes=True (datetimes handled automatically)
+    # --- 8. Build API response ---
     response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
 
-    
-    # Convert MacroTarget to MacroTargetResponse for the API response
-    macro_target_created_at = macro_target.created_at or datetime.utcnow()
-    macro_target_response = MacroTargetResponse(
-        target_calories=macro_target.target_calories,
-        target_protein=macro_target.target_protein,
-        target_carbs=macro_target.target_carbs,
-        target_fat=macro_target.target_fat,
-        target_electrolytes=macro_target.target_electrolytes,
-        pre_workout_macros=macro_target.pre_workout_macros,
-        during_workout_macros=macro_target.during_workout_macros,
-        post_workout_macros=macro_target.post_workout_macros,
-        reasoning=macro_target.reasoning,
-        rag_context=macro_target.rag_context,
-        confidence_score=macro_target.confidence_score,
-        created_at=macro_target_created_at
-    )
-    
+    macro_target_response = None
+    if macro_target:
+        macro_target_created_at = macro_target.created_at or datetime.utcnow()
+        macro_target_response = MacroTargetResponse(
+            target_calories=macro_target.target_calories,
+            target_protein=macro_target.target_protein,
+            target_carbs=macro_target.target_carbs,
+            target_fat=macro_target.target_fat,
+            target_electrolytes=macro_target.target_electrolytes,
+            pre_workout_macros=macro_target.pre_workout_macros,
+            during_workout_macros=macro_target.during_workout_macros,
+            post_workout_macros=macro_target.post_workout_macros,
+            reasoning=macro_target.reasoning,
+            rag_context=macro_target.rag_context,
+            confidence_score=macro_target.confidence_score,
+            created_at=macro_target_created_at
+        )
+
     return RecommendationResponse(
         recommended_products=response_products,
         macro_targets=macro_target_response,

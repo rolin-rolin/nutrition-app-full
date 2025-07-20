@@ -17,8 +17,9 @@ class RecommendationRequest(BaseModel):
     exercise_duration_minutes: Optional[int] = None
     exercise_intensity: Optional[str] = None
     timing: Optional[str] = None
-    preferences: Optional[Dict[str, Any]] = None
+    preferences: Optional[Dict[str, Any]] = None  # calorie_cap is optional, e.g. preferences={"calorie_cap": 300}
 
+    # Logic will branch based on which fields are present (see core/recommendation.py)
     model_config = ConfigDict(from_attributes=True)
 
 class RecommendationResponse(BaseModel):

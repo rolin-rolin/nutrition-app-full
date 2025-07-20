@@ -147,7 +147,8 @@ class MacroOptimizer:
                                     products: List[Product], 
                                     targets: MacroTargets,
                                     max_candidates: int = 10,
-                                    score_threshold: float = 0.3) -> CombinationResult:
+                                    score_threshold: float = 0.3,
+                                    calorie_cap: float = None) -> CombinationResult:
         """
         Dynamic programming algorithm that finds multiple valid combinations and randomly selects one.
         
@@ -158,6 +159,7 @@ class MacroOptimizer:
             targets: Macro targets to match
             max_candidates: Maximum number of candidate combinations to keep
             score_threshold: Score threshold above which combinations are considered valid
+            calorie_cap: If set, only consider combinations with total calories <= this value
         """
         if len(products) > 20:
             # Fall back to greedy for large datasets
@@ -170,6 +172,10 @@ class MacroOptimizer:
             for combination in itertools.combinations(products, size):
                 score, totals = self.calculate_combination_score(list(combination), targets)
                 
+                # Enforce calorie cap if set
+                if calorie_cap is not None and totals['calories'] > calorie_cap:
+                    continue
+                
                 # Keep combinations that meet the score threshold
                 if score <= score_threshold:
                     valid_combinations.append({
@@ -179,7 +185,7 @@ class MacroOptimizer:
                     })
         
         if not valid_combinations:
-            # If no combinations meet the threshold, return the best one
+            # If no combinations meet the threshold, return the best one (below calorie cap if possible)
             best_combination = None
             best_score = float('inf')
             best_totals = {}
@@ -187,7 +193,8 @@ class MacroOptimizer:
             for size in range(self.min_snacks, min(self.max_snacks + 1, len(products) + 1)):
                 for combination in itertools.combinations(products, size):
                     score, totals = self.calculate_combination_score(list(combination), targets)
-                    
+                    if calorie_cap is not None and totals['calories'] > calorie_cap:
+                        continue
                     if score < best_score:
                         best_score = score
                         best_combination = list(combination)
@@ -273,7 +280,8 @@ def optimize_macro_combination(products: List[Product],
                              min_snacks: int = 4,
                              max_snacks: int = 10,
                              max_candidates: int = 10,
-                             score_threshold: float = 1.5) -> CombinationResult:
+                             score_threshold: float = 1.5,
+                             calorie_cap: float = None) -> CombinationResult:
     """
     Main function to optimize macro combinations using dynamic programming with randomization.
     
@@ -284,6 +292,7 @@ def optimize_macro_combination(products: List[Product],
         max_snacks: Maximum number of snacks (4-10)
         max_candidates: Maximum number of candidate combinations to consider
         score_threshold: Score threshold for valid combinations (lower = stricter)
+        calorie_cap: If set, only consider combinations with total calories <= this value
     
     Returns:
         CombinationResult with randomly selected optimal snack combination
@@ -307,5 +316,6 @@ def optimize_macro_combination(products: List[Product],
         products, 
         targets, 
         max_candidates=max_candidates,
-        score_threshold=score_threshold
+        score_threshold=score_threshold,
+        calorie_cap=calorie_cap
     ) 

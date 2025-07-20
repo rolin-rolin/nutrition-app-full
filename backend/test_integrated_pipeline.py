@@ -29,6 +29,9 @@ async def test_integrated_pipeline():
                 "name": "High Protein Sweet Snack",
                 "request": RecommendationRequest(
                     user_query="I want a sweet high protein snack like a protein bar or yogurt",
+                    age=25,
+                    exercise_type="strength",
+                    exercise_duration_minutes=60,
                     preferences={
                         "flavor_preferences": ["sweet"],
                         "dietary_restrictions": ["high-protein"]
@@ -39,28 +42,24 @@ async def test_integrated_pipeline():
                 "name": "Vegan Post-Workout",
                 "request": RecommendationRequest(
                     user_query="I need a vegan snack for after my workout, maybe trail mix or hummus",
+                    age=30,
+                    exercise_type="cardio",
+                    exercise_duration_minutes=45,
                     preferences={
                         "dietary_restrictions": ["vegan"],
-                        "timing_suitability": ["post-workout"]
+                        "timing": "post-workout"
                     }
                 )
             },
             {
-                "name": "Low Carb Crunchy Snack",
+                "name": "Calorie Cap Test",
                 "request": RecommendationRequest(
-                    user_query="Looking for a low carb, crunchy snack like almonds or trail mix",
+                    user_query="I want snacks under 300 calories total",
+                    age=22,
+                    exercise_type="cardio",
+                    exercise_duration_minutes=30,
                     preferences={
-                        "flavor_preferences": ["savory", "crunchy"],
-                        "ingredient_exclusions": ["sugar"]
-                    }
-                )
-            },
-            {
-                "name": "Pre-Workout Carbs",
-                "request": RecommendationRequest(
-                    user_query="I need a snack with carbs for pre-workout, like banana or oatmeal",
-                    preferences={
-                        "timing_suitability": ["pre-workout"]
+                        "calorie_cap": 300
                     }
                 )
             }
