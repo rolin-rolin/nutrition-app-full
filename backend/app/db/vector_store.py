@@ -117,7 +117,7 @@ class ProductVectorStore:
         top_k: int = 20,
         hard_filters: Optional[Dict[str, Any]] = None,
         use_mmr: bool = True,
-        mmr_lambda: float = 0.5
+        mmr_lambda: float = 0.8  # Higher lambda = more emphasis on relevance
     ) -> List[Dict[str, Any]]:
         """
         Return similar products with hard filtering and optional MMR diversity.
@@ -177,9 +177,17 @@ class ProductVectorStore:
             
             candidates = filtered_candidates
 
-        # Apply MMR if requested
+        # Apply MMR if requested (very conservative approach)
         if use_mmr and len(candidates) > 1:
-            candidates = self._apply_mmr(candidates, query, mmr_lambda)
+            # Only apply MMR to the top 3 results and only if there's significant diversity benefit
+            top_candidates = candidates[:3]
+            remaining_candidates = candidates[3:]
+            
+            # Apply MMR to top candidates
+            top_candidates = self._apply_mmr(top_candidates, query, mmr_lambda)
+            
+            # Combine MMR results with remaining candidates
+            candidates = top_candidates + remaining_candidates
 
         # Return top_k results
         return candidates[:top_k]
@@ -206,7 +214,7 @@ class ProductVectorStore:
         selected = [candidates[0]]
         remaining = candidates[1:]
 
-        # Apply MMR selection
+        # Apply MMR selection (very conservative)
         while remaining and len(selected) < len(candidates):
             # Calculate MMR scores
             mmr_scores = []
@@ -214,20 +222,27 @@ class ProductVectorStore:
                 # Relevance score (already calculated)
                 relevance = candidate['score']
 
-                # Diversity score (minimum similarity to selected items)
-                diversity = 1.0
+                # Diversity score (very conservative)
+                diversity = 0.0
                 if selected:
                     similarities = []
                     for selected_item in selected:
-                        # Calculate similarity between embeddings
-                        # For now, use a simple heuristic based on form diversity
+                        # Only consider diversity if forms are very different
                         if candidate['metadata']['form'] != selected_item['metadata']['form']:
-                            similarities.append(0.3)  # Different form = more diverse
+                            # Check if forms are significantly different
+                            form_pairs = [
+                                ('bar', 'powder'), ('bar', 'cup'), ('bar', 'whole'),
+                                ('powder', 'cup'), ('powder', 'whole'), ('cup', 'whole')
+                            ]
+                            if (candidate['metadata']['form'], selected_item['metadata']['form']) in form_pairs:
+                                similarities.append(0.01)  # Very small diversity bonus
+                            else:
+                                similarities.append(0.0)
                         else:
-                            similarities.append(0.8) # Same form = less diverse
-                    diversity = 1 - max(similarities)
+                            similarities.append(0.0)  # No penalty for same form
+                    diversity = 1 - max(similarities) if similarities else 0.0
 
-                # MMR score
+                # MMR score (heavily weighted toward relevance)
                 mmr_score = lambda_param * relevance + (1 - lambda_param) * diversity
                 mmr_scores.append((mmr_score, candidate))
 
