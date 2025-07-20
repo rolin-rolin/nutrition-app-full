@@ -28,7 +28,7 @@ async def test_integrated_pipeline():
             {
                 "name": "Pre-Workout Energy Boost",
                 "request": RecommendationRequest(
-                    user_input="I need a pre-workout snack that gives me energy and protein for my strength training session",
+                    user_query="I need a pre-workout snack that gives me energy and protein for my strength training session",
                     preferences={
                         "dietary_restrictions": [],
                         "flavor_preferences": ["sweet", "chocolate"],
@@ -40,7 +40,7 @@ async def test_integrated_pipeline():
             {
                 "name": "Post-Workout Recovery",
                 "request": RecommendationRequest(
-                    user_input="I just finished a long cardio session and need snacks to help with muscle recovery",
+                    user_query="I just finished a long cardio session and need snacks to help with muscle recovery",
                     preferences={
                         "dietary_restrictions": ["vegan"],
                         "flavor_preferences": ["savory"],
@@ -51,7 +51,7 @@ async def test_integrated_pipeline():
             {
                 "name": "Low Carb Weight Loss",
                 "request": RecommendationRequest(
-                    user_input="I'm trying to lose weight and need low carb high protein snacks",
+                    user_query="I'm trying to lose weight and need low carb high protein snacks",
                     preferences={
                         "dietary_restrictions": [],
                         "flavor_preferences": ["savory"],
@@ -62,7 +62,7 @@ async def test_integrated_pipeline():
             {
                 "name": "Electrolyte Replenishment",
                 "request": RecommendationRequest(
-                    user_input="I need snacks with electrolytes for hydration after my workout",
+                    user_query="I need snacks with electrolytes for hydration after my workout",
                     preferences={
                         "dietary_restrictions": [],
                         "flavor_preferences": ["fruity", "citrus"],
@@ -74,7 +74,7 @@ async def test_integrated_pipeline():
         
         for scenario in test_scenarios:
             print(f"\n--- Scenario: {scenario['name']} ---")
-            print(f"User Input: '{scenario['request'].user_input}'")
+            print(f"User Input: '{scenario['request'].user_query}'")
             print(f"Preferences: {scenario['request'].preferences}")
             
             # Get recommendations
@@ -108,7 +108,7 @@ async def test_integrated_pipeline():
         print(f"Running the same query 3 times to test variety...")
         
         test_request = RecommendationRequest(
-            user_input="I need a pre-workout snack with protein and carbs for energy",
+            user_query="I need a pre-workout snack with protein and carbs for energy",
             preferences={
                 "dietary_restrictions": [],
                 "flavor_preferences": ["sweet"]
