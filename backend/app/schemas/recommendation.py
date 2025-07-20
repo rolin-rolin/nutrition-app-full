@@ -24,7 +24,7 @@ class RecommendationRequest(BaseModel):
 
 class RecommendationResponse(BaseModel):
     recommended_products: List[Product]
-    macro_targets: MacroTargetResponse
+    macro_targets: Optional[MacroTargetResponse] = None
     reasoning: str 
 
     model_config = ConfigDict(from_attributes=True)
