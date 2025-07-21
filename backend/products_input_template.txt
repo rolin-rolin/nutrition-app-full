@@ -1,0 +1,35 @@
+# Product Entry Template
+# Enter each field on a new line, in this order. Use N for empty, f for False, comma-separated for lists.
+# Double newline between products.
+
+Protein Bar - Chocolate
+PowerFuel
+High protein chocolate bar with 20g protein, good for post-workout recovery
+1 bar (60g)
+220.0
+20.0
+15.0
+8.0
+3.0
+5.0
+150.0
+chocolate
+chewy
+bar
+2.99
+protein bar, chocolate, sweet
+high-protein
+post-workout
+recovery, high-protein
+nuts
+high-protein
+https://example.com/protein-bar-chocolate
+https://example.com/images/protein-bar-chocolate.jpg
+sample_data
+f
+
+# Next product (fill in below, following the same order):
+
+
+
+
