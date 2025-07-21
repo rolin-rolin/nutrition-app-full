@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function OARecsLanding() {
     // State for textarea, loading, error, and result
@@ -52,25 +53,41 @@ export default function OARecsLanding() {
                         <span className="text-xl font-semibold text-white">OA Recs</span>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-16 leading-tight">
+                    {/* Animated Hero Text */}
+                    <motion.h1
+                        className="text-5xl md:text-7xl font-bold text-white mb-16 leading-tight"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1 }}
+                    >
                         Fuel Your Workout
                         <br />
                         in Seconds
-                    </h1>
+                    </motion.h1>
 
-                    <p className="text-xl text-purple-100 mb-16 max-w-2xl mx-auto leading-relaxed">
+                    <motion.p
+                        className="text-xl text-purple-100 mb-16 max-w-2xl mx-auto leading-relaxed"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4, duration: 1 }}
+                    >
                         Get personalized nutrition box recommendations based on your workout routine, dietary
                         preferences, and fitness goals.
-                    </p>
+                    </motion.p>
 
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                    <motion.div
+                        className="flex flex-col sm:flex-row gap-6 justify-center"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8, duration: 1 }}
+                    >
                         <button className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-full font-semibold hover:bg-yellow-300 transition-colors">
                             Get your Recommendation
                         </button>
                         <button className="border-2 border-white text-white px-12 py-5 rounded-full font-semibold hover:bg-white hover:text-purple-900 transition-colors">
                             How it works
                         </button>
-                    </div>
+                    </motion.div>
                 </div>
             </main>
 
