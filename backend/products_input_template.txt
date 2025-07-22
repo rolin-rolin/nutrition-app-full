@@ -30,6 +30,136 @@ f
 
 # Next product (fill in below, following the same order):
 
+IQ Bar - Chocolate Mint Chip
+IQ Bar 
+Plant-based protein bar with "brain ingredients" 
+1 bar 
+170
+12
+10
+12 
+8
+8
+1
+490
+chocolate and mint 
+chewy 
+bar
+2.00
+protein bar, chocolate, mint, sweet, plant-based 
+gluten-free, vegan, paleo, keto
+post-workout
+brain health, recovery, moderate-protein, plant protein
+nuts
+moderate-protein
+https://www.amazon.com/IQBAR-Brain-Body-Keto-Protein/dp/B0CRJYLRH3/ref=sr_1_4?crid=XF989HEW3W4N&dib=eyJ2IjoiMSJ9.J52mrYbyBN5j0QV63yxer3PDjGsF3e6sNponZxTY_8ej0kXru25jARIK-wGjbu4YqYmfsbGbl5nwwfdo7ERf5VdUa3z3sUiSfbIKnTQ43ziJ-KKX2u-lb354snrr79ZxC_pcUaWt6smpvPguKbw576pU6VX1dsolGYDYnRXQmx6DpiMvBLdTGOyZA3H5wgkmPpXrDq0CnOGTs8S8X0al94kQVyctdpozBrGuzDoxpFp373yZgT7hukVrKkBUd7JKyFQihvT2V8EpxADb9mOW6xaj5RC7fDSB_4_pvFX29cg.7q0edOsna5DAnKZIRrXtwFdbuf5s_PTpNgcqxFIkGJ8&dib_tag=se&keywords=IQ%2BBar%2B-%2BChocolate%2BMint%2BChip&qid=1753160034&s=grocery&sprefix=iq%2Bbar%2B-%2Bchocolate%2Bmint%2Bchip%2Cgrocery%2C286&sr=1-4&th=1
+https://m.media-amazon.com/images/I/81gcKn8nj9L._SX679_.jpg
+manual_entry
+f
+
+FITCRUNCH Protein Bar - Chocolate Brownie
+Robert Irvine 
+Baked, chef-inspired protein bar
+1 bar 
+210
+16
+16
+11
+1
+4
+370
+chocolate
+chewy
+bar
+2.40
+protein-bar, chocolate, sweet, savory, crunchy
+high-protein, gluten-free
+post-workout
+recovery, high-protein, muscle-building
+milk, soy, wheat, nuts
+high-protein
+https://www.amazon.com/FITCRUNCH-Protein-Designed-6-Layer-Chocolate/dp/B0CTMX2QG3?th=1
+https://m.media-amazon.com/images/I/81MV-Q8YQNL._SX679_PIbundle-9,TopRight,0,0_AA679SH20_.jpg
+manual_entry
+f
+
+Kirkland Protein Bar - Chocolate Brownie
+Kirkland
+Available at Costcos
+1 bar 
+190
+21
+22
+6
+10
+2
+353
+chocolate
+chewy
+2.25
+protein bar, chocolate, sweet
+high-protein
+post-workout
+recovery, high-protein, muscle-building
+milk, nuts
+high-protein
+https://www.amazon.com/Kirkland-Signature-Protein-Chocolate-20-count/dp/B07C4YLGFH/ref=sr_1_1?crid=1G6D95PW8NJHG&dib=eyJ2IjoiMSJ9.iVBGAiE3Nqs-CIzwNB_I5UjHPn6rdxt5AGUfFpK6AGhc2xmVElfIKhCqdYEoG89ydAxV1R27ykCMGf2O8W7LOgN-ZvQBkSZ2nVkMfVCwVjMCyKczvtH3yFhAE2_1EG0ArGRNAGfK6jnO7irMOyeqwMbpzuGO_s4Gk46Z0ULtJuA8SzQLwPBMPutFte-ZPbM4cKKpqO83GYm07sk-qGM7mLhAlciR1ZlvZqMMhcfzI2BDhf-qgWP9mV-lFkPmdDS7NOmdpaewwRdz8WOkZTY9Lhx31qx7gF741Sffmdthguw.1jli5F-gFuIg4BH80xVNFM4Lyrrxvv3n7LBvCEuRm70&dib_tag=se&keywords=kirkland%2Bchocolate%2Bbrownie%2Bprotein%2Bbar&qid=1753166827&s=grocery&sprefix=kirkland%2Bchocolate%2Bbrownie%2Bprotein%2Bba%2Cgrocery%2C178&sr=1-1&th=1
+https://m.media-amazon.com/images/I/614CNuA4YDL._SY879_.jpg
+manual_entry
+f
+
+Quest Bar - Cookies & Cream
+Quest 
+High-protein bars with no added sugar
+1 bar
+190
+21
+22
+8
+13
+1
+590
+cookies, vanilla
+chewy
+bar
+2.5
+protein bar, cookies, sweet
+high-protein, gluten-free, keto
+post-workout
+recovery, high-protein, muscle-building
+milk, nuts
+high-protein
+https://www.amazon.com/Quest-Nutrition-Cookies-Protein-Friendly/dp/B00I0DI0Z6?th=1
+https://m.media-amazon.com/images/I/81of4XL+BBL._SX679_.jpg
+manual_entry
+f
+
+Pure Protein - Galactic Brownie Bar
+Pure Protein
+Low-sugar protein bar 
+1 bar 
+180
+20
+17
+4.5
+1
+1
+395
+chocolate
+chewy
+bar
+1.40
+protein bar, chocolate, sweet, brownie
+high-protein, gluten-free, low-sugar
+post-workout
+recovery, high-protein, muscle-building
+milk, soy, nuts
+high-protein
+https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B00MNXGSAI/ref=sr_1_1?crid=12C00CMCEI8H9&dib=eyJ2IjoiMSJ9.SJu4D-DteFQQbr-xTQkIvoYC3KAYxDyl_SgFcurWt106bjgc5dNj6Q2mYPn7qQ4OwQf-lYbucHPMOiSwZxRTzyiZGOE3Z9cZ0f60XzEzWhwysK3QjsjY9RX2BWPa64XrbaGVFyg3Gpx3y75crIIn_dw5cizDaXP2-QOBjehKy8Z7JAuQz5VKMaXS1VmeA0YS3I7jJsff97WaYMgj0zq3McrVAo8FdI5Ya2StizGHGh8m7jhszo_yEZE9pljtR9nmDajJ7znuDNQE_PIihYg9TsU1EYm1NtvYz0-GOIY3Z3U.CBxf4ZxoYnyIkOEDLnzxf5VSAMoLhoKEyQaLn9bu7bQ&dib_tag=se&keywords=pure%2Bprotein%2Bgalactic%2Bbrownie&qid=1753167766&s=hpc&sprefix=pure%2Bprotein%2Bgalactic%2Bborwni%2Chpc%2C235&sr=1-1&th=1
+https://m.media-amazon.com/images/I/81IMbbUlA-L._AC_SX679_.jpg
+manual_entry
+f
+
 
 
 
