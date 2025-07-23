@@ -2,34 +2,54 @@
 # Enter each field on a new line, in this order. Use N for empty, f for False, comma-separated for lists.
 # Double newline between products.
 
-Protein Bar - Chocolate
-PowerFuel
-High protein chocolate bar with 20g protein, good for post-workout recovery
-1 bar (60g)
-220.0
-20.0
-15.0
-8.0
-3.0
-5.0
-150.0
-chocolate
-chewy
-bar
-2.99
-protein bar, chocolate, sweet
-high-protein
-post-workout
-recovery, high-protein
-nuts
-high-protein
-https://example.com/protein-bar-chocolate
-https://example.com/images/protein-bar-chocolate.jpg
-sample_data
-f
+# FIELD GUIDE (commented out so it won't be imported):
+# Line 1: product name (string) - Product name
+# Line 2: brand (string) - Brand name
+# Line 3: description (string) - Product description
+# Line 4: serving_size (string) - Serving size description
+# Line 5: calories (float) - Calories per serving
+# Line 6: protein_g (float) - Protein in grams
+# Line 7: carbs_g (float) - Carbohydrates in grams
+# Line 8: fat_g (float) - Fat in grams
+# Line 9: fiber_g (float) - Fiber in grams
+# Line 10: sugar_g (float) - Sugar in grams
+# Line 11: electrolytes_mg (float) - Electrolytes in milligrams
+# Line 12: flavor (string) - Flavor description
+# Line 13: texture (string) - Texture description
+# Line 14: form (string) - Physical form (bar, powder, liquid, etc.)
+# Line 15: price_usd (float) - Price in USD
+# Line 16: categories (comma-separated) - Product type, taste, texture
+#   Examples: protein bar, chocolate, sweet, nuts, savory, crunchy, dairy, yogurt, 
+#   seeds, fruit, vegetable, grain, trail mix, dip, smoothie, energy gel, energy bar, 
+#   cereal, crackers, chips, jerky, spicy, neutral, bitter, chewy, smooth, soft, crispy, creamy
+# Line 17: dietary_flags (comma-separated) - Nutritional/dietary characteristics
+#   Examples: high-protein, moderate-protein, low-protein, gluten-free, vegan, paleo, keto, 
+#   low-sugar, no-sugar, low-carb, high-fiber, organic, non-gmo, dairy-free, soy-free, 
+#   nut-free, grain-free, sugar-free, low-sodium, high-calcium, iron-rich, omega-3
+# Line 18: timing_suitability (comma-separated) - When to consume
+#   Examples: pre-workout, post-workout, meal-replacement, snack, breakfast, lunch, dinner, 
+#   anytime, before-bed, morning, afternoon, evening, long-session, short-session
+# Line 19: tags (comma-separated) - General tags for search/filtering
+#   Examples: recovery, muscle-building, brain-health, energy-boost, weight-loss, 
+#   weight-gain, endurance, strength, cardio, plant-protein, whey-protein, casein, 
+#   collagen, bcaa, creatine, prebiotic, probiotic, antioxidant, anti-inflammatory
+# Line 20: allergens (comma-separated) - Allergen information
+#   Examples: nuts, milk, soy, wheat, eggs, fish, shellfish, peanuts, tree-nuts, 
+#   sesame, sulfites, none
+# Line 21: diet (comma-separated) - Diet compatibility
+#   Examples: high-protein, moderate-protein, low-protein, keto-friendly, paleo-friendly, 
+#   vegan-friendly, vegetarian-friendly, gluten-free-friendly, dairy-free-friendly, 
+#   low-carb-friendly, low-sugar-friendly, mediterranean, atkins, south-beach
+# Line 22: link (string) - Product purchase link
+# Line 23: image_url (string) - Product image URL
+# Line 24: source (string) - Data source
+#   Examples: manual_entry, sample_data, web_scrape, api_import, user_submitted
+# Line 25: verified (boolean) - Data verification status (f for False, t for True)
+
 
 # Next product (fill in below, following the same order):
 
+# PRODUCT 1
 IQ Bar - Chocolate Mint Chip
 IQ Bar 
 Plant-based protein bar with "brain ingredients" 
@@ -40,7 +60,6 @@ Plant-based protein bar with "brain ingredients"
 12 
 8
 8
-1
 490
 chocolate and mint 
 chewy 
@@ -57,6 +76,7 @@ https://m.media-amazon.com/images/I/81gcKn8nj9L._SX679_.jpg
 manual_entry
 f
 
+# PRODUCT 2
 FITCRUNCH Protein Bar - Chocolate Brownie
 Robert Irvine 
 Baked, chef-inspired protein bar
@@ -83,6 +103,7 @@ https://m.media-amazon.com/images/I/81MV-Q8YQNL._SX679_PIbundle-9,TopRight,0,0_A
 manual_entry
 f
 
+# PRODUCT 3
 Kirkland Protein Bar - Chocolate Brownie
 Kirkland
 Available at Costcos
@@ -96,6 +117,7 @@ Available at Costcos
 353
 chocolate
 chewy
+bar
 2.25
 protein bar, chocolate, sweet
 high-protein
@@ -108,6 +130,7 @@ https://m.media-amazon.com/images/I/614CNuA4YDL._SY879_.jpg
 manual_entry
 f
 
+# PRODUCT 4
 Quest Bar - Cookies & Cream
 Quest 
 High-protein bars with no added sugar
@@ -134,6 +157,7 @@ https://m.media-amazon.com/images/I/81of4XL+BBL._SX679_.jpg
 manual_entry
 f
 
+# PRODUCT 5
 Pure Protein - Galactic Brownie Bar
 Pure Protein
 Low-sugar protein bar 
@@ -161,5 +185,1086 @@ manual_entry
 f
 
 
+# PRODUCT 6
 
+# Line 1: product name
+Pure Protein Bar - Chocolate Salted Caramel
+
+# Line 2: brand
+Pure Protein
+
+# Line 3: description
+Low-sugar, high-protein bar made with a blend of milk and soy proteins, sugar alcohols, and flavorings. Designed to support satiety and post-exercise recovery.
+
+# Line 4: serving_size
+1 bar 
+# Line 5: calories
+200
+# Line 6: protein_g
+19
+# Line 7: carbs_g
+20
+# Line 8: fat_g
+5
+# Line 9: fiber_g
+0
+# Line 10: sugar_g
+3
+# Line 11: electrolytes_mg
+420
+# Line 12: flavor
+chocolate, caramel
+# Line 13: texture
+chewy
+# Line 14: form
+bar
+# Line 15: price_usd
+1.87
+# Line 16: categories 
+# Examples: protein bar, chocolate, sweet, nuts, savory, crunchy, dairy, yogurt, 
+#   seeds, fruit, vegetable, grain, trail mix, dip, smoothie, energy gel, energy bar, 
+#   cereal, crackers, chips, jerky, spicy, neutral, bitter, chewy, smooth, soft, crispy, creamy
+protein bar, sweet, chocolate, chewy
+# Line 17: dietary_flags
+#   Examples: high-protein, moderate-protein, low-protein, gluten-free, vegan, paleo, keto, 
+#   low-sugar, no-sugar, low-carb, high-fiber, organic, non-gmo, dairy-free, soy-free, 
+high-protein, low-sugar, low-fiber
+# Line 18: timing_suitability
+post-workout, snack, anytime
+# Line 19: tags
+#   Examples: recovery, muscle-building, brain-health, energy-boost, weight-loss, 
+#   weight-gain, endurance, strength, cardio, plant-protein, whey-protein, casein, 
+#   collagen, bcaa, creatine, prebiotic, probiotic, antioxidant, anti-inflammatory
+recovery, muscle-building, weight-loss, energy-boost, whey-protein, soy-protein, casein, collagen
+# Line 20: allergens
+milk, soy, peanuts, tree nuts
+# Line 21: diet
+#   Examples: high-protein, moderate-protein, low-protein, keto-friendly, paleo-friendly, 
+#   vegan-friendly, vegetarian-friendly, gluten-free-friendly, dairy-free-friendly, 
+#   low-carb-friendly, low-sugar-friendly, mediterranean, atkins, south-beach
+high-protein, low-carb-friendly
+# Line 22: link
+https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B07G3D6D22?th=1
+# Line 23: image_url
+https://m.media-amazon.com/images/I/81LXI9UZEzL._AC_SX679_PIbundle-12,TopRight,0,0_SH20_.jpg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 7
+# Line 1: product name
+Pure Protein Bar - Chocolate and Peanut Butter
+
+# Line 2: brand
+Pure Protein
+
+# Line 3: description
+Low-sugar, high-protein bar made with soy and milk protein isolates, sweetened with sugar alcohols and flavored with chocolate and peanut butter.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+200
+
+# Line 6: protein_g
+20
+
+# Line 7: carbs_g
+17
+
+# Line 8: fat_g
+7
+
+# Line 9: fiber_g
+1
+
+# Line 10: sugar_g
+2
+
+# Line 11: electrolytes_mg
+460
+
+# Line 12: flavor
+chocolate, peanut butter
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+1.87
+
+# Line 16: categories 
+protein bar, chocolate, peanut, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, low-fiber
+
+# Line 18: timing_suitability
+post-workout
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein, casein, collagen
+
+# Line 20: allergens
+milk, soy, peanuts, nuts
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B00GJ82VK4?th=1
+# Line 23: image_url
+https://m.media-amazon.com/images/I/81xEXmuBDhL._AC_SX679_.jpg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 8
+
+# Line 1: product name
+Pure Protein Bar - Lemon Cake
+
+# Line 2: brand
+Pure Protein
+
+# Line 3: description
+Tangy lemon-flavored protein bar with low sugar and low fiber, made with milk and soy proteins and non-sugar sweeteners.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+200
+
+# Line 6: protein_g
+20
+
+# Line 7: carbs_g
+16
+
+# Line 8: fat_g
+7
+
+# Line 9: fiber_g
+0
+
+# Line 10: sugar_g
+2
+
+# Line 11: electrolytes_mg
+430
+
+# Line 12: flavor
+lemon
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+1.87
+
+# Line 16: categories 
+protein bar, citrus, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, low-fiber
+
+# Line 18: timing_suitability
+post-workout
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein, casein, collagen
+
+# Line 20: allergens
+milk, soy, peanuts, nuts
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B08K11C2BB?th=1
+# Line 23: image_url
+https://m.media-amazon.com/images/I/81uDbJ9-73L._AC_SX679_.jpg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 9
+
+## Line 1: product name
+Pure Protein Bar - Chocolate Mint Cookie
+
+# Line 2: brand
+Pure Protein
+
+# Line 3: description
+A chocolate and mint protein bar with a chewy texture and low sugar, made with a blend of milk and soy protein isolates.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+180
+
+# Line 6: protein_g
+19
+
+# Line 7: carbs_g
+20
+
+# Line 8: fat_g
+4.5
+
+# Line 9: fiber_g
+0
+
+# Line 10: sugar_g
+2
+
+# Line 11: electrolytes_mg
+430
+
+# Line 12: flavor
+chocolate, mint
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+1.87
+
+# Line 16: categories 
+protein bar, chocolate, mint, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, low-fiber
+
+# Line 18: timing_suitability
+post-workout
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein, casein, collagen
+
+# Line 20: allergens
+milk, soy, peanuts, nuts
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B0BFRTK3C6?th=1
+# Line 23: image_url
+https://m.media-amazon.com/images/I/81G12iW1L7L._AC_SX679_.jpg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+
+# PRODUCT 10
+
+# Line 1: product name
+Pure Protein Bar - Birthday Cake
+
+# Line 2: brand
+Pure Protein
+
+# Line 3: description
+Dessert-inspired protein bar with birthday cake flavor, low in sugar and fiber, made with milk and soy protein blend and sweetened with sugar alcohols.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+200
+
+# Line 6: protein_g
+20
+
+# Line 7: carbs_g
+18
+
+# Line 8: fat_g
+5
+
+# Line 9: fiber_g
+0
+
+# Line 10: sugar_g
+3
+
+# Line 11: electrolytes_mg
+390
+
+# Line 12: flavor
+cake
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+1.87
+
+# Line 16: categories 
+protein bar, dessert, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, low-fiber
+
+# Line 18: timing_suitability
+post-workout
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein, casein, collagen
+
+# Line 20: allergens
+milk, soy, peanuts, nuts
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B07RW28RPF?th=1
+# Line 23: image_url
+https://m.media-amazon.com/images/I/814dvsCMQrL._AC_SX679_.jpg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 11
+# Line 1: product name
+RXBAR - Peanut Butter
+
+# Line 2: brand
+RXBAR
+
+# Line 3: description
+Protein bar made with simple ingredients like dates, peanuts, and egg whites. Naturally sweet, chewy texture with peanut flavor.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+200
+
+# Line 6: protein_g
+12
+
+# Line 7: carbs_g
+25
+
+# Line 8: fat_g
+7
+
+# Line 9: fiber_g
+4
+
+# Line 10: sugar_g
+17
+
+# Line 11: electrolytes_mg
+700
+
+# Line 12: flavor
+peanut-butter
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.49
+
+# Line 16: categories 
+protein bar, nutty, sweet
+
+# Line 17: dietary_flags
+high-protein, no-added-sugar
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+
+# Line 20: allergens
+eggs, peanuts
+
+# Line 21: diet
+gluten-free, dairy-free, whole-food
+
+# Line 22: link
+https://shop.rxbar.com/shop/peanut-butter-protein-bars-box-of-12.html
+# Line 23: image_url
+https://shop.rxbar.com/media/catalog/product/cache/0e2b578320d64b0336db2c7c6d9aa85d/0/0/00193908003713_c1n1_3zsgdjrq11xtb9mm.jpeg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 12
+
+# Line 1: product name
+RXBAR - Blueberry
+
+# Line 2: brand
+RXBAR
+
+# Line 3: description
+Fruit-forward protein bar with blueberry flavor, made with dates, egg whites, and cashews. No added sugar.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+210
+
+# Line 6: protein_g
+12
+
+# Line 7: carbs_g
+24
+
+# Line 8: fat_g
+7
+
+# Line 9: fiber_g
+3
+
+# Line 10: sugar_g
+18
+
+# Line 11: electrolytes_mg
+540
+
+# Line 12: flavor
+blueberry
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.49
+
+# Line 16: categories 
+protein bar, fruity, sweet
+
+# Line 17: dietary_flags
+high-protein, no-added-sugar
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+
+# Line 20: allergens
+eggs, cashews, almonds
+
+# Line 21: diet
+gluten-free, dairy-free, whole-food
+
+# Line 22: link
+https://shop.rxbar.com/shop/blueberry-protein-bars-box-of-12.html
+# Line 23: image_url
+https://shop.rxbar.com/media/catalog/product/cache/0e2b578320d64b0336db2c7c6d9aa85d/0/0/00193908000279_c1n1_3lah9yrdijnpfmap.jpeg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 13
+
+# Line 1: product name
+RXBAR - Vanilla Almond
+
+# Line 2: brand
+RXBAR
+
+# Line 3: description
+Vanilla and almond protein bar made with dates, egg whites, and cashews. Smooth flavor and naturally sweetened.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+190
+
+# Line 6: protein_g
+12
+
+# Line 7: carbs_g
+25
+
+# Line 8: fat_g
+6
+
+# Line 9: fiber_g
+4
+
+# Line 10: sugar_g
+17
+
+# Line 11: electrolytes_mg
+620
+
+# Line 12: flavor
+vanilla, almond
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.49
+
+# Line 16: categories 
+protein bar, vanilla, nutty, sweet
+
+# Line 17: dietary_flags
+high-protein, no-added-sugar
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+
+# Line 20: allergens
+eggs, almonds, cashews
+
+# Line 21: diet
+gluten-free, dairy-free, whole-food
+
+# Line 22: link
+https://shop.rxbar.com/shop/vanilla-almond-protein-bar-box-12.html
+# Line 23: image_url
+https://shop.rxbar.com/media/catalog/product/cache/0e2b578320d64b0336db2c7c6d9aa85d/0/0/00193908003577_c1n1_vtfpuqirsv8rnow1.jpeg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 14
+
+# Line 1: product name
+RXBAR - Chocolate Sea Salt
+
+# Line 2: brand
+RXBAR
+
+# Line 3: description
+Chewy protein bar with rich chocolate flavor and a hint of sea salt. Made with egg whites, dates, and nuts—no added sugar.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+210
+
+# Line 6: protein_g
+12
+
+# Line 7: carbs_g
+23
+
+# Line 8: fat_g
+8
+
+# Line 9: fiber_g
+5
+
+# Line 10: sugar_g
+14
+
+# Line 11: electrolytes_mg
+610
+
+# Line 12: flavor
+chocolate, sea salt
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.49
+
+# Line 16: categories 
+protein bar, chocolate, salty, sweet
+
+# Line 17: dietary_flags
+high-protein, no-added-sugar
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+
+# Line 20: allergens
+eggs, almonds, cashews
+
+# Line 21: diet
+gluten-free, dairy-free, whole-food
+
+# Line 22: link
+https://shop.rxbar.com/shop/chocolate-sea-salt-box-of-12-bars.html
+# Line 23: image_url
+https://shop.rxbar.com/media/catalog/product/cache/0e2b578320d64b0336db2c7c6d9aa85d/0/0/00193908001214_c1n1_i5dmqytrghdqqfe9.jpeg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 15
+
+# Line 1: product name
+Clif Bar - Crunchy Peanut Butter
+# Line 2: brand
+Clif
+# Line 3: description
+Oat-based energy bar made using sustainable ingredients. 
+# Line 4: serving_size
+1 bar 
+# Line 5: calories
+260
+# Line 6: protein_g
+11
+# Line 7: carbs_g
+39
+# Line 8: fat_g
+7
+# Line 9: fiber_g
+4
+# Line 10: sugar_g
+19
+# Line 11: electrolytes_mg
+690
+# Line 12: flavor
+peanut-butter
+# Line 13: texture
+chewy, dense, crunchy
+# Line 14: form
+bar
+# Line 15: price_usd
+1.5
+# Line 16: categories 
+energy-bar, peanut, sweet
+# Line 17: dietary_flags
+organic 
+# Line 18: timing_suitability
+pre-workout, post-workout, snack
+# Line 19: tags
+endurance, energy-boosting, long-activity, oat-based, whole-grain, natural-sweetener
+# Line 20: allergens
+peanuts, soy, oats, barley 
+# Line 21: diet
+vegetarian, whole-food
+# Line 22: link
+https://www.amazon.com/CLIF-BAR-Crunchy-Organic-Protein/dp/B0CXQ6QP2B
+# Line 23: image_url
+https://m.media-amazon.com/images/I/81Ogzh7m76L._SX679_PIbundle-15,TopRight,0,0_AA679SH20_.jpg
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 16
+
+# Line 1: product name
+Quest Bar - White Chocolate Raspberry
+
+# Line 2: brand
+Quest
+
+# Line 3: description
+High-protein bar with white chocolate and raspberry flavor, sweetened with non-caloric sweeteners and enriched with fiber.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+190
+
+# Line 6: protein_g
+20
+
+# Line 7: carbs_g
+22
+
+# Line 8: fat_g
+8
+
+# Line 9: fiber_g
+13
+
+# Line 10: sugar_g
+1
+
+# Line 11: electrolytes_mg
+460
+
+# Line 12: flavor
+white-chocolate, raspberry
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.33
+
+# Line 16: categories 
+protein-bar, fruity, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, gluten-free
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
+
+# Line 20: allergens
+milk, almonds
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.questnutrition.com/products/white-chocolate-raspberry-protein-bar
+# Line 23: image_url
+https://www.questnutrition.com/cdn/shop/products/qst-000036_chocolate-chip-cookie-dough-protein-bars_3_7153e3b4-f3e7-436a-9401-40e08859e694.png?v=1681758489&width=1080
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 17
+
+# Line 1: product name
+Quest Bar - S'mores
+
+# Line 2: brand
+Quest
+
+# Line 3: description
+Dessert-flavored protein bar inspired by s’mores, with chocolate and graham cracker notes, high in protein and fiber.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+180
+
+# Line 6: protein_g
+21
+
+# Line 7: carbs_g
+23
+
+# Line 8: fat_g
+7
+
+# Line 9: fiber_g
+13
+
+# Line 10: sugar_g
+1
+
+# Line 11: electrolytes_mg
+460
+
+# Line 12: flavor
+chocolate, graham-cracker
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.33
+
+# Line 16: categories 
+protein-bar, dessert, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, gluten-free
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
+
+# Line 20: allergens
+milk, almonds
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.questnutrition.com/products/smores-protein-bar
+# Line 23: image_url
+https://www.questnutrition.com/cdn/shop/files/qst-001231_s_mores-protein-bars_1.png?v=1708548209&width=1080
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 18
+
+# Line 1: product name
+Quest Bar - Chocolate Peanut Butter
+
+# Line 2: brand
+Quest
+
+# Line 3: description
+Chocolate and peanut butter flavored protein bar, sweetened without added sugar and packed with fiber and dairy-based protein.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+200
+
+# Line 6: protein_g
+20
+
+# Line 7: carbs_g
+22
+
+# Line 8: fat_g
+9
+
+# Line 9: fiber_g
+11
+
+# Line 10: sugar_g
+1
+
+# Line 11: electrolytes_mg
+430
+
+# Line 12: flavor
+chocolate, peanut-butter
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.33
+
+# Line 16: categories 
+protein-bar, chocolate, nutty, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, gluten-free
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, casein, peanut-butter
+
+# Line 20: allergens
+milk, peanuts, almonds
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.questnutrition.com/products/chocolate-peanut-butter-protein-bar?_pos=1&_psq=Chocolate+Peanut+BUtter&_ss=e&_v=1.0
+# Line 23: image_url
+https://www.questnutrition.com/cdn/shop/files/qst-000463_chocolate-peanut-butter-protein-bar_1.png?v=1708547985&width=1080
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+# PRODUCT 19
+
+# Line 1: product name
+Quest Bar - Chocolate Chip Cookie Dough
+
+# Line 2: brand
+Quest
+
+# Line 3: description
+Classic chocolate chip cookie dough flavor in a high-protein bar with low sugar and high fiber content.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+200
+
+# Line 6: protein_g
+21
+
+# Line 7: carbs_g
+21
+
+# Line 8: fat_g
+9
+
+# Line 9: fiber_g
+14
+
+# Line 10: sugar_g
+1
+
+# Line 11: electrolytes_mg
+320
+
+# Line 12: flavor
+chocolate, cookie
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.33
+
+# Line 16: categories 
+protein-bar, dessert, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, gluten-free
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
+
+# Line 20: allergens
+milk, almonds
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.questnutrition.com/products/chocolate-chip-cookie-dough-protein-bar?_pos=2&_psq=Chocolate+Chip+cook&_ss=e&_v=1.0
+# Line 23: image_url
+https://www.questnutrition.com/cdn/shop/files/107559_QN_USA_Pkg_ProteinBar_CCCD_12ct_3D_Composite_SGS.png?v=1707935393&width=1080
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
+
+
+# PRODUCT 20
+
+# Line 1: product name
+Quest Bar - Cookies and Cream
+
+# Line 2: brand
+Quest
+
+# Line 3: description
+High-protein bar with cookies and cream flavor, low in sugar and fiber-rich, made with milk-based protein blend.
+
+# Line 4: serving_size
+1 bar
+
+# Line 5: calories
+190
+
+# Line 6: protein_g
+21
+
+# Line 7: carbs_g
+22
+
+# Line 8: fat_g
+8
+
+# Line 9: fiber_g
+13
+
+# Line 10: sugar_g
+1
+
+# Line 11: electrolytes_mg
+590
+
+# Line 12: flavor
+cookies, cream
+
+# Line 13: texture
+chewy
+
+# Line 14: form
+bar
+
+# Line 15: price_usd
+2.33
+
+# Line 16: categories 
+protein-bar, cookies, sweet
+
+# Line 17: dietary_flags
+high-protein, low-sugar, gluten-free
+
+# Line 18: timing_suitability
+post-workout, snack
+
+# Line 19: tags
+recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
+
+# Line 20: allergens
+milk, almonds
+
+# Line 21: diet
+high-protein, low-carb-friendly
+
+# Line 22: link
+https://www.questnutrition.com/products/cookies-cream-protein-bar?_pos=1&_psq=Cookies+%26+Cream&_ss=e&_v=1.0
+
+# Line 23: image_url
+https://www.questnutrition.com/cdn/shop/files/qst-000029_cookies-_-cream-protein-bars_1_92d17ed7-4320-4ed0-ae5e-07bd25256b84.png?v=1752167601&width=1080
+# Line 24: source
+manual_entry
+# Line 25: verified
+f
 
