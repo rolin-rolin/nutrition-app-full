@@ -69,41 +69,61 @@ def main():
     input_path = sys.argv[1]
     with open(input_path, "r") as f:
         content = f.read()
-    # Split products by double newline
-    raw_products = [block.strip() for block in re.split(r"\n\s*\n", content) if block.strip()]
+    
+    # Split products by "PRODUCT <number>" markers
+    product_blocks = re.split(r"# PRODUCT \d+", content)
+    
+    # Filter out empty blocks and the first block (before any PRODUCT marker)
+    raw_products = []
+    for block in product_blocks[1:]:  # Skip the first block (before any PRODUCT marker)
+        if block.strip():
+            # Filter out comment lines (lines starting with #) and empty lines
+            lines = [line.strip() for line in block.splitlines() 
+                    if line.strip() and not line.strip().startswith('#')]
+            if lines:  # Only add if there are non-comment, non-empty lines
+                raw_products.append(lines)
+    
     products = []
-    for raw in raw_products:
-        lines = raw.splitlines()
+    for lines in raw_products:
         product = parse_product(lines)
         products.append(product)
+    
     # Convert to Product(...) code
     product_codes = [product_to_python(p) for p in products]
+    
     # Read init_db.py
     init_db_path = Path(__file__).parent / "init_db.py"
     with open(init_db_path, "r") as f:
         init_db_code = f.read()
+    
     # Find sample_products = [ ... ]
     marker = PRODUCTS_START_MARKER
     idx = init_db_code.find(marker)
     if idx == -1:
         print("Could not find sample_products list in init_db.py!")
         sys.exit(1)
+    
     # Find the closing bracket of the list
     start_idx = idx + len(marker)
     end_idx = init_db_code.find("]", start_idx)
     if end_idx == -1:
         print("Could not find end of sample_products list in init_db.py!")
         sys.exit(1)
+    
     # Insert new products before the closing bracket
     before = init_db_code[:end_idx]
     after = init_db_code[end_idx:]
+    
     # Add comma if needed
     if before.rstrip()[-1] != "[":
         before = before.rstrip() + ",\n"
+    
     new_code = before + "\n    " + ",\n    ".join(product_codes) + after
+    
     # Write back to init_db.py
     with open(init_db_path, "w") as f:
         f.write(new_code)
+    
     print(f"Appended {len(products)} products to sample_products in init_db.py.")
 
 if __name__ == "__main__":
