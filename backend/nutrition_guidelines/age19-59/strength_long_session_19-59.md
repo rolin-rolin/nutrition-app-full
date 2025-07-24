@@ -4,47 +4,37 @@ duration: long
 age_group: 19-59
 ---
 
-# Guidelines for Strength, Long Duration (45–90+ min), Age 19–59
+timing:
+pre:
+carbs_g_per_kg: [0.5, 0.8]
+protein_g_per_kg: [0.1, 0.15]
+fat_g_per_kg: [0.0, 0.1]
 
-## Overall Macro Targets for Entire Session
+during:
+carbs_g_per_kg_per_hour: [0.3, 0.5]
+protein_g_per_kg_per_hour: [0.05, 0.1]
+electrolytes_mg_per_kg_per_hour: [21, 32]
 
--   **Total Carbs:** 1.0–1.2 g/kg
--   **Total Protein:** 0.3–0.4 g/kg
--   **Total Fat:** ~0.2 g/kg
--   **Electrolytes:**
-    -   Sodium: 20–30 mg/kg (if sweating heavily)
-    -   Potassium: 1–2 mg/kg (optional)
--   **Fluids:** 5–10 mL/kg every 15–20 min
+post:
+carbs_g_per_kg: [0.8, 1.0]
+protein_g_per_kg: [0.3, 0.4]
+fat_g_per_kg: [0.1, 0.2]
 
-## Breakdown by Timing
+# NOTE: This should be computed dynamically based on pre + during + post timing and duration
 
-### Pre-workout (30–60 min before)
+overall_targets: !!computed
+carbs_g_per_kg: [1.6, 2.3] # pre (0.5–0.8) + post (0.8–1.0) + during per hour
+protein_g_per_kg: [0.45, 0.65] # pre (0.1–0.15) + post (0.3–0.4) + during per hour
+fat_g_per_kg: [0.1, 0.3] # pre (≤0.1) + post (0.1–0.2)
+electrolytes_mg_per_kg_per_hour:
+sodium: [20, 30]
 
--   **Carbs:** 0.5–0.8 g/kg
--   **Protein:** 0.1–0.15 g/kg
--   **Fat:** ≤0.1 g/kg
--   **Fluids:** 5–7 mL/kg
-
-### During workout
-
--   **Carbs:** Optional 0.3–0.5 g/kg/hour if >60 min or intense
--   **Protein:** Optional 0.05–0.1 g/kg/hour in very long sessions
--   **Hydration:** 150–250 mL every 15–20 min
--   **Electrolytes:** Sodium 20–30 mg/kg/hour if heavy sweat
-
-### Post-workout (within 30 min)
-
--   **Carbs:** 0.8–1.0 g/kg
--   **Protein:** 0.3–0.4 g/kg
--   **Fat:** 0.1–0.2 g/kg
--   **Fluids:** ~1.25–1.5 L/kg body weight lost
-
-## Key Principles
+key_principles:
 
 -   Post-workout carb + protein combination supports muscle repair, glycogen replenishment, and recovery.
 -   Hydration and electrolyte replacement important in long or sweaty sessions.
 
-## Avoid
+avoid:
 
 -   Skipping recovery nutrition
 -   Large fatty meals close to training

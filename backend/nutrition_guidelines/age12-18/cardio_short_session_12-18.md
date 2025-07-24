@@ -4,43 +4,34 @@ duration: short
 age_group: 12-18
 ---
 
-# Guidelines for Cardio, Short Duration (20–30 min), Age 12–18
+timing:
+pre:
+carbs_g_per_kg: [0.3, 0.5]
+protein_g_per_kg: [0.05, 0.1] # optional
 
-## Overall Macro Targets for Entire Session
+during:
+carbs_g_per_kg_per_hour: [0.0, 0.0] # not required
+protein_g_per_kg_per_hour: [0.0, 0.0]
+electrolytes_mg_per_kg_per_hour: [16, 21]
 
--   **Total Carbs:** 0.5–0.7 g/kg
--   **Total Protein:** 0.1–0.2 g/kg (optional, mostly post-exercise)
--   **Total Fat:** Minimal (<0.1 g/kg)
--   **Total Electrolytes:**
-    -   Sodium: ~15–20 mg/kg (only if sweating)
-    -   Potassium: ~1 mg/kg
--   **Total Fluids:** ~5–7 mL/kg before and after
+post:
+carbs_g_per_kg: [0.5, 0.7]
+protein_g_per_kg: [0.15, 0.2]
 
-## Breakdown by Timing
+# NOTE: This should be computed dynamically based on pre + during + post timing and duration
 
-### Pre-workout (30–60 min before)
+overall_targets: !!computed
+carbs_g_per_kg: sum of pre.carbs + post.carbs
+protein_g_per_kg: sum of pre.protein (optional) + post.protein
+fat_g_per_kg: sum of pre.fat + post.fat
+electrolytes_mg_per_kg: during.electrolytes \* duration_hr
 
--   **Carbs:** 0.3–0.5 g/kg (e.g., granola bar, small smoothie, banana)
--   **Protein:** Optional, ~0.05–0.1 g/kg (e.g., milk, protein-rich snack)
--   **Fluids:** 5 mL/kg 1–2 hrs before
-
-### During workout
-
--   **Carbs/Protein:** Not required unless very high intensity
--   **Hydration:** Water sips (~100–200 mL every 20 min if desired)
-
-### Post-workout (within 30 min)
-
--   **Carbs:** 0.5–0.7 g/kg (e.g., fruit, chocolate milk, crackers)
--   **Protein:** 0.15–0.2 g/kg (e.g., milk, yogurt, egg, lean protein)
--   **Fluids:** ~300–600 mL depending on sweat
-
-## Key Principles
+key_principles:
 
 -   Nutritional support not strictly necessary for short cardio, but post-exercise fuel aids recovery especially for adolescents in growth phases.
 -   Hydration and light carbs are sufficient for most short workouts.
 
-## Avoid
+avoid:
 
 -   High-fiber or high-fat snacks right before exercise
 -   Energy drinks or excess caffeine

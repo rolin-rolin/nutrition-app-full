@@ -4,41 +4,36 @@ duration: short
 age_group: 19-59
 ---
 
-# Guidelines for Strength, Short Duration (20–30 min), Age 19–59
+timing:
+pre:
+carbs_g_per_kg: [0.4, 0.5]
+protein_g_per_kg: [0.05, 0.1] # optional
+fat_g_per_kg: [0.0, 0.0]
 
-## Overall Macro Targets for Entire Session
+during:
+carbs_g_per_kg: [0.0, 0.0]
+protein_g_per_kg: [0.0, 0.0]
+electrolytes_mg_per_kg_per_hour: [0, 0]
 
--   **Total Carbs:** 0.5–0.7 g/kg
--   **Total Protein:** 0.25–0.3 g/kg (mostly post-exercise)
--   **Total Fat:** 0.1–0.2 g/kg
--   **Electrolytes:** Not critical unless heavy sweating
--   **Fluids:** 5–7 mL/kg pre/post
+post:
+carbs_g_per_kg: [0.5, 0.7]
+protein_g_per_kg: [0.25, 0.3]
+fat_g_per_kg: [0.1, 0.2]
 
-## Breakdown by Timing
+# NOTE: This should be computed dynamically based on pre + during + post timing and duration
 
-### Pre-workout (30–60 min before)
+overall_targets: !!computed
+carbs_g_per_kg: [0.9, 1.2]
+protein_g_per_kg: [0.3, 0.4]
+fat_g_per_kg: [0.1, 0.2]
+electrolytes_mg_per_kg_per_hour: null
 
--   **Carbs:** 0.4–0.5 g/kg (toast, fruit, granola)
--   **Protein:** Optional 0.05–0.1 g/kg
--   **Fluids:** 5 mL/kg
-
-### During workout
-
--   **Carbs/Protein:** Not needed for short sessions
--   **Hydration:** Water as needed
-
-### Post-workout (within 30 min)
-
--   **Carbs:** 0.5–0.7 g/kg
--   **Protein:** 0.25–0.3 g/kg
--   **Fluids:** 400–600 mL
-
-## Key Principles
+key_principles:
 
 -   Post-workout protein supports muscle repair and growth.
 -   Simple carb + protein snack is adequate.
 
-## Avoid
+avoid:
 
 -   Over-reliance on supplements
 -   High-fat meals before training
