@@ -304,7 +304,138 @@ class MacroTargetingServiceLocal:
         return "\n\n".join(formatted_results)
     
     def _extract_macro_values_from_context(self, context: str, user_input: UserInput) -> Dict[str, Any]:
-        """Extract macro values from context using rule-based approach."""
+        """
+        Calculate macro targets from YAML-structured nutrition guidelines.
+        
+        Args:
+            context: The YAML content from the nutrition guideline document
+            user_input: User input with age, weight, duration, etc.
+        
+        Returns:
+            Dict with calculated macro targets
+        """
+        try:
+            # Try to parse the context as YAML
+            data = yaml.safe_load(context)
+            
+            # If parsing fails, fall back to the old rule-based approach
+            if not data or 'timing' not in data:
+                print("Context is not in YAML format, falling back to rule-based approach")
+                return self._get_default_macro_values(user_input)
+            
+            # Extract timing data
+            timing = data.get('timing', {})
+            pre = timing.get('pre', {})
+            during = timing.get('during', {})
+            post = timing.get('post', {})
+            
+            # Get user weight and duration with validation
+            weight_kg = user_input.weight_kg
+            duration_minutes = user_input.exercise_duration_minutes
+            age = user_input.age
+            exercise_type = user_input.exercise_type
+            
+            if weight_kg is None:
+                weight_kg = 70.0  # Default weight for calculations
+            
+            if duration_minutes is None:
+                duration_minutes = 60  # Default duration for calculations
+            
+            if age is None:
+                age = 21  # Default age for calculations
+            
+            if exercise_type is None:
+                exercise_type = "cardio"  # Default exercise type for calculations
+            
+            duration_hours = duration_minutes / 60.0
+            
+            # Calculate pre-workout macros
+            pre_carbs = self._calculate_range(pre.get('carbs_g_per_kg', [0, 0]), weight_kg)
+            pre_protein = self._calculate_range(pre.get('protein_g_per_kg', [0, 0]), weight_kg)
+            pre_fat = self._calculate_range(pre.get('fat_g_per_kg', [0, 0]), weight_kg)
+            
+            # Calculate during-workout macros
+            during_carbs = self._calculate_range(during.get('carbs_g_per_kg_per_hour', [0, 0]), weight_kg * duration_hours)
+            during_protein = self._calculate_range(during.get('protein_g_per_kg_per_hour', [0, 0]), weight_kg * duration_hours)
+            during_fat = self._calculate_range(during.get('fat_g_per_kg_per_hour', [0, 0]), weight_kg * duration_hours)
+            during_electrolytes = self._calculate_range(during.get('electrolytes_mg_per_kg_per_hour', [0, 0]), weight_kg * duration_hours)
+            
+            # Calculate post-workout macros
+            post_carbs = self._calculate_range(post.get('carbs_g_per_kg', [0, 0]), weight_kg)
+            post_protein = self._calculate_range(post.get('protein_g_per_kg', [0, 0]), weight_kg)
+            post_fat = self._calculate_range(post.get('fat_g_per_kg', [0, 0]), weight_kg)
+            
+            # Calculate totals (now including during-workout protein and fat)
+            total_carbs = pre_carbs + during_carbs + post_carbs
+            total_protein = pre_protein + during_protein + post_protein
+            total_fat = pre_fat + during_fat + post_fat
+            total_electrolytes = during_electrolytes  # Only during workout
+            
+            # Estimate calories (4 cal/g for carbs and protein, 9 cal/g for fat)
+            total_calories = (total_carbs * 4) + (total_protein * 4) + (total_fat * 9)
+            
+            return {
+                'target_calories': total_calories,
+                'target_protein': total_protein,
+                'target_carbs': total_carbs,
+                'target_fat': total_fat,
+                'target_electrolytes': total_electrolytes,
+                'pre_workout_macros': {
+                    'carbs': pre_carbs,
+                    'protein': pre_protein,
+                    'fat': pre_fat,
+                    'calories': (pre_carbs * 4) + (pre_protein * 4) + (pre_fat * 9)
+                },
+                'during_workout_macros': {
+                    'carbs': during_carbs,
+                    'protein': during_protein,
+                    'fat': during_fat,
+                    'electrolytes': during_electrolytes,
+                    'calories': (during_carbs * 4) + (during_protein * 4) + (during_fat * 9)
+                },
+                'post_workout_macros': {
+                    'carbs': post_carbs,
+                    'protein': post_protein,
+                    'fat': post_fat,
+                    'calories': (post_carbs * 4) + (post_protein * 4) + (post_fat * 9)
+                }
+            }
+            
+        except Exception as e:
+            print(f"Error calculating macros from YAML: {e}")
+            # Fallback to default values
+            return self._get_default_macro_values(user_input)
+    
+    def _calculate_range(self, range_values: List[float], multiplier: float) -> float:
+        """
+        Calculate the average of a range and multiply by the given factor.
+        
+        Args:
+            range_values: List of values representing a range (e.g., [0.5, 0.8])
+            multiplier: The factor to multiply the result by (e.g., weight in kg)
+        
+        Returns:
+            float: The calculated value
+        """
+        if not range_values:
+            return 0.0
+        if len(range_values) == 1:
+            return range_values[0] * multiplier
+        # Take the average of the range
+        avg = sum(range_values) / len(range_values)
+        return avg * multiplier
+    
+    def _get_default_macro_values(self, user_input: UserInput) -> Dict[str, Any]:
+        """
+        Fallback method that provides default macro values using the old rule-based approach.
+        This is used when YAML parsing fails or when the context doesn't contain structured data.
+        
+        Args:
+            user_input: User input with age, weight, duration, etc.
+        
+        Returns:
+            Dict with default macro targets
+        """
         macro_values = {
             'target_calories': 500.0,  # Default values
             'target_protein': 25.0,
@@ -315,45 +446,48 @@ class MacroTargetingServiceLocal:
                 'carbs': 30.0,
                 'protein': 10.0,
                 'fat': 5.0,
-                'calories': 200.0
+                'calories': (30.0 * 4) + (10.0 * 4) + (5.0 * 9)  # 120 + 40 + 45 = 205
             },
             'during_workout_macros': {
                 'carbs': 20.0,
-                'protein': 0.0,
-                'electrolytes': 0.5
+                'protein': 5.0,  # Added during-workout protein
+                'fat': 2.0,      # Added during-workout fat
+                'electrolytes': 0.5,
+                'calories': (20.0 * 4) + (5.0 * 4) + (2.0 * 9)  # 80 + 20 + 18 = 118
             },
             'post_workout_macros': {
                 'carbs': 25.0,
                 'protein': 15.0,
                 'fat': 10.0,
-                'calories': 300.0
+                'calories': (25.0 * 4) + (15.0 * 4) + (10.0 * 9)  # 100 + 60 + 90 = 250
             }
         }
         
         # Adjust based on exercise duration
         duration_factor = user_input.exercise_duration_minutes / 60.0 if user_input.exercise_duration_minutes else 1.0
         
-        # Adjust based on exercise type
-        if user_input.exercise_type and 'cardio' in user_input.exercise_type.lower():
+        # Adjust based on exercise type (default to cardio)
+        exercise_type = user_input.exercise_type or "cardio"
+        if 'cardio' in exercise_type.lower():
             macro_values['target_carbs'] *= 1.2  # More carbs for cardio
             macro_values['target_protein'] *= 0.8  # Less protein for cardio
-        elif user_input.exercise_type and 'strength' in user_input.exercise_type.lower():
+        elif 'strength' in exercise_type.lower():
             macro_values['target_protein'] *= 1.3  # More protein for strength
             macro_values['target_carbs'] *= 0.9  # Slightly fewer carbs for strength
         
-        # Adjust based on age
-        if user_input.age:
-            if user_input.age <= 11:  # Children
-                macro_values['target_calories'] *= 0.7
-                macro_values['target_protein'] *= 0.8
-                macro_values['target_carbs'] *= 0.8
-                macro_values['target_fat'] *= 0.8
-            elif user_input.age <= 18:  # Adolescents
-                macro_values['target_calories'] *= 1.1
-                macro_values['target_protein'] *= 1.1
-                macro_values['target_carbs'] *= 1.1
-                macro_values['target_fat'] *= 1.1
-            # Adults (19-59) use default values
+        # Adjust based on age (default to 21)
+        age = user_input.age or 21
+        if age <= 11:  # Children
+            macro_values['target_calories'] *= 0.7
+            macro_values['target_protein'] *= 0.8
+            macro_values['target_carbs'] *= 0.8
+            macro_values['target_fat'] *= 0.8
+        elif age <= 18:  # Adolescents
+            macro_values['target_calories'] *= 1.1
+            macro_values['target_protein'] *= 1.1
+            macro_values['target_carbs'] *= 1.1
+            macro_values['target_fat'] *= 1.1
+        # Adults (19-59) use default values
         
         # Apply duration factor to all values
         for key in ['target_calories', 'target_protein', 'target_carbs', 'target_fat', 'target_electrolytes']:
@@ -366,12 +500,41 @@ class MacroTargetingServiceLocal:
         macro_values['pre_workout_macros']['calories'] *= duration_factor
         
         macro_values['during_workout_macros']['carbs'] *= duration_factor
+        macro_values['during_workout_macros']['protein'] *= duration_factor
+        macro_values['during_workout_macros']['fat'] *= duration_factor
         macro_values['during_workout_macros']['electrolytes'] *= duration_factor
+        macro_values['during_workout_macros']['calories'] *= duration_factor
         
         macro_values['post_workout_macros']['carbs'] *= duration_factor
         macro_values['post_workout_macros']['protein'] *= duration_factor
         macro_values['post_workout_macros']['fat'] *= duration_factor
         macro_values['post_workout_macros']['calories'] *= duration_factor
+        
+        # Recalculate calories based on updated macro values to ensure accuracy
+        macro_values['pre_workout_macros']['calories'] = (
+            macro_values['pre_workout_macros']['carbs'] * 4 + 
+            macro_values['pre_workout_macros']['protein'] * 4 + 
+            macro_values['pre_workout_macros']['fat'] * 9
+        )
+        
+        macro_values['during_workout_macros']['calories'] = (
+            macro_values['during_workout_macros']['carbs'] * 4 + 
+            macro_values['during_workout_macros']['protein'] * 4 + 
+            macro_values['during_workout_macros']['fat'] * 9
+        )
+        
+        macro_values['post_workout_macros']['calories'] = (
+            macro_values['post_workout_macros']['carbs'] * 4 + 
+            macro_values['post_workout_macros']['protein'] * 4 + 
+            macro_values['post_workout_macros']['fat'] * 9
+        )
+        
+        # Recalculate total calories
+        macro_values['target_calories'] = (
+            macro_values['pre_workout_macros']['calories'] + 
+            macro_values['during_workout_macros']['calories'] + 
+            macro_values['post_workout_macros']['calories']
+        )
         
         return macro_values
     
@@ -388,8 +551,41 @@ class MacroTargetingServiceLocal:
         # Retrieve relevant context using metadata-based filtering
         context = self.retrieve_context_by_metadata(user_input)
         
-        # Extract macro recommendations from context using rule-based approach
+        # Extract macro recommendations from context using YAML-based calculation
         macro_values = self._extract_macro_values_from_context(context, user_input)
+        
+        # Build detailed reasoning
+        reasoning_parts = []
+        
+        # Add user context with new defaults
+        if user_input.age and user_input.weight_kg:
+            reasoning_parts.append(f"Calculated for {user_input.age}-year-old, {user_input.weight_kg}kg individual")
+        elif user_input.age:
+            reasoning_parts.append(f"Calculated for {user_input.age}-year-old individual (using default 70kg weight)")
+        elif user_input.weight_kg:
+            reasoning_parts.append(f"Calculated for {user_input.weight_kg}kg individual (using default age 21)")
+        else:
+            reasoning_parts.append("Calculated using default values (age: 21, weight: 70kg)")
+        
+        if user_input.exercise_type and user_input.exercise_duration_minutes:
+            reasoning_parts.append(f"doing {user_input.exercise_duration_minutes} minutes of {user_input.exercise_type}")
+        elif user_input.exercise_type:
+            reasoning_parts.append(f"doing {user_input.exercise_type} (using default 60-minute duration)")
+        elif user_input.exercise_duration_minutes:
+            reasoning_parts.append(f"doing {user_input.exercise_duration_minutes} minutes of cardio (using default exercise type)")
+        else:
+            reasoning_parts.append("doing cardio (using default 60-minute duration)")
+        
+        # Add calculation method
+        if "timing:" in context and "pre:" in context:
+            reasoning_parts.append("using structured nutrition guidelines with YAML-based calculations")
+        else:
+            reasoning_parts.append("using fallback rule-based calculations")
+        
+        # Add macro breakdown
+        reasoning_parts.append(f"Total targets: {macro_values['target_carbs']:.1f}g carbs, {macro_values['target_protein']:.1f}g protein, {macro_values['target_fat']:.1f}g fat, {macro_values['target_electrolytes']:.0f}mg electrolytes, {macro_values['target_calories']:.0f} calories")
+        
+        reasoning = " | ".join(reasoning_parts)
         
         # Create MacroTarget object
         macro_target = MacroTarget(
@@ -403,7 +599,7 @@ class MacroTargetingServiceLocal:
             during_workout_macros=macro_values['during_workout_macros'],
             post_workout_macros=macro_values['post_workout_macros'],
             rag_context=context,
-            reasoning=f"Generated from local RAG context: {context[:200]}..."
+            reasoning=reasoning
         )
         
         return macro_target
