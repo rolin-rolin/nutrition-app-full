@@ -95,8 +95,9 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     reasoning_steps = []
 
     # --- 1. Parse user query and preferences for available info ---
-    has_activity_info = all([
+    has_activity_info = any([
         request.age is not None,
+        request.weight_kg is not None,
         request.exercise_type is not None,
         request.exercise_duration_minutes is not None
     ])
