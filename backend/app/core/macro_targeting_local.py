@@ -1,10 +1,11 @@
 """
-Macro Targeting Service using Local RAG Pipeline
+Macro Targeting Service using Local RAG Pipeline with LLM Field Extraction
 
-Sentence-Transformers + Chroma to generate target macro recommendations 
-based on user context and stores them in the database.
+Sentence-Transformers + Chroma for document retrieval + OpenAI for field extraction
+to generate target macro recommendations based on user context and stores them in the database.
 
 Uses metadata-based filtering for exact matches and local embeddings for fallback.
+LLM extracts structured fields from natural language user queries.
 """
 
 import os
@@ -16,6 +17,7 @@ from langchain_chroma import Chroma
 from langchain.schema import SystemMessage, HumanMessage
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import ChatOpenAI
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 
@@ -814,7 +816,7 @@ class MacroTargetingServiceLocal:
             reasoning=reasoning
         )
         
-            return macro_target
+        return macro_target
 
     def get_context_and_macro_targets(self, user_input: UserInput):
         """
