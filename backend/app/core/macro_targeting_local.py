@@ -689,6 +689,133 @@ class MacroTargetingServiceLocal:
             db.refresh(macro_target)
             return macro_target
 
+    def generate_macro_targets_from_query(self, user_query: str, db: Session) -> Tuple[UserInput, MacroTarget]:
+        """
+        Main integration method: Extract fields from user query and generate macro targets.
+        
+        Args:
+            user_query: Natural language user query
+            db: Database session
+            
+        Returns:
+            Tuple of (UserInput, MacroTarget) objects
+        """
+        # Step 1: Extract structured fields from user query using LLM
+        extracted_fields = self.extract_fields_from_query(user_query)
+        
+        # Step 2: Convert extracted fields to UserInput format
+        user_input_data = self._convert_extracted_fields_to_user_input(extracted_fields, user_query)
+        
+        # Step 3: Create UserInput object and save to database
+        user_input = UserInput(**user_input_data)
+        db.add(user_input)
+        db.commit()
+        db.refresh(user_input)
+        
+        # Step 4: Generate macro targets using the enhanced pipeline
+        macro_target = self.generate_macro_targets_enhanced(user_input, extracted_fields)
+        macro_target.user_input_id = user_input.id
+        db.add(macro_target)
+        db.commit()
+        db.refresh(macro_target)
+        
+        return user_input, macro_target
+    
+    def generate_macro_targets_enhanced(self, user_input: UserInput, extracted_fields: Optional[Dict[str, Any]] = None) -> MacroTarget:
+        """
+        Enhanced macro target generation that incorporates LLM-extracted preferences.
+        
+        Args:
+            user_input: UserInput object with user context
+            extracted_fields: Optional extracted fields from LLM (for enhanced reasoning)
+            
+        Returns:
+            MacroTarget object with generated recommendations
+        """
+        # Retrieve relevant context using metadata-based filtering (unchanged)
+        context = self.retrieve_context_by_metadata(user_input)
+        
+        # Extract macro recommendations from context using YAML-based calculation (unchanged)
+        macro_values = self._extract_macro_values_from_context(context, user_input)
+        
+        # Build enhanced reasoning that includes LLM-extracted preferences
+        reasoning_parts = []
+        
+        # Add user context with new defaults
+        if user_input.age and user_input.weight_kg:
+            reasoning_parts.append(f"Calculated for {user_input.age}-year-old, {user_input.weight_kg}kg individual")
+        elif user_input.age:
+            reasoning_parts.append(f"Calculated for {user_input.age}-year-old individual (using default 70kg weight)")
+        elif user_input.weight_kg:
+            reasoning_parts.append(f"Calculated for {user_input.weight_kg}kg individual (using default age 21)")
+        else:
+            reasoning_parts.append("Calculated using default values (age: 21, weight: 70kg)")
+        
+        if user_input.exercise_type and user_input.exercise_duration_minutes:
+            reasoning_parts.append(f"doing {user_input.exercise_duration_minutes} minutes of {user_input.exercise_type}")
+        elif user_input.exercise_type:
+            reasoning_parts.append(f"doing {user_input.exercise_type} (using default 60-minute duration)")
+        elif user_input.exercise_duration_minutes:
+            reasoning_parts.append(f"doing {user_input.exercise_duration_minutes} minutes of cardio (using default exercise type)")
+        else:
+            reasoning_parts.append("doing cardio (using default 60-minute duration)")
+        
+        # Add LLM-extracted preferences to reasoning if available
+        if extracted_fields:
+            preferences_info = []
+            
+            # Add calorie cap if specified
+            calorie_cap = extracted_fields.get("calorie_cap")
+            if calorie_cap:
+                preferences_info.append(f"calorie limit: {calorie_cap}")
+            
+            # Add soft preferences
+            soft_prefs = extracted_fields.get("soft_preferences", {})
+            if soft_prefs.get("flavor"):
+                preferences_info.append(f"flavor preferences: {', '.join(soft_prefs['flavor'])}")
+            if soft_prefs.get("texture"):
+                preferences_info.append(f"texture preferences: {', '.join(soft_prefs['texture'])}")
+            if soft_prefs.get("price_dollars"):
+                preferences_info.append(f"price limit: ${soft_prefs['price_dollars']}")
+            
+            # Add hard constraints
+            hard_constraints = extracted_fields.get("hard_constraints", {})
+            if hard_constraints.get("dietary"):
+                preferences_info.append(f"dietary requirements: {', '.join(hard_constraints['dietary'])}")
+            if hard_constraints.get("allergens"):
+                preferences_info.append(f"allergen restrictions: {', '.join(hard_constraints['allergens'])}")
+            
+            if preferences_info:
+                reasoning_parts.append(f"with preferences: {' | '.join(preferences_info)}")
+        
+        # Add calculation method
+        if "timing:" in context and "pre:" in context:
+            reasoning_parts.append("using structured nutrition guidelines with YAML-based calculations")
+        else:
+            reasoning_parts.append("using fallback rule-based calculations")
+        
+        # Add macro breakdown
+        reasoning_parts.append(f"Total targets: {macro_values['target_carbs']:.1f}g carbs, {macro_values['target_protein']:.1f}g protein, {macro_values['target_fat']:.1f}g fat, {macro_values['target_electrolytes']:.0f}mg electrolytes, {macro_values['target_calories']:.0f} calories")
+        
+        reasoning = " | ".join(reasoning_parts)
+        
+        # Create MacroTarget object
+        macro_target = MacroTarget(
+            user_input_id=user_input.id if hasattr(user_input, 'id') else None,
+            target_calories=macro_values['target_calories'],
+            target_protein=macro_values['target_protein'],
+            target_carbs=macro_values['target_carbs'],
+            target_fat=macro_values['target_fat'],
+            target_electrolytes=macro_values['target_electrolytes'],
+            pre_workout_macros=macro_values['pre_workout_macros'],
+            during_workout_macros=macro_values['during_workout_macros'],
+            post_workout_macros=macro_values['post_workout_macros'],
+            rag_context=context,
+            reasoning=reasoning
+        )
+        
+            return macro_target
+
     def get_context_and_macro_targets(self, user_input: UserInput):
         """
         Retrieve the RAG context and compute macro targets for a user input.
