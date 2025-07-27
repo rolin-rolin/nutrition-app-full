@@ -286,9 +286,10 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         )
         if product:
             candidate_snacks.append(product)
-    reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks with diversity optimization.")
+    
+    reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks.")
 
-    # --- 6. Apply additional hard filters (ingredient exclusions) ---
+    # --- 7. Apply additional hard filters (ingredient exclusions) ---
     additional_filters = {
         key: preferences.get(key) for key in ["ingredient_exclusions"] if preferences.get(key)
     }
@@ -296,7 +297,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         candidate_snacks = _apply_hard_filters(candidate_snacks, additional_filters)
         reasoning_steps.append(f"Applied additional hard filters. {len(candidate_snacks)} products remaining.")
 
-    # --- 7. Macro optimization (Layer 2) if activity info is present ---
+    # --- 8. Macro optimization (Layer 2) if activity info is present ---
     if has_activity_info and macro_target:
         optimization_result = optimize_macro_combination(
             products=candidate_snacks,
@@ -329,7 +330,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             final_recommendations = candidate_snacks[:6]
             reasoning_steps.append(f"No macro optimization or calorie cap; returning top {len(final_recommendations)} vector search results.")
 
-    # --- 8. Build API response ---
+    # --- 9. Build API response ---
     response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
 
     macro_target_response = None
