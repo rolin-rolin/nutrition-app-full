@@ -699,3 +699,213 @@ class MacroTargetingServiceLocal:
         # Generate macro targets
         macro_target = self.generate_macro_targets(user_input)
         return context, macro_target 
+
+    def extract_fields_from_query(self, user_query: str) -> Dict[str, Any]:
+        """
+        Extract structured fields from user query using OpenAI LLM.
+        
+        Args:
+            user_query: Natural language user query
+            
+        Returns:
+            Dict with extracted fields in the expected format
+        """
+        if not self.llm:
+            print("No LLM available, using fallback field extraction")
+            return self._fallback_field_extraction(user_query)
+        
+        system_prompt = """You're an API that extracts structured nutrition planning fields from a user query.
+
+Extract and return the following fields:
+
+{
+  "age": int or null,
+  "weight_lb": int or null,
+  "activity_type": "cardio" | "strength" | null,
+  "duration_minutes": int or null,
+  "calorie_cap": int or null,
+  "soft_preferences": {
+    "flavor": [string] (can contain multiple flavors),
+    "texture": [string] (can contain multiple textures),
+    "price_dollars": float or null
+  },
+  "hard_constraints": {
+    "dietary": [string] (can contain multiple dietary requirements),
+    "allergens": [string] (can contain multiple allergens)
+  }
+}
+
+If a value is not specified in the user query, return null or an empty list.
+
+Use the vocabularies below as guidance. Interpret user preferences loosely but return standardized values only from the vocab lists when possible. If a preference doesn't match any known item, return null.
+
+**ACTIVITY TYPE GUIDELINES:**
+
+Classify the user's activity into one of the following two groups:
+
+- Cardio: soccer game, volleyball practice, light run, swimming, badminton, HIIT
+- Strength: gym workout, weightlifting competition, plyometrics, resistance band training, bodyweight exercises
+
+**SOFT PREFERENCE VOCABULARY:**
+
+- Flavor: sweet, salty, savory, tangy, chocolate, vanilla, fruity, nutty, spicy, umami
+- Texture: crunchy, chewy, smooth, creamy, crispy, soft
+
+**HARD CONSTRAINT VOCABULARY:**
+
+- Dietary: gluten-free, vegan, vegetarian, keto, paleo, high-protein, low-sugar, no-sugar, low-carb, high-fiber, dairy-free, soy-free, organic, non-gmo
+- Allergens: peanuts, milk, eggs, wheat, soy, tree-nuts, fish, shellfish
+
+---
+**Example query:**
+"I'm an 18-year-old guy, weigh 160 pounds. I want savory, chewy snacks for my 90-minute soccer match to fuel recovery. I'm lactose intolerant and I'd like to be gluten-free. Keep it under 400 calories"
+
+**Extracted output:**
+```json
+{
+  "age": 18,
+  "weight_lb": 160,
+  "activity_type": "cardio",
+  "duration_minutes": 90,
+  "calorie_cap": 400,
+  "soft_preferences": {
+    "flavor": ["savory"],
+    "texture": ["chewy"],
+    "price_dollars": null
+  },
+  "hard_constraints": {
+    "dietary": ["gluten-free"],
+    "allergens": ["milk"]
+  }
+}
+```
+
+Return ONLY valid JSON. No additional text or explanation."""
+
+        human_prompt = f"Extract fields from this query: {user_query}"
+        
+        try:
+            messages = [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=human_prompt)
+            ]
+            
+            response = self.llm.invoke(messages)
+            extracted_data = json.loads(response.content)
+            
+            print(f"[DEBUG] LLM extracted fields: {extracted_data}")
+            return extracted_data
+            
+        except Exception as e:
+            print(f"Error in LLM field extraction: {e}")
+            return self._fallback_field_extraction(user_query)
+    
+    def _fallback_field_extraction(self, user_query: str) -> Dict[str, Any]:
+        """
+        Fallback field extraction using simple rule-based parsing.
+        
+        Args:
+            user_query: Natural language user query
+            
+        Returns:
+            Dict with basic extracted fields
+        """
+        query_lower = user_query.lower()
+        
+        # Basic extraction patterns
+        age = None
+        weight_lb = None
+        activity_type = None
+        duration_minutes = None
+        calorie_cap = None
+        
+        # Try to extract age
+        if "year" in query_lower or "age" in query_lower:
+            import re
+            age_match = re.search(r'(\d+)[-\s]*year', query_lower)
+            if age_match:
+                age = int(age_match.group(1))
+        
+        # Try to extract weight
+        if "pound" in query_lower or "lb" in query_lower:
+            import re
+            weight_match = re.search(r'(\d+)[-\s]*(?:pound|lb)', query_lower)
+            if weight_match:
+                weight_lb = int(weight_match.group(1))
+        
+        # Try to extract activity type
+        cardio_keywords = ['soccer', 'volleyball', 'run', 'swimming', 'badminton', 'hiit', 'cardio']
+        strength_keywords = ['gym', 'weight', 'lifting', 'strength', 'resistance', 'bodyweight']
+        
+        if any(keyword in query_lower for keyword in cardio_keywords):
+            activity_type = "cardio"
+        elif any(keyword in query_lower for keyword in strength_keywords):
+            activity_type = "strength"
+        
+        # Try to extract duration
+        if "minute" in query_lower:
+            import re
+            duration_match = re.search(r'(\d+)[-\s]*minute', query_lower)
+            if duration_match:
+                duration_minutes = int(duration_match.group(1))
+        
+        # Try to extract calorie cap
+        if "calorie" in query_lower:
+            import re
+            calorie_match = re.search(r'(\d+)[-\s]*calorie', query_lower)
+            if calorie_match:
+                calorie_cap = int(calorie_match.group(1))
+        
+        return {
+            "age": age,
+            "weight_lb": weight_lb,
+            "activity_type": activity_type,
+            "duration_minutes": duration_minutes,
+            "calorie_cap": calorie_cap,
+            "soft_preferences": {
+                "flavor": [],
+                "texture": [],
+                "price_dollars": None
+            },
+            "hard_constraints": {
+                "dietary": [],
+                "allergens": []
+            }
+        }
+    
+    def _convert_extracted_fields_to_user_input(self, extracted_fields: Dict[str, Any], original_query: str) -> Dict[str, Any]:
+        """
+        Convert LLM-extracted fields to UserInput model format.
+        
+        Args:
+            extracted_fields: Fields extracted by LLM
+            original_query: Original user query
+            
+        Returns:
+            Dict suitable for UserInput model creation
+        """
+        user_input_data = {
+            "user_query": original_query,
+            "age": extracted_fields.get("age"),
+            "exercise_type": extracted_fields.get("activity_type"),
+            "exercise_duration_minutes": extracted_fields.get("duration_minutes"),
+        }
+        
+        # Convert weight from pounds to kg
+        weight_lb = extracted_fields.get("weight_lb")
+        if weight_lb:
+            user_input_data["weight_kg"] = round(weight_lb * 0.453592, 1)
+        
+        # Store additional preferences in the preferences JSON field
+        preferences = {
+            "calorie_cap": extracted_fields.get("calorie_cap"),
+            "soft_preferences": extracted_fields.get("soft_preferences", {}),
+            "hard_constraints": extracted_fields.get("hard_constraints", {})
+        }
+        
+        # Remove null values to keep JSON clean
+        preferences = {k: v for k, v in preferences.items() if v is not None}
+        if preferences:
+            user_input_data["preferences"] = preferences
+        
+        return user_input_data 
