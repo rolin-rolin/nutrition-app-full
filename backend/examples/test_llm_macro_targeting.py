@@ -56,7 +56,7 @@ def test_llm_field_extraction():
         print(f"  Duration (min): {extracted_fields.get('duration_minutes')}")
         print(f"  Calorie Cap: {extracted_fields.get('calorie_cap')}")
         print(f"  Soft Preferences: {extracted_fields.get('soft_preferences')}")
-        print(f"  Hard Constraints: {extracted_fields.get('hard_constraints')}")
+        print(f"  Hard Constraints: {extracted_fields.get('hard_filters')}")
         print()
         
         # Convert to UserInput format
@@ -159,7 +159,7 @@ def test_fallback_extraction():
     print(f"  Duration (min): {extracted_fields.get('duration_minutes')}")
     print(f"  Calorie Cap: {extracted_fields.get('calorie_cap')}")
     print(f"  Soft Preferences: {extracted_fields.get('soft_preferences')}")
-    print(f"  Hard Constraints: {extracted_fields.get('hard_constraints')}")
+    print(f"  Hard Constraints: {extracted_fields.get('hard_filters')}")
 
 if __name__ == "__main__":
     print("LLM-Enhanced Macro Targeting Service Test")
