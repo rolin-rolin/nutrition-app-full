@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import os
+from pydantic import BaseModel
 
-from app.schemas.macro_target import MacroTargetRequest, MacroTargetResponse
+from app.schemas.macro_target import MacroTargetRequest, MacroTargetResponse, MacroTargetWithUserInput
 from app.core.macro_targeting_local import MacroTargetingServiceLocal
 from app.db.models import UserInput, MacroTarget
 from app.db.session import get_db
