@@ -93,10 +93,7 @@ def _pre_filter_products_by_hard_constraints(db: Session, hard_filters: Dict[str
                 ~(Product.allergens.contains([allergen]))
             )
     
-    # Apply price constraints
-    max_price = hard_filters.get("max_price")
-    if max_price:
-        query = query.filter(Product.price_usd <= max_price)
+    # Note: Price is NOT applied here - it's a soft constraint for optimization
     
     # Execute query and return results
     filtered_products = query.all()
