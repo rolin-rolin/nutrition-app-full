@@ -25,15 +25,29 @@ from app.db.session import get_db
 load_dotenv()
 
 class MacroTargetingServiceLocal:
-    def __init__(self, rag_store_path: str = "../rag_store", force_rebuild: bool = False):
+    def __init__(self, rag_store_path: str = "../rag_store", force_rebuild: bool = False, openai_api_key: Optional[str] = None):
         print(f"[DEBUG] MacroTargetingServiceLocal __init__ called with rag_store_path={rag_store_path}, force_rebuild={force_rebuild}")
         """
-        Initialize the macro targeting service with local RAG capabilities.
+        Initialize the macro targeting service with local RAG capabilities and LLM field extraction.
         
         Args:
             rag_store_path: Path to store Chroma vector database
+            force_rebuild: Whether to force rebuild the vector store
+            openai_api_key: OpenAI API key for field extraction
         """
         self.rag_store_path = rag_store_path
+        
+        # Initialize OpenAI for field extraction
+        if openai_api_key is None:
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+        self.openai_api_key = openai_api_key
+        
+        if self.openai_api_key:
+            # Use gpt-4o-mini which is more widely available and cost-effective
+            self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1, openai_api_key=self.openai_api_key)
+        else:
+            print("Warning: No OpenAI API key provided. Field extraction will use fallback parsing.")
+            self.llm = None
         
         # Initialize local embeddings
         self.embeddings = SentenceTransformer('all-MiniLM-L6-v2')
