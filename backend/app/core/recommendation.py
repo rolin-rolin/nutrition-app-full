@@ -204,8 +204,6 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             filter_details.append(f"dietary: {hard_filters['dietary_requirements']}")
         if hard_filters.get("allergen_restrictions"):
             filter_details.append(f"allergens: {hard_filters['allergen_restrictions']}")
-        if hard_filters.get("max_price"):
-            filter_details.append(f"max price: ${hard_filters['max_price']}")
         if filter_details:
             reasoning_steps.append(f"Applied hard filters: {', '.join(filter_details)}")
     else:
