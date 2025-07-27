@@ -28,6 +28,84 @@ def _build_augmented_query(macro_target: MacroTarget, preferences: Dict[str, Any
         
     return " ".join(query_parts)
 
+def _build_hard_filters_from_llm_extraction(preferences: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Build hard filters from LLM-extracted preferences for pre-filtering products.
+    
+    Args:
+        preferences: Dictionary containing LLM-extracted preferences with hard_filters
+        
+    Returns:
+        Dictionary of hard filters for product filtering
+    """
+    hard_filters = {}
+    
+    # Get hard filters from LLM extraction
+    hard_filters_data = preferences.get("hard_filters", {})
+    
+    # Dietary restrictions - check against dietary_flags, diet fields
+    dietary_requirements = hard_filters_data.get("dietary", [])
+    if dietary_requirements:
+        hard_filters["dietary_requirements"] = dietary_requirements
+    
+    # Allergen restrictions - check against allergens field
+    allergen_restrictions = hard_filters_data.get("allergens", [])
+    if allergen_restrictions:
+        hard_filters["allergen_restrictions"] = allergen_restrictions
+    
+    # Price constraints from soft preferences
+    soft_prefs = preferences.get("soft_preferences", {})
+    price_limit = soft_prefs.get("price_dollars")
+    if price_limit:
+        hard_filters["max_price"] = price_limit
+    
+    return hard_filters
+
+def _pre_filter_products_by_hard_constraints(db: Session, hard_filters: Dict[str, Any]) -> List[Product]:
+    """
+    Pre-filter products based on hard constraints before vector search.
+    
+    Args:
+        db: Database session
+        hard_filters: Dictionary of hard filters from LLM extraction
+        
+    Returns:
+        List of products that meet all hard constraints
+    """
+    # Start with all products
+    query = db.query(Product)
+    
+    # Apply dietary restrictions
+    dietary_requirements = hard_filters.get("dietary_requirements", [])
+    if dietary_requirements:
+        # Products must have ALL required dietary flags
+        for requirement in dietary_requirements:
+            # Check both dietary_flags and diet fields
+            query = query.filter(
+                (Product.dietary_flags.contains([requirement])) |
+                (Product.diet == requirement) |
+                (Product.diet.contains([requirement]))
+            )
+    
+    # Apply allergen restrictions - exclude products that contain restricted allergens
+    allergen_restrictions = hard_filters.get("allergen_restrictions", [])
+    if allergen_restrictions:
+        for allergen in allergen_restrictions:
+            # Exclude products that contain this allergen
+            query = query.filter(
+                ~(Product.allergens.contains([allergen]))
+            )
+    
+    # Apply price constraints
+    max_price = hard_filters.get("max_price")
+    if max_price:
+        query = query.filter(Product.price_usd <= max_price)
+    
+    # Execute query and return results
+    filtered_products = query.all()
+    
+    return filtered_products
+
 def _build_hard_filters(preferences: Dict[str, Any]) -> Dict[str, Any]:
     """Build hard filters for vector search based on user preferences."""
     hard_filters = {}
