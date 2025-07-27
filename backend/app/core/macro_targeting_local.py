@@ -781,11 +781,11 @@ class MacroTargetingServiceLocal:
                 preferences_info.append(f"price limit: ${soft_prefs['price_dollars']}")
             
             # Add hard constraints
-            hard_constraints = extracted_fields.get("hard_constraints", {})
-            if hard_constraints.get("dietary"):
-                preferences_info.append(f"dietary requirements: {', '.join(hard_constraints['dietary'])}")
-            if hard_constraints.get("allergens"):
-                preferences_info.append(f"allergen restrictions: {', '.join(hard_constraints['allergens'])}")
+            hard_filters = extracted_fields.get("hard_filters", {})
+            if hard_filters.get("dietary"):
+                preferences_info.append(f"dietary requirements: {', '.join(hard_filters['dietary'])}")
+            if hard_filters.get("allergens"):
+                preferences_info.append(f"allergen restrictions: {', '.join(hard_filters['allergens'])}")
             
             if preferences_info:
                 reasoning_parts.append(f"with preferences: {' | '.join(preferences_info)}")
@@ -858,7 +858,7 @@ Extract and return the following fields:
     "texture": [string] (can contain multiple textures),
     "price_dollars": float or null
   },
-  "hard_constraints": {
+  "hard_filters": {
     "dietary": [string] (can contain multiple dietary requirements),
     "allergens": [string] (can contain multiple allergens)
   }
@@ -902,7 +902,7 @@ Classify the user's activity into one of the following two groups:
     "texture": ["chewy"],
     "price_dollars": null
   },
-  "hard_constraints": {
+  "hard_filters": {
     "dietary": ["gluten-free"],
     "allergens": ["milk"]
   }
@@ -996,7 +996,7 @@ Return ONLY valid JSON. No additional text or explanation."""
                 "texture": [],
                 "price_dollars": None
             },
-            "hard_constraints": {
+            "hard_filters": {
                 "dietary": [],
                 "allergens": []
             }
@@ -1029,7 +1029,7 @@ Return ONLY valid JSON. No additional text or explanation."""
         preferences = {
             "calorie_cap": extracted_fields.get("calorie_cap"),
             "soft_preferences": extracted_fields.get("soft_preferences", {}),
-            "hard_constraints": extracted_fields.get("hard_constraints", {})
+            "hard_filters": extracted_fields.get("hard_filters", {})
         }
         
         # Remove null values to keep JSON clean
