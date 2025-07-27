@@ -37,9 +37,9 @@
 #   Examples: nuts, milk, soy, wheat, eggs, fish, shellfish, peanuts, tree-nuts, 
 #   sesame, sulfites, none
 # Line 21: diet (comma-separated) - Diet compatibility
-#   Examples: high-protein, moderate-protein, low-protein, keto-friendly, paleo-friendly, 
-#   vegan-friendly, vegetarian-friendly, gluten-free-friendly, dairy-free-friendly, 
-#   low-carb-friendly, low-sugar-friendly, mediterranean, atkins, south-beach
+#   Examples: high-protein, moderate-protein, low-protein, keto, paleo, 
+#   vegan, vegetarian, gluten-free, dairy-free, 
+#   low-carb, low-sugar, mediterranean, atkins, south-beach
 # Line 22: link (string) - Product purchase link
 # Line 23: image_url (string) - Product image URL
 # Line 24: source (string) - Data source
@@ -152,7 +152,7 @@ post-workout
 recovery, high-protein, muscle-building
 milk, nuts
 high-protein
-https://www.amazon.com/Quest-Nutrition-Cookies-Protein-Friendly/dp/B00I0DI0Z6?th=1
+https://www.amazon.com/Quest-Nutrition-Cookies-Protein/dp/B00I0DI0Z6?th=1
 https://m.media-amazon.com/images/I/81of4XL+BBL._SX679_.jpg
 manual_entry
 f
@@ -237,12 +237,12 @@ post-workout, snack, anytime
 #   collagen, bcaa, creatine, prebiotic, probiotic, antioxidant, anti-inflammatory
 recovery, muscle-building, weight-loss, energy-boost, whey-protein, soy-protein, casein, collagen
 # Line 20: allergens
-milk, soy, peanuts, tree nuts
+milk, soy, peanuts, tree-nuts
 # Line 21: diet
-#   Examples: high-protein, moderate-protein, low-protein, keto-friendly, paleo-friendly, 
-#   vegan-friendly, vegetarian-friendly, gluten-free-friendly, dairy-free-friendly, 
-#   low-carb-friendly, low-sugar-friendly, mediterranean, atkins, south-beach
-high-protein, low-carb-friendly
+#   Examples: high-protein, moderate-protein, low-protein, keto, paleo, 
+#   vegan, vegetarian, gluten-free, dairy-free, 
+#   low-carb, low-sugar, mediterranean, atkins, south-beach
+high-protein, low-carb
 # Line 22: link
 https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B07G3D6D22?th=1
 # Line 23: image_url
@@ -314,7 +314,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein,
 milk, soy, peanuts, nuts
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B00GJ82VK4?th=1
@@ -388,7 +388,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein,
 milk, soy, peanuts, nuts
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B08K11C2BB?th=1
@@ -462,7 +462,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein,
 milk, soy, peanuts, nuts
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B0BFRTK3C6?th=1
@@ -537,7 +537,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, soy-protein,
 milk, soy, peanuts, nuts
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.amazon.com/Pure-Protein-Healthy-Support-Chocolate/dp/B07RW28RPF?th=1
@@ -604,7 +604,7 @@ high-protein, no-added-sugar
 post-workout, snack
 
 # Line 19: tags
-recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+recovery, high-protein, muscle-building, paleo, whole-food-based, date-based
 
 # Line 20: allergens
 eggs, peanuts
@@ -678,7 +678,7 @@ high-protein, no-added-sugar
 post-workout, snack
 
 # Line 19: tags
-recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+recovery, high-protein, muscle-building, paleo, whole-food-based, date-based
 
 # Line 20: allergens
 eggs, cashews, almonds
@@ -752,7 +752,7 @@ high-protein, no-added-sugar
 post-workout, snack
 
 # Line 19: tags
-recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+recovery, high-protein, muscle-building, paleo, whole-food-based, date-based
 
 # Line 20: allergens
 eggs, almonds, cashews
@@ -826,7 +826,7 @@ high-protein, no-added-sugar
 post-workout, snack
 
 # Line 19: tags
-recovery, high-protein, muscle-building, paleo-friendly, whole-food-based, date-based
+recovery, high-protein, muscle-building, paleo, whole-food-based, date-based
 
 # Line 20: allergens
 eggs, almonds, cashews
@@ -959,7 +959,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
 milk, almonds
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.questnutrition.com/products/white-chocolate-raspberry-protein-bar
@@ -1033,7 +1033,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
 milk, almonds
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.questnutrition.com/products/smores-protein-bar
@@ -1107,7 +1107,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, casein, pean
 milk, peanuts, almonds
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.questnutrition.com/products/chocolate-peanut-butter-protein-bar?_pos=1&_psq=Chocolate+Peanut+BUtter&_ss=e&_v=1.0
@@ -1181,7 +1181,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
 milk, almonds
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.questnutrition.com/products/chocolate-chip-cookie-dough-protein-bar?_pos=2&_psq=Chocolate+Chip+cook&_ss=e&_v=1.0
@@ -1256,7 +1256,7 @@ recovery, high-protein, muscle-building, weight-loss, whey-protein, casein
 milk, almonds
 
 # Line 21: diet
-high-protein, low-carb-friendly
+high-protein, low-carb
 
 # Line 22: link
 https://www.questnutrition.com/products/cookies-cream-protein-bar?_pos=1&_psq=Cookies+%26+Cream&_ss=e&_v=1.0
