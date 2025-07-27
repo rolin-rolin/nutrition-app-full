@@ -53,11 +53,8 @@ def _build_hard_filters_from_llm_extraction(preferences: Dict[str, Any]) -> Dict
     if allergen_restrictions:
         hard_filters["allergen_restrictions"] = allergen_restrictions
     
-    # Price constraints from soft preferences
-    soft_prefs = preferences.get("soft_preferences", {})
-    price_limit = soft_prefs.get("price_dollars")
-    if price_limit:
-        hard_filters["max_price"] = price_limit
+    # Note: Price is NOT a hard filter - it's a soft preference for optimization
+    # Price constraints should be handled during macro optimization or final selection
     
     return hard_filters
 
@@ -243,11 +240,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         vector_query = request.user_query
         reasoning_steps.append(f"Built vector search query (fallback to user_query): '{vector_query}'")
 
-    # --- 4. Build hard filters ---
-    hard_filters = _build_hard_filters(preferences)
-    reasoning_steps.append(f"Built hard filters: {hard_filters}")
-
-    # --- 5. Vector search (Layer 1) ---
+    # --- 5. Vector search on pre-filtered products (Layer 1) ---
     vector_store = get_product_vector_store()
     vector_results = vector_store.query_similar_products(
         query=vector_query,
