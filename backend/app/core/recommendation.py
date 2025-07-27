@@ -198,7 +198,27 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     else:
         reasoning_steps.append("No activity info detected; skipping macro targeting and optimization.")
 
-    # --- 3. Build vector search query ---
+    # --- 3. Pre-filter products by hard constraints from LLM extraction ---
+    hard_filters = _build_hard_filters_from_llm_extraction(preferences)
+    if hard_filters:
+        pre_filtered_products = _pre_filter_products_by_hard_constraints(db, hard_filters)
+        reasoning_steps.append(f"Pre-filtered products by hard constraints: {len(pre_filtered_products)} products remaining from {db.query(Product).count()} total.")
+        
+        # Log what filters were applied
+        filter_details = []
+        if hard_filters.get("dietary_requirements"):
+            filter_details.append(f"dietary: {hard_filters['dietary_requirements']}")
+        if hard_filters.get("allergen_restrictions"):
+            filter_details.append(f"allergens: {hard_filters['allergen_restrictions']}")
+        if hard_filters.get("max_price"):
+            filter_details.append(f"max price: ${hard_filters['max_price']}")
+        if filter_details:
+            reasoning_steps.append(f"Applied hard filters: {', '.join(filter_details)}")
+    else:
+        pre_filtered_products = db.query(Product).all()
+        reasoning_steps.append("No hard constraints found; using all products for vector search.")
+
+    # --- 4. Build vector search query ---
     if has_activity_info and macro_target:
         # Use macro targets to build query
         soft_guidance = extract_soft_guidance(context)
