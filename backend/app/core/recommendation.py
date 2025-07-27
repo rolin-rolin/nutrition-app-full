@@ -239,13 +239,43 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # --- 5. Vector search on pre-filtered products (Layer 1) ---
     vector_store = get_product_vector_store()
-    vector_results = vector_store.query_similar_products(
-        query=vector_query,
-        top_k=50,
-        hard_filters=hard_filters if hard_filters else None,
-        use_mmr=True,
-        mmr_lambda=0.5
-    )
+    
+    # If we have pre-filtered products, we need to do vector search on that subset
+    if len(pre_filtered_products) < db.query(Product).count():
+        # We have hard filters applied, so we need to do vector search only on pre-filtered products
+        # Since the vector store contains all products, we'll do the search and then filter results
+        
+        # Do vector search on all products first, then filter to our pre-filtered subset
+        vector_results = vector_store.query_similar_products(
+            query=vector_query,
+            top_k=100,  # Get more candidates since we'll filter
+            hard_filters=None,  # Don't use vector store hard filters since we pre-filtered
+            use_mmr=True,
+            mmr_lambda=0.5
+        )
+        
+        # Filter results to only include pre-filtered products
+        pre_filtered_ids = set(p.id for p in pre_filtered_products)
+        filtered_vector_results = []
+        for result in vector_results:
+            if result['product_id'] in pre_filtered_ids:
+                filtered_vector_results.append(result)
+        
+        # Take top results from filtered subset
+        vector_results = filtered_vector_results[:50]
+        reasoning_steps.append(f"Vector search on pre-filtered products returned {len(vector_results)} candidates.")
+    else:
+        # No hard filters, do normal vector search on all products
+        vector_results = vector_store.query_similar_products(
+            query=vector_query,
+            top_k=50,
+            hard_filters=None,  # We already pre-filtered
+            use_mmr=True,
+            mmr_lambda=0.5
+        )
+        reasoning_steps.append(f"Vector search returned {len(vector_results)} candidate snacks with diversity optimization.")
+
+    # --- 6. Convert vector results to Product objects ---
     candidate_snacks = []
     for result in vector_results:
         product = (
