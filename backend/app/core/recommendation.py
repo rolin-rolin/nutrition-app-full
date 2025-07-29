@@ -221,6 +221,14 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             user_soft_prefs.append(f"texture: {'/'.join(preferences['texture_preferences'])}")
         if preferences.get("flavor_exclusions"):
             user_soft_prefs.append(f"not: {'/'.join(preferences['flavor_exclusions'])}")
+        
+        # Add high-protein preference if detected from strength activities
+        if preferences.get("soft_preferences", {}).get("dietary"):
+            dietary_prefs = preferences["soft_preferences"]["dietary"]
+            if "high-protein" in dietary_prefs:
+                user_soft_prefs.append("high-protein")
+                reasoning_steps.append("Added high-protein preference based on strength activity detection")
+        
         vector_query = f"{soft_guidance} {' '.join(user_soft_prefs)}"
         reasoning_steps.append(f"Built vector search query: '{vector_query}'")
     elif has_flavor_info:
