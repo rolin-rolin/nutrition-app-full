@@ -7,7 +7,7 @@ import re
 from dotenv import load_dotenv
 from datetime import datetime
 load_dotenv()
-from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
+from app.schemas.recommendation import RecommendationRequest, RecommendationResponse, EnhancedRecommendationResponse, UserProfileInfo, BundleStats, PreferenceInfo, KeyPrinciple
 from app.schemas.product import Product as ProductSchema
 from app.schemas.macro_target import MacroTargetResponse
 from app.core.macro_targeting_local import MacroTargetingServiceLocal
