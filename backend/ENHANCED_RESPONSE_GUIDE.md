@@ -22,12 +22,22 @@ The enhanced recommendation response provides all the information needed for fro
 
 ### 1. Macro Targets Display
 
-**Format:** "Based on your profile: `<age_display>`, `<weight_display>`, `<exercise_display>`, these are your macro targets: `<target_protein>`g protein, `<target_carbs>`g carbs, `<target_fat>`g fat, `<target_electrolytes>`mg electrolytes"
+**Format:** "Based on your profile: `<age_display>`, `<weight_display>`, `<exercise_display>`, these are your macro targets: `<target_protein>`g protein, `<target_carbs>`g carbs, `<target_fat>`g fat, `<target_electrolytes>`mg electrolytes [ℹ️]"
 
 **Example:**
 
 ```
-Based on your profile: 25 years old, 70kg, cardio for 60 minutes, these are your macro targets: 25g protein, 75g carbs, 15g fat, 1000mg electrolytes
+Based on your profile: 25 years old, 70kg, cardio for 60 minutes, these are your macro targets: 25g protein, 75g carbs, 15g fat, 1000mg electrolytes [ℹ️]
+```
+
+**Info Button Hover Display:**
+
+When the user hovers over the info button (ℹ️), show the timing breakdown:
+
+```
+Pre-workout: 15g carbs, 5g protein, 5g fat, 100 calories
+During workout: 10g carbs, 2g protein, 2g fat, 50mg electrolytes, 58 calories
+Post-workout: 50g carbs, 18g protein, 10g fat, 400 calories
 ```
 
 **Default Values:**
@@ -128,6 +138,33 @@ Some key principles:
   target_electrolytes?: number;
   reasoning: string;
   // ... other fields
+}
+```
+
+### `timing_breakdown` (TimingMacroBreakdown)
+
+```typescript
+{
+  pre_workout?: {
+    carbs?: number;
+    protein?: number;
+    fat?: number;
+    calories?: number;
+    electrolytes?: number;
+  };
+  during_workout?: {
+    carbs?: number;
+    protein?: number;
+    fat?: number;
+    electrolytes?: number;
+    calories?: number;
+  };
+  post_workout?: {
+    carbs?: number;
+    protein?: number;
+    fat?: number;
+    calories?: number;
+  };
 }
 ```
 
@@ -239,6 +276,7 @@ Some key principles:
 interface EnhancedRecommendationResponse {
     recommended_products: Product[];
     macro_targets?: MacroTargetResponse;
+    timing_breakdown?: TimingMacroBreakdown;
     reasoning: string;
     user_profile?: UserProfileInfo;
     bundle_stats?: BundleStats;

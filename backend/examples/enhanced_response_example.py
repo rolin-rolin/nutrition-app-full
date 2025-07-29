@@ -61,6 +61,27 @@ async def demonstrate_enhanced_response():
             "target_electrolytes": 1.0,
             "reasoning": "Calculated for 25-year-old, 70kg individual doing cardio for 60 minutes..."
         },
+        "timing_breakdown": {
+            "pre_workout": {
+                "carbs": 15.0,
+                "protein": 5.0,
+                "fat": 5.0,
+                "calories": 100.0
+            },
+            "during_workout": {
+                "carbs": 10.0,
+                "protein": 2.0,
+                "fat": 2.0,
+                "electrolytes": 50.0,
+                "calories": 58.0
+            },
+            "post_workout": {
+                "carbs": 50.0,
+                "protein": 18.0,
+                "fat": 10.0,
+                "calories": 400.0
+            }
+        },
         "user_profile": {
             "age": 25,
             "weight_kg": 70.0,
@@ -139,6 +160,27 @@ async def demonstrate_enhanced_response():
             "target_protein": 32.5,  // Higher protein for strength
             "target_carbs": 67.5,    // Slightly lower carbs
             ...
+        },
+        "timing_breakdown": {
+            "pre_workout": {
+                "carbs": 20.0,
+                "protein": 8.0,
+                "fat": 8.0,
+                "calories": 180.0
+            },
+            "during_workout": {
+                "carbs": 5.0,
+                "protein": 3.0,
+                "fat": 1.0,
+                "electrolytes": 75.0,
+                "calories": 41.0
+            },
+            "post_workout": {
+                "carbs": 42.5,
+                "protein": 21.5,
+                "fat": 7.0,
+                "calories": 320.0
+            }
         },
         "user_profile": {
             "age": 30,
