@@ -7,6 +7,14 @@ from .macro_target import MacroTargetResponse
 Contains pydantic models (data validation/serialization)
 """
 
+class TimingMacroBreakdown(BaseModel):
+    """Breakdown of macro targets by timing (pre, during, post workout)."""
+    pre_workout: Optional[Dict[str, Any]] = None
+    during_workout: Optional[Dict[str, Any]] = None
+    post_workout: Optional[Dict[str, Any]] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
 class RecommendationRequest(BaseModel):
     """Request model for getting a full snack recommendation."""
     user_query: str
@@ -63,6 +71,7 @@ class EnhancedRecommendationResponse(BaseModel):
     """Enhanced response model with all information needed for frontend display."""
     recommended_products: List[Product]
     macro_targets: Optional[MacroTargetResponse] = None
+    timing_breakdown: Optional[TimingMacroBreakdown] = None
     reasoning: str
     
     # New fields for frontend presentation

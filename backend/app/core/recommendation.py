@@ -468,6 +468,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # Build macro target response
     macro_target_response = None
+    timing_breakdown = None
     if macro_target:
         macro_target_created_at = macro_target.created_at or datetime.utcnow()
         macro_target_response = MacroTargetResponse(
@@ -484,10 +485,19 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             confidence_score=macro_target.confidence_score,
             created_at=macro_target_created_at
         )
+        
+        # Create timing breakdown for frontend display
+        from app.schemas.recommendation import TimingMacroBreakdown
+        timing_breakdown = TimingMacroBreakdown(
+            pre_workout=macro_target.pre_workout_macros,
+            during_workout=macro_target.during_workout_macros,
+            post_workout=macro_target.post_workout_macros
+        )
 
     return EnhancedRecommendationResponse(
         recommended_products=response_products,
         macro_targets=macro_target_response,
+        timing_breakdown=timing_breakdown,
         reasoning="\n".join(reasoning_steps),
         user_profile=user_profile,
         bundle_stats=bundle_stats,
