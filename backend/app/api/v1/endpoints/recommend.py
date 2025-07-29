@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
+from app.schemas.recommendation import RecommendationRequest, RecommendationResponse, EnhancedRecommendationResponse
 from app.core.recommendation import get_recommendations
 from app.db.session import get_db
 
 router = APIRouter()
 
-@router.post("/", response_model=RecommendationResponse)
+@router.post("/", response_model=EnhancedRecommendationResponse)
 async def recommend(request: RecommendationRequest, db: Session = Depends(get_db)):
     """
     Get snack recommendations based on user context and preferences.
