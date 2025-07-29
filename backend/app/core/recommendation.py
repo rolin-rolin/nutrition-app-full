@@ -485,10 +485,14 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             created_at=macro_target_created_at
         )
 
-    return RecommendationResponse(
+    return EnhancedRecommendationResponse(
         recommended_products=response_products,
         macro_targets=macro_target_response,
-        reasoning="\n".join(reasoning_steps)
+        reasoning="\n".join(reasoning_steps),
+        user_profile=user_profile,
+        bundle_stats=bundle_stats,
+        preferences=preferences_info,
+        key_principles=key_principles
     )
 
 
