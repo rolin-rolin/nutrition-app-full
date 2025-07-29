@@ -375,7 +375,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             final_recommendations = candidate_snacks[:6]
             reasoning_steps.append(f"No macro optimization or calorie cap; returning top {len(final_recommendations)} vector search results.")
 
-    # --- 9. Build API response ---
+    # --- 9. Build Enhanced API response ---
     response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
 
     # Build user profile info for display
