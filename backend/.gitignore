@@ -46,3 +46,8 @@ ENV/
 
 #Rag readme
 RAG_PIPELINE_README.md
+
+product_vector_store/
+rag_store/
+*.sqlite3
+*.bin
