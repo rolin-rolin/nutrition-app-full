@@ -319,19 +319,19 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             )
             reasoning_steps.append(f"Vector search returned {len(vector_results)} candidate snacks with diversity optimization.")
 
-    # --- 6. Convert vector results to Product objects ---
-    candidate_snacks = []
-    for result in vector_results:
-        product = (
-            db.query(Product)
-            .options(load_only(*(getattr(Product, c.name) for c in Product.__table__.columns)))
-            .filter(Product.id == result['product_id'])
-            .first()
-        )
-        if product:
-            candidate_snacks.append(product)
-    
-    reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks.")
+        # --- 6. Convert vector results to Product objects ---
+        candidate_snacks = []
+        for result in vector_results:
+            product = (
+                db.query(Product)
+                .options(load_only(*(getattr(Product, c.name) for c in Product.__table__.columns)))
+                .filter(Product.id == result['product_id'])
+                .first()
+            )
+            if product:
+                candidate_snacks.append(product)
+        
+        reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks.")
 
     # --- 7. Apply additional hard filters (ingredient exclusions) ---
     additional_filters = {
