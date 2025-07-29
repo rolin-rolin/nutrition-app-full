@@ -378,6 +378,95 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     # --- 9. Build API response ---
     response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
 
+    # Build user profile info for display
+    user_profile = None
+    if has_activity_info:
+        age_display = f"{request.age} years old" if request.age else "using default age 21"
+        weight_display = f"{request.weight_kg}kg" if request.weight_kg else "using default 70kg weight"
+        
+        if request.exercise_type and request.exercise_duration_minutes:
+            exercise_display = f"{request.exercise_type} for {request.exercise_duration_minutes} minutes"
+        elif request.exercise_type:
+            exercise_display = f"{request.exercise_type} (using default 60-minute duration)"
+        elif request.exercise_duration_minutes:
+            exercise_display = f"cardio for {request.exercise_duration_minutes} minutes (using default exercise type)"
+        else:
+            exercise_display = "cardio (using default 60-minute duration)"
+        
+        user_profile = UserProfileInfo(
+            age=request.age,
+            weight_kg=request.weight_kg,
+            exercise_type=request.exercise_type,
+            exercise_duration_minutes=request.exercise_duration_minutes,
+            age_display=age_display,
+            weight_display=weight_display,
+            exercise_display=exercise_display
+        )
+
+    # Build bundle stats
+    bundle_stats = None
+    if has_activity_info and macro_target and 'optimization_result' in locals():
+        if optimization_result:
+            bundle_stats = BundleStats(
+                total_protein=optimization_result.total_protein,
+                total_carbs=optimization_result.total_carbs,
+                total_fat=optimization_result.total_fat,
+                total_electrolytes=optimization_result.total_electrolytes,
+                total_calories=optimization_result.total_calories,
+                num_snacks=len(final_recommendations),
+                target_match_percentage=optimization_result.target_match_percentage
+            )
+        else:
+            # Calculate totals manually if no optimization result
+            total_protein = sum(p.protein or 0 for p in final_recommendations)
+            total_carbs = sum(p.carbs or 0 for p in final_recommendations)
+            total_fat = sum(p.fat or 0 for p in final_recommendations)
+            total_electrolytes = sum(p.electrolytes_mg or 0 for p in final_recommendations)
+            total_calories = sum(p.calories or 0 for p in final_recommendations)
+            
+            bundle_stats = BundleStats(
+                total_protein=total_protein,
+                total_carbs=total_carbs,
+                total_fat=total_fat,
+                total_electrolytes=total_electrolytes,
+                total_calories=total_calories,
+                num_snacks=len(final_recommendations),
+                target_match_percentage=0.0  # No optimization, so no target match
+            )
+
+    # Build preferences info
+    soft_prefs = []
+    hard_filters = []
+    
+    # Extract soft preferences
+    if preferences.get("flavor_preferences"):
+        soft_prefs.extend([f"{pref} flavor" for pref in preferences["flavor_preferences"]])
+    if preferences.get("texture_preferences"):
+        soft_prefs.extend([f"{pref} texture" for pref in preferences["texture_preferences"]])
+    if preferences.get("soft_preferences", {}).get("dietary"):
+        soft_prefs.extend(preferences["soft_preferences"]["dietary"])
+    
+    # Extract hard filters
+    if preferences.get("dietary_requirements"):
+        hard_filters.extend(preferences["dietary_requirements"])
+    if preferences.get("allergen_restrictions"):
+        hard_filters.extend([f"no {allergen}" for allergen in preferences["allergen_restrictions"]])
+    if preferences.get("ingredient_exclusions"):
+        hard_filters.extend([f"no {ingredient}" for ingredient in preferences["ingredient_exclusions"]])
+    
+    preferences_info = PreferenceInfo(
+        soft_preferences=soft_prefs,
+        hard_filters=hard_filters
+    )
+
+    # Extract key principles from knowledge document
+    key_principles = []
+    if has_activity_info and macro_target and macro_target.rag_context:
+        macro_targeting_service = MacroTargetingServiceLocal()
+        principles = macro_targeting_service.extract_key_principles(macro_target.rag_context, num_principles=2)
+        key_principles = [KeyPrinciple(principle=principle) for principle in principles]
+
+    # Build macro target response
     macro_target_response = None
     if macro_target:
         macro_target_created_at = macro_target.created_at or datetime.utcnow()
