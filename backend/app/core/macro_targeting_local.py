@@ -824,11 +824,118 @@ class MacroTargetingServiceLocal:
         Returns (context, macro_target)
         """
         # Retrieve relevant context using metadata-based filtering
-        context = self.retrieve_context_by_metadata(user_input)
+        context, retrieved_metadata = self.retrieve_context_by_metadata_with_metadata(user_input)
+        
+        # Check if the retrieved context has "strength" in its metadata
+        # and add "high-protein" as a soft preference if so
+        strength_detected = self._detect_strength_in_retrieved_metadata(retrieved_metadata, user_input)
+        if strength_detected:
+            # Add high-protein as a soft preference to the user input preferences
+            if not hasattr(user_input, 'preferences') or user_input.preferences is None:
+                user_input.preferences = {}
+            
+            # Initialize soft_preferences if it doesn't exist
+            if 'soft_preferences' not in user_input.preferences:
+                user_input.preferences['soft_preferences'] = {}
+            
+            # Add high-protein to the soft preferences
+            if 'dietary' not in user_input.preferences['soft_preferences']:
+                user_input.preferences['soft_preferences']['dietary'] = []
+            
+            if 'high-protein' not in user_input.preferences['soft_preferences']['dietary']:
+                user_input.preferences['soft_preferences']['dietary'].append('high-protein')
+                print(f"[DEBUG] Added high-protein soft preference due to strength activity detection")
+        
         # Generate macro targets
         macro_target = self.generate_macro_targets(user_input)
         return context, macro_target 
 
+    def retrieve_context_by_metadata_with_metadata(self, user_input: UserInput) -> Tuple[str, Optional[Dict[str, Any]]]:
+        """Retrieve context using metadata-based filtering and return both context and metadata."""
+        # Extract metadata from user input
+        age_group = self._get_age_group_from_age(user_input.age) if user_input.age else None
+        exercise_type = self._get_exercise_type(user_input.exercise_type) if user_input.exercise_type else None
+        duration_type = self._get_duration_type(user_input.exercise_duration_minutes) if user_input.exercise_duration_minutes else None
+        
+        print(f"Looking for: age_group={age_group}, exercise_type={exercise_type}, duration={duration_type}")
+        
+        # Build metadata filter
+        where_clause = {}
+        if age_group:
+            where_clause["age_group"] = age_group
+        if exercise_type:
+            where_clause["type_of_activity"] = exercise_type
+        if duration_type:
+            where_clause["duration"] = duration_type
+        
+        # Try exact metadata match first
+        if where_clause:
+            # Debug: Check what's in the vector store
+            try:
+                all_results = self.vectorstore.get(include=["documents", "metadatas"])
+                print(f"Total documents in vector store: {len(all_results['documents'])}")
+                print("Available metadata:")
+                for i, metadata in enumerate(all_results['metadatas']):
+                    print(f"  Doc {i}: {metadata}")
+            except Exception as e:
+                print(f"Error getting all documents: {e}")
+            
+            try:
+                # Chroma metadata filtering syntax
+                if len(where_clause) > 1:
+                    # Multiple conditions - use $and
+                    chroma_where = {"$and": [{k: {"$eq": v}} for k, v in where_clause.items()]}
+                else:
+                    # Single condition
+                    key, value = list(where_clause.items())[0]
+                    chroma_where = {key: {"$eq": value}}
+                
+                print(f"Chroma where clause: {chroma_where}")
+                
+                results = self.vectorstore.get(
+                    where=chroma_where,
+                    include=["documents", "metadatas"]
+                )
+                
+                if results['documents'] and results['metadatas']:
+                    print(f"Found {len(results['documents'])} exact metadata matches")
+                    # Return both the content and metadata of the first match
+                    return results['documents'][0], results['metadatas'][0]
+            except Exception as e:
+                print(f"Error in metadata-based retrieval: {e}")
+        
+        # Fallback to vector search if no exact match
+        print("No exact metadata match found, falling back to vector search")
+        return self.retrieve_context_fallback(user_input), None
+
+    def _detect_strength_in_retrieved_metadata(self, retrieved_metadata: Optional[Dict[str, Any]], user_input: UserInput) -> bool:
+        """
+        Detect if the retrieved knowledge document has "strength" in its metadata.
+        
+        Args:
+            retrieved_metadata: Metadata from the retrieved document (if available)
+            user_input: UserInput object with user context
+            
+        Returns:
+            True if strength activity is detected, False otherwise
+        """
+        # First check the retrieved metadata if available
+        if retrieved_metadata:
+            if retrieved_metadata.get('type_of_activity') == 'strength':
+                print(f"[DEBUG] Detected strength activity in metadata: {retrieved_metadata}")
+                return True
+        
+        # Fallback: check if exercise_type contains "strength" keywords
+        if user_input.exercise_type:
+            strength_keywords = ['strength', 'weight', 'lift', 'gym', 'resistance', 'plyometric']
+            exercise_type_lower = user_input.exercise_type.lower()
+            for keyword in strength_keywords:
+                if keyword in exercise_type_lower:
+                    print(f"[DEBUG] Detected strength activity from exercise_type: {user_input.exercise_type}")
+                    return True
+        
+        return False
+    
     def extract_fields_from_query(self, user_query: str) -> Dict[str, Any]:
         """
         Extract structured fields from user query using OpenAI LLM.
