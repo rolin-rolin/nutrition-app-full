@@ -12,6 +12,7 @@ import os
 import json
 import yaml
 from typing import Dict, Optional, Tuple, Any, List
+import random
 from sentence_transformers import SentenceTransformer
 from langchain_chroma import Chroma
 from langchain.schema import SystemMessage, HumanMessage
@@ -935,6 +936,54 @@ class MacroTargetingServiceLocal:
                     return True
         
         return False
+
+    def extract_key_principles(self, context: str, num_principles: int = 2) -> List[str]:
+        """
+        Extract key principles from the knowledge document context.
+        Specifically targets the key_principles: section and returns random principles.
+        
+        Args:
+            context: The knowledge document content
+            num_principles: Number of principles to extract (default: 2)
+            
+        Returns:
+            List of key principles as strings
+        """
+        principles = []
+        
+        # Split context into lines
+        lines = context.split('\n')
+        
+        # First, try to find the specific "key_principles:" section
+        in_key_principles_section = False
+        for line in lines:
+            line = line.strip()
+            
+            # Check if we're entering the key_principles section
+            if line.lower() == 'key_principles:' or line.lower() == 'key principles:':
+                in_key_principles_section = True
+                continue
+            
+            # Check if we're leaving the key_principles section (next section starts)
+            if in_key_principles_section and (line.lower() == 'avoid:' or line.lower() == 'timing:' or line.startswith('---')):
+                break
+            
+            # If we're in the key_principles section, look for bullet points
+            if in_key_principles_section:
+                if (line.startswith('- ') or 
+                    line.startswith('* ') or 
+                    line.startswith('• ')):
+                    
+                    # Clean up the principle text
+                    principle = line.lstrip('- *• ')
+                    if principle and len(principle) > 10:  # Ensure it's substantial
+                        principles.append(principle)
+        
+        # Return random selection if we have more than requested
+        if len(principles) > num_principles:
+            return random.sample(principles, num_principles)
+        else:
+            return principles[:num_principles]
     
     def extract_fields_from_query(self, user_query: str) -> Dict[str, Any]:
         """
