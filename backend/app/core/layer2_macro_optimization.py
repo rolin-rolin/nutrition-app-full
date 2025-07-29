@@ -162,8 +162,8 @@ class MacroOptimizer:
             calorie_cap: If set, only consider combinations with total calories <= this value
         """
         if len(products) > 20:
-            # Fall back to greedy for large datasets
-            return self.greedy_algorithm(products, targets)
+            # Fall back to simple selection for large datasets
+            return self._simple_selection_algorithm(products, targets)
         
         valid_combinations = []
         
@@ -239,9 +239,35 @@ class MacroOptimizer:
             target_match_percentage=target_match
         )
     
-
-    
-
+    def _simple_selection_algorithm(self, products: List[Product], targets: MacroTargets) -> CombinationResult:
+        """Simple selection algorithm for large datasets."""
+        # Sort products by how well they match the targets
+        scored_products = []
+        for product in products:
+            score, totals = self.calculate_combination_score([product], targets)
+            scored_products.append((product, score, totals))
+        
+        # Sort by score (lower is better)
+        scored_products.sort(key=lambda x: x[1])
+        
+        # Select top products up to max_snacks
+        selected_products = [p[0] for p in scored_products[:self.max_snacks]]
+        
+        # Calculate totals for selected products
+        score, totals = self.calculate_combination_score(selected_products, targets)
+        target_match = self._calculate_target_match_percentage(totals, targets)
+        
+        return CombinationResult(
+            products=selected_products,
+            total_protein=totals['protein'],
+            total_carbs=totals['carbs'],
+            total_fat=totals['fat'],
+            total_electrolytes=totals['electrolytes'],
+            total_calories=totals['calories'],
+            score=score,
+            algorithm_used="simple_selection",
+            target_match_percentage=target_match
+        )
     
     def _calculate_target_match_percentage(self, 
                                          totals: Dict[str, float], 
