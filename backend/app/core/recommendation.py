@@ -246,40 +246,78 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     # --- 5. Vector search on pre-filtered products (Layer 1) ---
     vector_store = get_product_vector_store()
     
-    # If we have pre-filtered products, we need to do vector search on that subset
-    if len(pre_filtered_products) < db.query(Product).count():
-        # We have hard filters applied, so we need to do vector search only on pre-filtered products
-        # Since the vector store contains all products, we'll do the search and then filter results
+    # Check if we have soft preferences (including high-protein from strength activities)
+    has_soft_preferences = bool(
+        preferences.get("flavor_preferences") or 
+        preferences.get("texture_preferences") or
+        preferences.get("soft_preferences", {}).get("dietary")
+    )
+    
+    # If we have soft preferences, use enhanced embedding system
+    if has_soft_preferences and has_activity_info and macro_target:
+        # Use enhanced embedding system for better matching with soft preferences
+        from app.core.enhanced_embedding import _enhanced_vector_search_with_embeddings
         
-        # Do vector search on all products first, then filter to our pre-filtered subset
-        vector_results = vector_store.query_similar_products(
-            query=vector_query,
-            top_k=100,  # Get more candidates since we'll filter
-            hard_filters=None,  # Don't use vector store hard filters since we pre-filtered
-            use_mmr=True,
-            mmr_lambda=0.5
+        # Prepare soft preferences for enhanced embedding
+        soft_preferences = {}
+        if preferences.get("flavor_preferences"):
+            soft_preferences["flavor"] = preferences["flavor_preferences"]
+        if preferences.get("texture_preferences"):
+            soft_preferences["texture"] = preferences["texture_preferences"]
+        if preferences.get("soft_preferences", {}).get("dietary"):
+            soft_preferences["dietary"] = preferences["soft_preferences"]["dietary"]
+        
+        # Prepare macro targets for enhanced embedding
+        macro_targets = {
+            "target_protein": macro_target.target_protein,
+            "target_carbs": macro_target.target_carbs,
+            "target_calories": macro_target.target_calories
+        }
+        
+        # Use enhanced embedding system
+        candidate_snacks = _enhanced_vector_search_with_embeddings(
+            user_query=vector_query,
+            pre_filtered_products=pre_filtered_products,
+            soft_preferences=soft_preferences,
+            macro_targets=macro_targets
         )
-        
-        # Filter results to only include pre-filtered products
-        pre_filtered_ids = set(p.id for p in pre_filtered_products)
-        filtered_vector_results = []
-        for result in vector_results:
-            if result['product_id'] in pre_filtered_ids:
-                filtered_vector_results.append(result)
-        
-        # Take top results from filtered subset
-        vector_results = filtered_vector_results[:50]
-        reasoning_steps.append(f"Vector search on pre-filtered products returned {len(vector_results)} candidates.")
+        reasoning_steps.append(f"Enhanced embedding search returned {len(candidate_snacks)} candidate snacks with soft preferences.")
     else:
-        # No hard filters, do normal vector search on all products
-        vector_results = vector_store.query_similar_products(
-            query=vector_query,
-            top_k=50,
-            hard_filters=None,  # We already pre-filtered
-            use_mmr=True,
-            mmr_lambda=0.5
-        )
-        reasoning_steps.append(f"Vector search returned {len(vector_results)} candidate snacks with diversity optimization.")
+        # Use standard vector search
+        # If we have pre-filtered products, we need to do vector search on that subset
+        if len(pre_filtered_products) < db.query(Product).count():
+            # We have hard filters applied, so we need to do vector search only on pre-filtered products
+            # Since the vector store contains all products, we'll do the search and then filter results
+            
+            # Do vector search on all products first, then filter to our pre-filtered subset
+            vector_results = vector_store.query_similar_products(
+                query=vector_query,
+                top_k=100,  # Get more candidates since we'll filter
+                hard_filters=None,  # Don't use vector store hard filters since we pre-filtered
+                use_mmr=True,
+                mmr_lambda=0.5
+            )
+            
+            # Filter results to only include pre-filtered products
+            pre_filtered_ids = set(p.id for p in pre_filtered_products)
+            filtered_vector_results = []
+            for result in vector_results:
+                if result['product_id'] in pre_filtered_ids:
+                    filtered_vector_results.append(result)
+            
+            # Take top results from filtered subset
+            vector_results = filtered_vector_results[:50]
+            reasoning_steps.append(f"Vector search on pre-filtered products returned {len(vector_results)} candidates.")
+        else:
+            # No hard filters, do normal vector search on all products
+            vector_results = vector_store.query_similar_products(
+                query=vector_query,
+                top_k=50,
+                hard_filters=None,  # We already pre-filtered
+                use_mmr=True,
+                mmr_lambda=0.5
+            )
+            reasoning_steps.append(f"Vector search returned {len(vector_results)} candidate snacks with diversity optimization.")
 
     # --- 6. Convert vector results to Product objects ---
     candidate_snacks = []
