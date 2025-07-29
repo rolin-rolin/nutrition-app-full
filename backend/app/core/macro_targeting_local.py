@@ -848,7 +848,7 @@ class MacroTargetingServiceLocal:
         
         # Generate macro targets
         macro_target = self.generate_macro_targets(user_input)
-        return context, macro_target 
+        return context, macro_target
 
     def retrieve_context_by_metadata_with_metadata(self, user_input: UserInput) -> Tuple[str, Optional[Dict[str, Any]]]:
         """Retrieve context using metadata-based filtering and return both context and metadata."""
