@@ -1,3 +1,4 @@
+from app.core.enhanced_embedding import get_top_matching_products, rank_products_by_similarity
 import os
 from typing import List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
@@ -402,3 +403,14 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     )
 
 
+def _enhanced_vector_search_with_embeddings(user_query: str, pre_filtered_products: List[Product], soft_preferences: dict = None, macro_targets: dict = None) -> List[Product]:
+    """Enhanced vector search using unified embeddings for user queries and products."""
+    # Use the enhanced embedding system to rank products
+    ranked_products = rank_products_by_similarity(
+        user_query, 
+        pre_filtered_products, 
+        soft_preferences, 
+        macro_targets
+    )
+    # Return top products (limit to reasonable number for optimization)
+    return [product for product, score in ranked_products[:50]]
