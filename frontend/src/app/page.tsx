@@ -15,15 +15,17 @@ export default function OARecsLanding() {
         setError(null);
         setResult(null);
         try {
-            const response = await fetch("http://localhost:8000/api/v1/macro-targets/", {
+            const response = await fetch("http://localhost:8000/api/v1/recommend/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ user_query: userQuery }),
             });
+
             if (!response.ok) {
                 const err = await response.json().catch(() => ({}));
                 throw new Error(err.detail || "Failed to get recommendation");
             }
+
             const data = await response.json();
             setResult(data);
         } catch (err: any) {
@@ -311,40 +313,278 @@ export default function OARecsLanding() {
 
                         {/* Result Display */}
                         {result && (
-                            <div className="mt-10 p-6 rounded-lg bg-purple-50 border border-purple-200">
-                                <h3 className="text-2xl font-bold text-purple-700 mb-4">Your Macro Recommendation</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-gray-950">
-                                    <div>
-                                        <div className="font-semibold">Calories:</div>
-                                        <div>{result.target_calories ?? "-"} kcal</div>
+                            <div className="mt-10 space-y-6">
+                                {/* User Profile */}
+                                {result.user_profile ? (
+                                    <div className="p-6 rounded-lg bg-blue-50 border border-blue-200">
+                                        <h3 className="text-xl font-bold text-blue-700 mb-4">Your Profile</h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-950">
+                                            <div>
+                                                <div className="font-semibold text-sm">Age:</div>
+                                                <div>{result.user_profile.age_display}</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-sm">Weight:</div>
+                                                <div>{result.user_profile.weight_display}</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-sm">Exercise:</div>
+                                                <div>{result.user_profile.exercise_display}</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="font-semibold">Protein:</div>
-                                        <div>{result.target_protein ?? "-"} g</div>
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold">Carbs:</div>
-                                        <div>{result.target_carbs ?? "-"} g</div>
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold">Fat:</div>
-                                        <div>{result.target_fat ?? "-"} g</div>
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold">Electrolytes:</div>
-                                        <div>{result.target_electrolytes ?? "-"} g</div>
-                                    </div>
-                                </div>
-                                {result.reasoning && (
-                                    <div className="mt-4 text-gray-950">
-                                        <div className="font-semibold mb-1">Reasoning:</div>
-                                        <div className="whitespace-pre-line text-sm">{result.reasoning}</div>
+                                ) : (
+                                    <div className="p-6 rounded-lg bg-blue-50 border border-blue-200">
+                                        <h3 className="text-xl font-bold text-blue-700 mb-4">Your Profile</h3>
+                                        <div className="text-sm text-gray-600">No profile data available</div>
                                     </div>
                                 )}
-                                {result.rag_context && (
-                                    <div className="mt-4 text-gray-950">
-                                        <div className="font-semibold mb-1">Context Used:</div>
-                                        <div className="whitespace-pre-line text-xs">{result.rag_context}</div>
+
+                                {/* Macro Targets */}
+                                {result.macro_targets ? (
+                                    <div className="p-6 rounded-lg bg-purple-50 border border-purple-200">
+                                        <h3 className="text-xl font-bold text-purple-700 mb-4">
+                                            Your Macro Targets
+                                            {result.timing_breakdown && (
+                                                <span className="ml-2 text-sm font-normal text-purple-600">
+                                                    (ℹ️ Hover for timing breakdown)
+                                                </span>
+                                            )}
+                                        </h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4 text-gray-950">
+                                            <div>
+                                                <div className="font-semibold">Calories:</div>
+                                                <div>{result.macro_targets.target_calories ?? "-"} kcal</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Protein:</div>
+                                                <div>{result.macro_targets.target_protein ?? "-"} g</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Carbs:</div>
+                                                <div>{result.macro_targets.target_carbs ?? "-"} g</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Fat:</div>
+                                                <div>{result.macro_targets.target_fat ?? "-"} g</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Electrolytes:</div>
+                                                <div>{result.macro_targets.target_electrolytes ?? "-"} mg</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Timing Breakdown Tooltip */}
+                                        {result.timing_breakdown && (
+                                            <div className="mt-4 p-4 bg-white rounded-lg border border-purple-300">
+                                                <h4 className="font-semibold text-purple-700 mb-2">
+                                                    Timing Breakdown:
+                                                </h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                                    {result.timing_breakdown.pre_workout && (
+                                                        <div>
+                                                            <div className="font-semibold text-green-700">
+                                                                Pre-workout:
+                                                            </div>
+                                                            <div className="text-gray-700">
+                                                                {result.timing_breakdown.pre_workout.carbs &&
+                                                                    `${result.timing_breakdown.pre_workout.carbs}g carbs, `}
+                                                                {result.timing_breakdown.pre_workout.protein &&
+                                                                    `${result.timing_breakdown.pre_workout.protein}g protein, `}
+                                                                {result.timing_breakdown.pre_workout.fat &&
+                                                                    `${result.timing_breakdown.pre_workout.fat}g fat, `}
+                                                                {result.timing_breakdown.pre_workout.calories &&
+                                                                    `${result.timing_breakdown.pre_workout.calories} cal`}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {result.timing_breakdown.during_workout && (
+                                                        <div>
+                                                            <div className="font-semibold text-blue-700">
+                                                                During workout:
+                                                            </div>
+                                                            <div className="text-gray-700">
+                                                                {result.timing_breakdown.during_workout.carbs &&
+                                                                    `${result.timing_breakdown.during_workout.carbs}g carbs, `}
+                                                                {result.timing_breakdown.during_workout.protein &&
+                                                                    `${result.timing_breakdown.during_workout.protein}g protein, `}
+                                                                {result.timing_breakdown.during_workout.electrolytes &&
+                                                                    `${result.timing_breakdown.during_workout.electrolytes}mg electrolytes, `}
+                                                                {result.timing_breakdown.during_workout.calories &&
+                                                                    `${result.timing_breakdown.during_workout.calories} cal`}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {result.timing_breakdown.post_workout && (
+                                                        <div>
+                                                            <div className="font-semibold text-orange-700">
+                                                                Post-workout:
+                                                            </div>
+                                                            <div className="text-gray-700">
+                                                                {result.timing_breakdown.post_workout.carbs &&
+                                                                    `${result.timing_breakdown.post_workout.carbs}g carbs, `}
+                                                                {result.timing_breakdown.post_workout.protein &&
+                                                                    `${result.timing_breakdown.post_workout.protein}g protein, `}
+                                                                {result.timing_breakdown.post_workout.fat &&
+                                                                    `${result.timing_breakdown.post_workout.fat}g fat, `}
+                                                                {result.timing_breakdown.post_workout.calories &&
+                                                                    `${result.timing_breakdown.post_workout.calories} cal`}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="p-6 rounded-lg bg-purple-50 border border-purple-200">
+                                        <h3 className="text-xl font-bold text-purple-700 mb-4">Your Macro Targets</h3>
+                                        <div className="text-sm text-gray-600">No macro targets available</div>
+                                    </div>
+                                )}
+
+                                {/* Recommended Products */}
+                                {result.recommended_products && result.recommended_products.length > 0 && (
+                                    <div className="p-6 rounded-lg bg-green-50 border border-green-200">
+                                        <h3 className="text-xl font-bold text-green-700 mb-4">
+                                            Recommended Products ({result.recommended_products.length})
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {result.recommended_products.map((product: any, index: number) => (
+                                                <div
+                                                    key={index}
+                                                    className="bg-white p-4 rounded-lg border border-green-300"
+                                                >
+                                                    <h4 className="font-semibold text-gray-800 mb-2">{product.name}</h4>
+                                                    <div className="text-sm text-gray-600 mb-2">
+                                                        {product.description}
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                        <div>
+                                                            <span className="font-semibold">Protein:</span>{" "}
+                                                            {product.protein}g
+                                                        </div>
+                                                        <div>
+                                                            <span className="font-semibold">Carbs:</span>{" "}
+                                                            {product.carbs}g
+                                                        </div>
+                                                        <div>
+                                                            <span className="font-semibold">Fat:</span> {product.fat}g
+                                                        </div>
+                                                        <div>
+                                                            <span className="font-semibold">Calories:</span>{" "}
+                                                            {product.calories}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Bundle Stats */}
+                                {result.bundle_stats ? (
+                                    <div className="p-6 rounded-lg bg-yellow-50 border border-yellow-200">
+                                        <h3 className="text-xl font-bold text-yellow-700 mb-4">Bundle Summary</h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-950">
+                                            <div>
+                                                <div className="font-semibold">Total Calories:</div>
+                                                <div>{result.bundle_stats.total_calories} kcal</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Total Protein:</div>
+                                                <div>{result.bundle_stats.total_protein} g</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Total Carbs:</div>
+                                                <div>{result.bundle_stats.total_carbs} g</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Total Fat:</div>
+                                                <div>{result.bundle_stats.total_fat} g</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-6 rounded-lg bg-yellow-50 border border-yellow-200">
+                                        <h3 className="text-xl font-bold text-yellow-700 mb-4">Bundle Summary</h3>
+                                        <div className="text-sm text-gray-600">No bundle stats available</div>
+                                    </div>
+                                )}
+
+                                {/* Preferences */}
+                                {result.preferences ? (
+                                    <div className="p-6 rounded-lg bg-indigo-50 border border-indigo-200">
+                                        <h3 className="text-xl font-bold text-indigo-700 mb-4">Applied Preferences</h3>
+                                        <div className="space-y-2">
+                                            {result.preferences.soft_preferences &&
+                                            result.preferences.soft_preferences.length > 0 ? (
+                                                <div>
+                                                    <div className="font-semibold text-sm text-indigo-600">
+                                                        Soft Preferences:
+                                                    </div>
+                                                    <div className="text-sm text-gray-700">
+                                                        {result.preferences.soft_preferences.join(", ")}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-sm text-gray-600">No soft preferences applied</div>
+                                            )}
+                                            {result.preferences.hard_filters &&
+                                            result.preferences.hard_filters.length > 0 ? (
+                                                <div>
+                                                    <div className="font-semibold text-sm text-indigo-600">
+                                                        Hard Filters:
+                                                    </div>
+                                                    <div className="text-sm text-gray-700">
+                                                        {result.preferences.hard_filters.join(", ")}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-sm text-gray-600">No hard filters applied</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-6 rounded-lg bg-indigo-50 border border-indigo-200">
+                                        <h3 className="text-xl font-bold text-indigo-700 mb-4">Applied Preferences</h3>
+                                        <div className="text-sm text-gray-600">No preferences data available</div>
+                                    </div>
+                                )}
+
+                                {/* Key Principles */}
+                                {result.key_principles && result.key_principles.length > 0 ? (
+                                    <div className="p-6 rounded-lg bg-pink-50 border border-pink-200">
+                                        <h3 className="text-xl font-bold text-pink-700 mb-4">
+                                            Key Nutrition Principles
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {result.key_principles.map((principle: any, index: number) => (
+                                                <div key={index} className="flex items-start space-x-2">
+                                                    <div className="w-2 h-2 bg-pink-400 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <div className="text-sm text-gray-700">{principle.principle}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-6 rounded-lg bg-pink-50 border border-pink-200">
+                                        <h3 className="text-xl font-bold text-pink-700 mb-4">
+                                            Key Nutrition Principles
+                                        </h3>
+                                        <div className="text-sm text-gray-600">
+                                            No key principles available for this recommendation.
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Reasoning */}
+                                {result.reasoning && (
+                                    <div className="p-6 rounded-lg bg-gray-50 border border-gray-200">
+                                        <h3 className="text-xl font-bold text-gray-700 mb-4">
+                                            Recommendation Reasoning
+                                        </h3>
+                                        <div className="text-gray-700 whitespace-pre-line">{result.reasoning}</div>
                                     </div>
                                 )}
                             </div>
