@@ -8,24 +8,25 @@ timing:
 pre:
 carbs_g_per_kg: [0.5, 0.8]
 protein_g_per_kg: [0.05, 0.1]
-fat_g_per_kg: [0.1, 0.1]
+fat_g_per_kg: [0.0, 0.0]
 
 during:
 carbs_g_per_kg_per_hour: [0.5, 1.0]
+protein_g_per_kg_per_hour: [0.0, 0.0]
 electrolytes_mg_per_kg_per_hour: [11, 21]
 
 post:
 carbs_g_per_kg: [1.0, 1.0]
 protein_g_per_kg: [0.2, 0.25]
-fat_g_per_kg: [0.1, 0.2]
+fat_g_per_kg: [0.0, 0.0]
 
 # NOTE: This should be computed dynamically based on pre + during + post timing and duration
 
-overall_targets: !!computed
-carbs_g_per_kg: sum of pre.carbs + (during.carbs _ duration_hr) + post.carbs
+overall*targets:
+carbs_g_per_kg: sum of pre.carbs + (during.carbs * duration*hr) + post.carbs
 protein_g_per_kg: sum of pre.protein + post.protein
 fat_g_per_kg: sum of pre.fat + post.fat
-electrolytes_mg_per_kg: during.electrolytes _ duration_hr
+electrolytes_mg_per_kg: during.electrolytes * duration_hr
 
 key_principles:
 

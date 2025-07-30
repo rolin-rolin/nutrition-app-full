@@ -7,7 +7,7 @@ age_group: 19-59
 timing:
 pre:
 carbs_g_per_kg: [0.4, 0.5]
-protein_g_per_kg: [0.05, 0.1] # optional
+protein_g_per_kg: [0.05, 0.1]
 fat_g_per_kg: [0.0, 0.0]
 
 during:
@@ -22,7 +22,7 @@ fat_g_per_kg: [0.1, 0.2]
 
 # NOTE: This should be computed dynamically based on pre + during + post timing and duration
 
-overall_targets: !!computed
+overall_targets:
 carbs_g_per_kg: [0.9, 1.2]
 protein_g_per_kg: [0.3, 0.4]
 fat_g_per_kg: [0.1, 0.2]

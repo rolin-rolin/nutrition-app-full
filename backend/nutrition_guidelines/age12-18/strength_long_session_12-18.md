@@ -8,12 +8,12 @@ timing:
 pre:
 carbs_g_per_kg: [0.5, 0.8]
 protein_g_per_kg: [0.1, 0.15]
-fat_g_per_kg: [0.0, 0.1] # keep low
+fat_g_per_kg: [0.0, 0.1]
 
 during:
-carbs_g_per_kg_per_hour: [0.3, 0.5] # optional, if >60 min
-protein_g_per_kg_per_hour: [0.05, 0.1] # optional
-electrolytes_mg_per_kg_per_hour: [15, 25] # if in heat or high sweat
+carbs_g_per_kg_per_hour: [0.3, 0.5]
+protein_g_per_kg_per_hour: [0.05, 0.1]
+electrolytes_mg_per_kg_per_hour: [15, 25]
 
 post:
 carbs_g_per_kg: [0.8, 1.0]
@@ -22,7 +22,7 @@ fat_g_per_kg: [0.1, 0.2]
 
 # NOTE: This should be computed dynamically based on pre + during + post timing and duration
 
-overall_targets: !!computed
+overall_targets:
 carbs_g_per_kg: sum of pre.carbs + during.carbs/hour + post.carbs
 protein_g_per_kg: sum of pre.protein + during.protein/hour + post.protein
 fat_g_per_kg: sum of pre.fat + post.fat

@@ -22,7 +22,7 @@ fat_g_per_kg: [0.1, 0.2]
 
 # NOTE: This should be computed dynamically based on pre + during + post timing and duration
 
-overall_targets: !!computed
+overall_targets:
 carbs_g_per_kg: [1.6, 2.3] # pre (0.5–0.8) + post (0.8–1.0) + during per hour
 protein_g_per_kg: [0.45, 0.65] # pre (0.1–0.15) + post (0.3–0.4) + during per hour
 fat_g_per_kg: [0.1, 0.3] # pre (≤0.1) + post (0.1–0.2)
