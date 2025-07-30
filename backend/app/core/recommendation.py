@@ -418,8 +418,8 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # Build bundle stats
     bundle_stats = None
-    if (has_activity_info or user_input_db) and macro_target:
-        if 'optimization_result' in locals() and optimization_result:
+    if (has_activity_info or user_input_db) and macro_target and 'optimization_result' in locals():
+        if optimization_result:
             bundle_stats = BundleStats(
                 total_protein=optimization_result.total_protein,
                 total_carbs=optimization_result.total_carbs,
