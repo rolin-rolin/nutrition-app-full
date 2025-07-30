@@ -185,13 +185,23 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     # --- 2. If activity info is present, generate macro targets ---
     macro_target = None
     context = ""
+    user_input_db = None
+    
     if has_activity_info:
+        # Use structured fields from request
         macro_targeting_service = MacroTargetingServiceLocal()
         user_input_db = UserInput(**request.model_dump())
         context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
         reasoning_steps.append(f"Retrieved RAG context and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs.")
     else:
-        reasoning_steps.append("No activity info detected; skipping macro targeting and optimization.")
+        # Try to extract activity info from natural language query
+        macro_targeting_service = MacroTargetingServiceLocal()
+        try:
+            user_input_db, macro_target = macro_targeting_service.generate_macro_targets_from_query(request.user_query, db)
+            context = macro_targeting_service.retrieve_context_by_metadata(user_input_db)
+            reasoning_steps.append(f"Extracted activity info from query and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs.")
+        except Exception as e:
+            reasoning_steps.append(f"No activity info detected; skipping macro targeting and optimization. Error: {str(e)}")
 
     # --- 3. Pre-filter products by hard constraints from LLM extraction ---
     hard_filters = _build_hard_filters_from_llm_extraction(preferences)
@@ -380,24 +390,27 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # Build user profile info for display
     user_profile = None
-    if has_activity_info:
-        age_display = f"{request.age} years old" if request.age else "using default age 21"
-        weight_display = f"{request.weight_kg}kg" if request.weight_kg else "using default 70kg weight"
+    if has_activity_info or user_input_db:
+        # Use extracted user_input_db if available, otherwise use request fields
+        source_data = user_input_db if user_input_db else request
         
-        if request.exercise_type and request.exercise_duration_minutes:
-            exercise_display = f"{request.exercise_type} for {request.exercise_duration_minutes} minutes"
-        elif request.exercise_type:
-            exercise_display = f"{request.exercise_type} (using default 60-minute duration)"
-        elif request.exercise_duration_minutes:
-            exercise_display = f"cardio for {request.exercise_duration_minutes} minutes (using default exercise type)"
+        age_display = f"{source_data.age} years old" if source_data.age else "using default age 21"
+        weight_display = f"{source_data.weight_kg}kg" if source_data.weight_kg else "using default 70kg weight"
+        
+        if source_data.exercise_type and source_data.exercise_duration_minutes:
+            exercise_display = f"{source_data.exercise_type} for {source_data.exercise_duration_minutes} minutes"
+        elif source_data.exercise_type:
+            exercise_display = f"{source_data.exercise_type} (using default 60-minute duration)"
+        elif source_data.exercise_duration_minutes:
+            exercise_display = f"cardio for {source_data.exercise_duration_minutes} minutes (using default exercise type)"
         else:
             exercise_display = "cardio (using default 60-minute duration)"
         
         user_profile = UserProfileInfo(
-            age=request.age,
-            weight_kg=request.weight_kg,
-            exercise_type=request.exercise_type,
-            exercise_duration_minutes=request.exercise_duration_minutes,
+            age=source_data.age,
+            weight_kg=source_data.weight_kg,
+            exercise_type=source_data.exercise_type,
+            exercise_duration_minutes=source_data.exercise_duration_minutes,
             age_display=age_display,
             weight_display=weight_display,
             exercise_display=exercise_display
@@ -405,8 +418,8 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # Build bundle stats
     bundle_stats = None
-    if has_activity_info and macro_target and 'optimization_result' in locals():
-        if optimization_result:
+    if (has_activity_info or user_input_db) and macro_target:
+        if 'optimization_result' in locals() and optimization_result:
             bundle_stats = BundleStats(
                 total_protein=optimization_result.total_protein,
                 total_carbs=optimization_result.total_carbs,
@@ -461,7 +474,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # Extract key principles from knowledge document
     key_principles = []
-    if has_activity_info and macro_target and macro_target.rag_context:
+    if (has_activity_info or user_input_db) and macro_target and macro_target.rag_context:
         macro_targeting_service = MacroTargetingServiceLocal()
         principles = macro_targeting_service.extract_key_principles(macro_target.rag_context, num_principles=2)
         key_principles = [KeyPrinciple(principle=principle) for principle in principles]
