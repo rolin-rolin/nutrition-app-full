@@ -1120,7 +1120,7 @@ Return ONLY valid JSON. No additional text or explanation."""
                 weight_lb = int(weight_match.group(1))
         
         # Try to extract activity type
-        cardio_keywords = ['soccer', 'volleyball', 'run', 'swimming', 'badminton', 'hiit', 'cardio']
+        cardio_keywords = ['soccer', 'volleyball', 'run', 'swimming', 'badminton', 'hiit', 'cardio', 'workout']
         strength_keywords = ['gym', 'weight', 'lifting', 'strength', 'resistance', 'bodyweight']
         
         if any(keyword in query_lower for keyword in cardio_keywords):
