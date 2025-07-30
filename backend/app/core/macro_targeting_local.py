@@ -971,6 +971,7 @@ class MacroTargetingServiceLocal:
             # If we're in the key_principles section, look for bullet points
             if in_key_principles_section:
                 if (line.startswith('- ') or 
+                    line.startswith('-   ') or
                     line.startswith('* ') or 
                     line.startswith('• ')):
                     
