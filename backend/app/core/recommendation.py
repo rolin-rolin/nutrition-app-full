@@ -372,7 +372,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         optimization_result = optimize_macro_combination(
             products=candidate_snacks,
             macro_targets=macro_target,
-            min_snacks=4,
+            min_snacks=1,
             max_snacks=8,
             max_candidates=10,
             score_threshold=1.5,
