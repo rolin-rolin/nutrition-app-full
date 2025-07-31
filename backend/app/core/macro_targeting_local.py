@@ -516,29 +516,29 @@ class MacroTargetingServiceLocal:
             total_calories = (total_carbs * 4) + (total_protein * 4) + (total_fat * 9)
             
             return {
-                'target_calories': total_calories,
-                'target_protein': total_protein,
-                'target_carbs': total_carbs,
-                'target_fat': total_fat,
-                'target_electrolytes': total_electrolytes,
+                'target_calories': round(total_calories, 1),
+                'target_protein': round(total_protein, 1),
+                'target_carbs': round(total_carbs, 1),
+                'target_fat': round(total_fat, 1),
+                'target_electrolytes': round(total_electrolytes, 1),
                 'pre_workout_macros': {
                     'carbs': pre_carbs,
                     'protein': pre_protein,
                     'fat': pre_fat,
-                    'calories': (pre_carbs * 4) + (pre_protein * 4) + (pre_fat * 9)
+                    'calories': round((pre_carbs * 4) + (pre_protein * 4) + (pre_fat * 9), 1)
                 },
                 'during_workout_macros': {
                     'carbs': during_carbs,
                     'protein': during_protein,
                     'fat': during_fat,
                     'electrolytes': during_electrolytes,
-                    'calories': (during_carbs * 4) + (during_protein * 4) + (during_fat * 9)
+                    'calories': round((during_carbs * 4) + (during_protein * 4) + (during_fat * 9), 1)
                 },
                 'post_workout_macros': {
                     'carbs': post_carbs,
                     'protein': post_protein,
                     'fat': post_fat,
-                    'calories': (post_carbs * 4) + (post_protein * 4) + (post_fat * 9)
+                    'calories': round((post_carbs * 4) + (post_protein * 4) + (post_fat * 9), 1)
                 }
             }
             
@@ -556,15 +556,15 @@ class MacroTargetingServiceLocal:
             multiplier: The factor to multiply the result by (e.g., weight in kg)
         
         Returns:
-            float: The calculated value
+            float: The calculated value rounded to the nearest tenth
         """
         if not range_values:
             return 0.0
         if len(range_values) == 1:
-            return range_values[0] * multiplier
+            return round(range_values[0] * multiplier, 1)
         # Take the average of the range
         avg = sum(range_values) / len(range_values)
-        return avg * multiplier
+        return round(avg * multiplier, 1)
     
     def _get_default_macro_values(self, user_input: UserInput) -> Dict[str, Any]:
         """
@@ -652,29 +652,29 @@ class MacroTargetingServiceLocal:
         macro_values['post_workout_macros']['calories'] *= duration_factor
         
         # Recalculate calories based on updated macro values to ensure accuracy
-        macro_values['pre_workout_macros']['calories'] = (
+        macro_values['pre_workout_macros']['calories'] = round(
             macro_values['pre_workout_macros']['carbs'] * 4 + 
             macro_values['pre_workout_macros']['protein'] * 4 + 
-            macro_values['pre_workout_macros']['fat'] * 9
+            macro_values['pre_workout_macros']['fat'] * 9, 1
         )
         
-        macro_values['during_workout_macros']['calories'] = (
+        macro_values['during_workout_macros']['calories'] = round(
             macro_values['during_workout_macros']['carbs'] * 4 + 
             macro_values['during_workout_macros']['protein'] * 4 + 
-            macro_values['during_workout_macros']['fat'] * 9
+            macro_values['during_workout_macros']['fat'] * 9, 1
         )
         
-        macro_values['post_workout_macros']['calories'] = (
+        macro_values['post_workout_macros']['calories'] = round(
             macro_values['post_workout_macros']['carbs'] * 4 + 
             macro_values['post_workout_macros']['protein'] * 4 + 
-            macro_values['post_workout_macros']['fat'] * 9
+            macro_values['post_workout_macros']['fat'] * 9, 1
         )
         
         # Recalculate total calories
-        macro_values['target_calories'] = (
+        macro_values['target_calories'] = round(
             macro_values['pre_workout_macros']['calories'] + 
             macro_values['during_workout_macros']['calories'] + 
-            macro_values['post_workout_macros']['calories']
+            macro_values['post_workout_macros']['calories'], 1
         )
         
         return macro_values
