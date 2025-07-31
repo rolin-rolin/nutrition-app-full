@@ -39,7 +39,7 @@ class MacroTargetingService:
         
         # Initialize components with explicit API key
         self.embeddings = OpenAIEmbeddings(openai_api_key=self.openai_api_key)
-        self.llm = ChatOpenAI(model="gpt-4", temperature=0.4, openai_api_key=self.openai_api_key)
+        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.4, openai_api_key=self.openai_api_key)
         
         # Initialize vector store
         self._initialize_vectorstore()

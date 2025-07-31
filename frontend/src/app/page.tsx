@@ -354,7 +354,7 @@ export default function OARecsLanding() {
                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4 text-gray-950">
                                             <div>
                                                 <div className="font-semibold">Calories:</div>
-                                                <div>{result.macro_targets.target_calories ?? "-"} kcal</div>
+                                                <div>{result.macro_targets.target_calories ?? "-"} cal</div>
                                             </div>
                                             <div>
                                                 <div className="font-semibold">Protein:</div>
