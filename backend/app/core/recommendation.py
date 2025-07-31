@@ -353,6 +353,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         reasoning_steps.append(f"Applied additional hard filters. {len(candidate_snacks)} products remaining.")
 
     # --- 8. Macro optimization (Layer 2) if activity info is present ---
+    optimization_result = None
     if has_activity_info and macro_target:
         optimization_result = optimize_macro_combination(
             products=candidate_snacks,
