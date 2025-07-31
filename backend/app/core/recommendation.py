@@ -182,26 +182,40 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         except (ValueError, TypeError):
             calorie_cap = None
 
-    # --- 2. If activity info is present, generate macro targets ---
+    # --- 2. Always generate macro targets (with defaults if needed) ---
     macro_target = None
     context = ""
     user_input_db = None
     
+    # Always try to generate macro targets
+    macro_targeting_service = MacroTargetingServiceLocal()
+    
     if has_activity_info:
         # Use structured fields from request
-        macro_targeting_service = MacroTargetingServiceLocal()
         user_input_db = UserInput(**request.model_dump())
         context, macro_target = macro_targeting_service.get_context_and_macro_targets(user_input_db)
         reasoning_steps.append(f"Retrieved RAG context and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs.")
     else:
         # Try to extract activity info from natural language query
-        macro_targeting_service = MacroTargetingServiceLocal()
         try:
             user_input_db, macro_target = macro_targeting_service.generate_macro_targets_from_query(request.user_query, db)
             context = macro_targeting_service.retrieve_context_by_metadata(user_input_db)
             reasoning_steps.append(f"Extracted activity info from query and generated macro targets: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs.")
         except Exception as e:
-            reasoning_steps.append(f"No activity info detected; skipping macro targeting and optimization. Error: {str(e)}")
+            # If extraction fails, create a default user input and generate macro targets
+            reasoning_steps.append(f"Failed to extract activity info from query, using default values. Error: {str(e)}")
+            
+            # Create default user input with default values
+            default_user_input = UserInput(
+                user_query=request.user_query,
+                age=21,  # Default age
+                weight_kg=70.0,  # Default weight
+                exercise_type="cardio",  # Default exercise type
+                exercise_duration_minutes=60  # Default duration
+            )
+            user_input_db = default_user_input
+            context, macro_target = macro_targeting_service.get_context_and_macro_targets(default_user_input)
+            reasoning_steps.append(f"Generated macro targets with default values: ~{macro_target.target_protein or 0:.0f}g protein, ~{macro_target.target_carbs or 0:.0f}g carbs.")
 
     # --- 3. Pre-filter products by hard constraints from LLM extraction ---
     hard_filters = _build_hard_filters_from_llm_extraction(preferences)
@@ -222,8 +236,8 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         reasoning_steps.append("No hard constraints found; using all products for vector search.")
 
     # --- 4. Build vector search query ---
-    if has_activity_info and macro_target:
-        # Use macro targets to build query
+    if macro_target:
+        # Use macro targets to build query (always available now)
         soft_guidance = extract_soft_guidance(context)
         user_soft_prefs = []
         if preferences.get("flavor_preferences"):
@@ -241,7 +255,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
                 reasoning_steps.append("Added high-protein preference based on strength activity detection")
         
         vector_query = f"{soft_guidance} {' '.join(user_soft_prefs)}"
-        reasoning_steps.append(f"Built vector search query: '{vector_query}'")
+        reasoning_steps.append(f"Built vector search query with macro guidance: '{vector_query}'")
     elif has_flavor_info:
         # Use only flavor/texture info
         vector_query = " ".join([
@@ -265,7 +279,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     )
     
     # If we have soft preferences, use enhanced embedding system
-    if has_soft_preferences and has_activity_info and macro_target:
+    if has_soft_preferences and macro_target:
         # Use enhanced embedding system for better matching with soft preferences
         from app.core.enhanced_embedding import _enhanced_vector_search_with_embeddings
         
@@ -352,9 +366,9 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         candidate_snacks = _apply_hard_filters(candidate_snacks, additional_filters)
         reasoning_steps.append(f"Applied additional hard filters. {len(candidate_snacks)} products remaining.")
 
-    # --- 8. Macro optimization (Layer 2) if activity info is present ---
+    # --- 8. Macro optimization (Layer 2) if macro targets are available ---
     optimization_result = None
-    if has_activity_info and macro_target:
+    if macro_target:
         optimization_result = optimize_macro_combination(
             products=candidate_snacks,
             macro_targets=macro_target,
@@ -389,64 +403,62 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     # --- 9. Build Enhanced API response ---
     response_products = [ProductSchema.model_validate(p, from_attributes=True) for p in final_recommendations]
 
-    # Build user profile info for display
+    # Build user profile info for display (always create)
     user_profile = None
-    if has_activity_info or user_input_db:
-        # Use extracted user_input_db if available, otherwise use request fields
-        source_data = user_input_db if user_input_db else request
-        
-        age_display = f"{source_data.age} years old" if source_data.age else "using default age 21"
-        weight_display = f"{source_data.weight_kg}kg" if source_data.weight_kg else "using default 70kg weight"
-        
-        if source_data.exercise_type and source_data.exercise_duration_minutes:
-            exercise_display = f"{source_data.exercise_type} for {source_data.exercise_duration_minutes} minutes"
-        elif source_data.exercise_type:
-            exercise_display = f"{source_data.exercise_type} (using default 60-minute duration)"
-        elif source_data.exercise_duration_minutes:
-            exercise_display = f"cardio for {source_data.exercise_duration_minutes} minutes (using default exercise type)"
-        else:
-            exercise_display = "cardio (using default 60-minute duration)"
-        
-        user_profile = UserProfileInfo(
-            age=source_data.age,
-            weight_kg=source_data.weight_kg,
-            exercise_type=source_data.exercise_type,
-            exercise_duration_minutes=source_data.exercise_duration_minutes,
-            age_display=age_display,
-            weight_display=weight_display,
-            exercise_display=exercise_display
-        )
+    # Use extracted user_input_db if available, otherwise use request fields
+    source_data = user_input_db if user_input_db else request
+    
+    age_display = f"{source_data.age} years old" if source_data.age else "using default age 21"
+    weight_display = f"{source_data.weight_kg}kg" if source_data.weight_kg else "using default 70kg weight"
+    
+    if source_data.exercise_type and source_data.exercise_duration_minutes:
+        exercise_display = f"{source_data.exercise_type} for {source_data.exercise_duration_minutes} minutes"
+    elif source_data.exercise_type:
+        exercise_display = f"{source_data.exercise_type} (using default 60-minute duration)"
+    elif source_data.exercise_duration_minutes:
+        exercise_display = f"cardio for {source_data.exercise_duration_minutes} minutes (using default exercise type)"
+    else:
+        exercise_display = "cardio (using default 60-minute duration)"
+    
+    user_profile = UserProfileInfo(
+        age=source_data.age,
+        weight_kg=source_data.weight_kg,
+        exercise_type=source_data.exercise_type,
+        exercise_duration_minutes=source_data.exercise_duration_minutes,
+        age_display=age_display,
+        weight_display=weight_display,
+        exercise_display=exercise_display
+    )
 
-    # Build bundle stats
+    # Build bundle stats (always calculate)
     bundle_stats = None
-    if (has_activity_info or user_input_db) and macro_target and 'optimization_result' in locals():
-        if optimization_result:
-            bundle_stats = BundleStats(
-                total_protein=optimization_result.total_protein,
-                total_carbs=optimization_result.total_carbs,
-                total_fat=optimization_result.total_fat,
-                total_electrolytes=optimization_result.total_electrolytes,
-                total_calories=optimization_result.total_calories,
-                num_snacks=len(final_recommendations),
-                target_match_percentage=optimization_result.target_match_percentage
-            )
-        else:
-            # Calculate totals manually if no optimization result
-            total_protein = sum(p.protein or 0 for p in final_recommendations)
-            total_carbs = sum(p.carbs or 0 for p in final_recommendations)
-            total_fat = sum(p.fat or 0 for p in final_recommendations)
-            total_electrolytes = sum(p.electrolytes_mg or 0 for p in final_recommendations)
-            total_calories = sum(p.calories or 0 for p in final_recommendations)
-            
-            bundle_stats = BundleStats(
-                total_protein=total_protein,
-                total_carbs=total_carbs,
-                total_fat=total_fat,
-                total_electrolytes=total_electrolytes,
-                total_calories=total_calories,
-                num_snacks=len(final_recommendations),
-                target_match_percentage=0.0  # No optimization, so no target match
-            )
+    if optimization_result:
+        bundle_stats = BundleStats(
+            total_protein=optimization_result.total_protein,
+            total_carbs=optimization_result.total_carbs,
+            total_fat=optimization_result.total_fat,
+            total_electrolytes=optimization_result.total_electrolytes,
+            total_calories=optimization_result.total_calories,
+            num_snacks=len(final_recommendations),
+            target_match_percentage=optimization_result.target_match_percentage
+        )
+    else:
+        # Calculate totals manually if no optimization result
+        total_protein = sum(p.protein or 0 for p in final_recommendations)
+        total_carbs = sum(p.carbs or 0 for p in final_recommendations)
+        total_fat = sum(p.fat or 0 for p in final_recommendations)
+        total_electrolytes = sum(p.electrolytes_mg or 0 for p in final_recommendations)
+        total_calories = sum(p.calories or 0 for p in final_recommendations)
+        
+        bundle_stats = BundleStats(
+            total_protein=total_protein,
+            total_carbs=total_carbs,
+            total_fat=total_fat,
+            total_electrolytes=total_electrolytes,
+            total_calories=total_calories,
+            num_snacks=len(final_recommendations),
+            target_match_percentage=0.0  # No optimization, so no target match
+        )
 
     # Build preferences info
     soft_prefs = []
@@ -475,7 +487,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # Extract key principles from knowledge document
     key_principles = []
-    if (has_activity_info or user_input_db) and macro_target and macro_target.rag_context:
+    if macro_target and macro_target.rag_context:
         macro_targeting_service = MacroTargetingServiceLocal()
         principles = macro_targeting_service.extract_key_principles(macro_target.rag_context, num_principles=2)
         key_principles = [KeyPrinciple(principle=principle) for principle in principles]
