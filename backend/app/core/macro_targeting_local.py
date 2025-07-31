@@ -1126,7 +1126,7 @@ class MacroTargetingServiceLocal:
         
         system_prompt = """You're an API that extracts structured nutrition planning fields from a user query.
 
-Extract and return the following fields:
+Return ONLY valid JSON matching this schema exactly; do not return any explanatory text.
 
 {
   "age": int or null,
@@ -1135,19 +1135,19 @@ Extract and return the following fields:
   "duration_minutes": int or null,
   "calorie_cap": int or null,
   "soft_preferences": {
-    "flavor": [string] (can contain multiple flavors),
-    "texture": [string] (can contain multiple textures),
-    "price_dollars": float or null
+    "flavor": [string] (from vocabulary, can contain multiple),
+    "texture": [string] (from vocabulary, can contain multiple),
+    "price_dollars": float or null (numeric dollar amount if specified, else null)
   },
   "hard_filters": {
-    "dietary": [string] (can contain multiple dietary requirements),
-    "allergens": [string] (can contain multiple allergens)
+    "dietary": [string] (from vocabulary, can contain multiple),
+    "allergens": [string] (from vocabulary, can contain multiple)
   }
 }
 
-If a value is not specified in the user query, return null or an empty list.
+If a value is not specified or cannot be confidently inferred, return null or an empty list as appropriate. Do not hallucinate values.
 
-Use the vocabularies below as guidance. Interpret user preferences loosely but return standardized values only from the vocab lists when possible. If a preference doesn't match any known item, return null.
+VOCABULARIES (standardize output to these; if user wording is a close synonym, map it; if it does not match, return null):
 
 **ACTIVITY TYPE GUIDELINES:**
 
@@ -1165,6 +1165,12 @@ Classify the user's activity into one of the following two groups:
 
 - Dietary: gluten-free, vegan, vegetarian, keto, paleo, high-protein, low-sugar, no-sugar, low-carb, high-fiber, dairy-free, soy-free, organic, non-gmo
 - Allergens: peanuts, milk, eggs, wheat, soy, tree-nuts, fish, shellfish
+
+Normalization rules / notes:
+- Interpret numeric expressions like “around 150 lbs,” “~2 hours” (convert to minutes), “under 500 calories” (set calorie_cap to 500).
+- Price: extract explicit dollar amounts (e.g., $2.50 → 2.5); vague terms like “cheap” or “affordable” should result in null unless a numeric range is given.
+- If multiple flavors/textures are mentioned, return all that match the vocabulary.
+- If conflicting hard filters are present (e.g., “vegan with milk”), include only the ones that are consistent; do not invent reconciliations.
 
 ---
 **Example query:**
@@ -1189,8 +1195,7 @@ Classify the user's activity into one of the following two groups:
   }
 }
 ```
-
-Return ONLY valid JSON. No additional text or explanation."""
+"""
 
         human_prompt = f"Extract fields from this query: {user_query}"
         
