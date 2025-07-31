@@ -54,7 +54,7 @@ class MacroOptimizer:
     """Advanced macro optimization engine for Layer 2."""
     
     def __init__(self, 
-                 min_snacks: int = 4, 
+                 min_snacks: int = 1, 
                  max_snacks: int = 10,
                  protein_weight: float = 1.0,
                  carbs_weight: float = 1.0,
@@ -130,11 +130,9 @@ class MacroOptimizer:
                 # Penalize if we have macros but no target
                 total_score += self.weights[macro] * 0.5
         
-        # Penalize too many or too few snacks
+        # Only penalize too many snacks (no minimum penalty for exact matching)
         snack_count_penalty = 0.0
-        if len(products) < self.min_snacks:
-            snack_count_penalty = (self.min_snacks - len(products)) * 0.2
-        elif len(products) > self.max_snacks:
+        if len(products) > self.max_snacks:
             snack_count_penalty = (len(products) - self.max_snacks) * 0.1
         
         total_score += snack_count_penalty
@@ -280,7 +278,7 @@ class MacroOptimizer:
             'electrolytes': targets.target_electrolytes_mg
         }
         
-        total_diff = 0.0
+        total_score = 0.0
         valid_targets = 0
         
         for macro, total in totals.items():
@@ -289,21 +287,32 @@ class MacroOptimizer:
                 
             target = target_values[macro]
             if target > 0:
-                diff = abs(total - target) / target
-                total_diff += diff
+                # Use a more balanced calculation that doesn't penalize as harshly
+                # for reasonable overages (within 50% of target)
+                if total <= target:
+                    # Perfect or under target
+                    score = 100.0
+                elif total <= target * 1.5:
+                    # Over target but within 50% - gradual penalty
+                    overage = (total - target) / target
+                    score = 100.0 - (overage * 40.0)  # Max 40% penalty for 50% overage
+                else:
+                    # More than 50% over target - heavy penalty
+                    overage = (total - target) / target
+                    score = 60.0 - (overage - 0.5) * 80.0  # Additional penalty
+                
+                total_score += max(0, score)
                 valid_targets += 1
         
         if valid_targets == 0:
             return 100.0
         
-        avg_diff = total_diff / valid_targets
-        match_percentage = max(0, 100 - (avg_diff * 100))
-        
-        return match_percentage
+        avg_score = total_score / valid_targets
+        return avg_score
 
 def optimize_macro_combination(products: List[Product], 
                              macro_targets: MacroTarget,
-                             min_snacks: int = 4,
+                             min_snacks: int = 1,
                              max_snacks: int = 10,
                              max_candidates: int = 10,
                              score_threshold: float = 1.5,
