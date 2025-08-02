@@ -351,7 +351,6 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     # If we have soft preferences, use enhanced embedding system
     if has_soft_preferences and macro_target:
         # Use enhanced embedding system for better matching with soft preferences
-        from app.core.enhanced_embedding import _enhanced_vector_search_with_embeddings
         
         # Prepare soft preferences for enhanced embedding
         soft_preferences = {}
