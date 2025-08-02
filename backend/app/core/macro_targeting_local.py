@@ -1206,7 +1206,17 @@ Normalization rules / notes:
             ]
             
             response = self.llm.invoke(messages)
-            extracted_data = json.loads(response.content)
+            
+            # Handle markdown code blocks in LLM response
+            content = response.content.strip()
+            if content.startswith('```json'):
+                content = content[7:]  # Remove ```json
+            if content.startswith('```'):
+                content = content[3:]   # Remove ```
+            if content.endswith('```'):
+                content = content[:-3]  # Remove trailing ```
+            
+            extracted_data = json.loads(content.strip())
             
             print(f"[DEBUG] LLM extracted fields: {extracted_data}")
             return extracted_data
