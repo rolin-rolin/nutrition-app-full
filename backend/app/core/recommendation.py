@@ -370,9 +370,13 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             # Filter results to only include pre-filtered products
             pre_filtered_ids = set(p.id for p in pre_filtered_products)
             filtered_vector_results = []
+            seen_product_ids = set()  # Track seen product IDs to avoid duplicates
+            
             for result in vector_results:
-                if result['product_id'] in pre_filtered_ids:
+                product_id = result['product_id']
+                if product_id in pre_filtered_ids and product_id not in seen_product_ids:
                     filtered_vector_results.append(result)
+                    seen_product_ids.add(product_id)
             
             # Take top results from filtered subset
             vector_results = filtered_vector_results[:50]
