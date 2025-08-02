@@ -166,6 +166,51 @@ def extract_soft_guidance(context: str) -> str:
 async def get_recommendations(request: RecommendationRequest, db: Session) -> RecommendationResponse:
     preferences = request.preferences or {}
     reasoning_steps = []
+    
+    # Initialize service once at the beginning
+    macro_targeting_service = get_macro_service()
+    
+    # Extract preferences from user query if not provided
+    if not preferences and request.user_query:
+        try:
+            # Use existing service for preference extraction
+            extracted_fields = macro_targeting_service.extract_fields_from_query(request.user_query)
+            
+            # Convert LLM extracted fields to preferences format
+            if extracted_fields:
+                # Extract LLM fields
+                soft_prefs = extracted_fields.get("soft_preferences", {})
+                hard_filters_data = extracted_fields.get("hard_filters", {})
+                
+                # Set preferences in the expected format
+                preferences = {
+                    "soft_preferences": {
+                        "flavor": soft_prefs.get("flavor", []),
+                        "texture": soft_prefs.get("texture", []),
+                        "dietary": []  # Will be populated by macro targeting service
+                    },
+                    "flavor_preferences": soft_prefs.get("flavor", []),  # Legacy format support
+                    "texture_preferences": soft_prefs.get("texture", []),  # Legacy format support
+                    "hard_filters": {
+                        "dietary": hard_filters_data.get("dietary", []),
+                        "allergens": hard_filters_data.get("allergens", [])
+                    },
+                    "calorie_cap": extracted_fields.get("calorie_cap")
+                }
+                
+                # Build summary for reasoning
+                soft_preferences_list = []
+                soft_preferences_list.extend(soft_prefs.get("flavor", []))
+                soft_preferences_list.extend(soft_prefs.get("texture", []))
+                
+                hard_filters_list = []
+                hard_filters_list.extend(hard_filters_data.get("dietary", []))
+                hard_filters_list.extend(hard_filters_data.get("allergens", []))
+                
+                reasoning_steps.append(f"Extracted preferences from query: soft={soft_preferences_list}, hard={hard_filters_list}")
+        except Exception as e:
+            reasoning_steps.append(f"Failed to extract preferences from query: {str(e)}")
+            preferences = {}
 
     # --- 1. Parse user query and preferences for available info ---
     has_activity_info = any([
@@ -187,8 +232,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     context = ""
     user_input_db = None
     
-    # Always try to generate macro targets
-    macro_targeting_service = MacroTargetingServiceLocal()
+    # Use existing macro targeting service (already initialized)
     
     if has_activity_info:
         # Use structured fields from request
