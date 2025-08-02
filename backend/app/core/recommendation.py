@@ -88,11 +88,27 @@ def _pre_filter_products_by_hard_constraints(db: Session, hard_filters: Dict[str
     # Apply allergen restrictions - exclude products that contain restricted allergens
     allergen_restrictions = hard_filters.get("allergen_restrictions", [])
     if allergen_restrictions:
+        # Use a more reliable approach for SQLite JSON filtering
         for allergen in allergen_restrictions:
             # Exclude products that contain this allergen
+            # Use JSON_ARRAY_CONTAINS for SQLite or fallback to Python filtering
             query = query.filter(
                 ~(Product.allergens.contains([allergen]))
             )
+        
+        # Execute query and do additional Python-level filtering as backup
+        filtered_products = query.all()
+        
+        # Additional Python-level filtering to ensure allergens are properly excluded
+        final_filtered = []
+        for product in filtered_products:
+            product_allergens = product.allergens or []
+            # Check if any restricted allergen is in this product's allergens
+            has_restricted_allergen = any(allergen in product_allergens for allergen in allergen_restrictions)
+            if not has_restricted_allergen:
+                final_filtered.append(product)
+        
+        return final_filtered
     
     # Note: Price is NOT applied here - it's a soft constraint for optimization
     
@@ -392,19 +408,19 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             )
             reasoning_steps.append(f"Vector search returned {len(vector_results)} candidate snacks with diversity optimization.")
 
-        # --- 6. Convert vector results to Product objects ---
-        candidate_snacks = []
-        for result in vector_results:
-            product = (
-                db.query(Product)
-                .options(load_only(*(getattr(Product, c.name) for c in Product.__table__.columns)))
-                .filter(Product.id == result['product_id'])
-                .first()
-            )
-            if product:
-                candidate_snacks.append(product)
-        
-        reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks.")
+    # --- 6. Convert vector results to Product objects ---
+    candidate_snacks = []
+    for result in vector_results:
+        product = (
+            db.query(Product)
+            .options(load_only(*(getattr(Product, c.name) for c in Product.__table__.columns)))
+            .filter(Product.id == result['product_id'])
+            .first()
+        )
+        if product:
+            candidate_snacks.append(product)
+    
+    reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks.")
 
     # --- 7. Apply additional hard filters (ingredient exclusions) ---
     additional_filters = {
@@ -536,7 +552,7 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     # Extract key principles from knowledge document
     key_principles = []
     if macro_target and macro_target.rag_context:
-        macro_targeting_service = MacroTargetingServiceLocal()
+        # Use existing service instance
         principles = macro_targeting_service.extract_key_principles(macro_target.rag_context, num_principles=2)
         key_principles = [KeyPrinciple(principle=principle) for principle in principles]
 
