@@ -16,6 +16,16 @@ from app.db.models import UserInput, Product, MacroTarget
 from app.db.vector_store import get_product_vector_store
 from sqlalchemy.orm import load_only
 
+# Module-level singleton for MacroTargetingServiceLocal
+_macro_service_instance = None
+
+def get_macro_service():
+    """Get singleton instance of MacroTargetingServiceLocal to avoid multiple expensive initializations."""
+    global _macro_service_instance
+    if _macro_service_instance is None:
+        _macro_service_instance = MacroTargetingServiceLocal()
+    return _macro_service_instance
+
 def _build_augmented_query(macro_target: MacroTarget, preferences: Dict[str, Any]) -> str:
     """Builds a natural language query for vector search using soft preferences."""
     query_parts = [f"A snack with around {macro_target.target_protein or 0:.0f}g of protein and {macro_target.target_carbs or 0:.0f}g of carbs."]
