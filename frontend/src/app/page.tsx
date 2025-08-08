@@ -475,6 +475,10 @@ export default function OARecsLanding() {
                                                             <span className="font-semibold">Calories:</span>{" "}
                                                             {product.calories}
                                                         </div>
+                                                        <div className="col-span-2">
+                                                            <span className="font-semibold">Electrolytes:</span>{" "}
+                                                            {product.electrolytes_mg ?? "-"} mg
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -486,7 +490,7 @@ export default function OARecsLanding() {
                                 {result.bundle_stats ? (
                                     <div className="p-6 rounded-lg bg-yellow-50 border border-yellow-200">
                                         <h3 className="text-xl font-bold text-yellow-700 mb-4">Bundle Summary</h3>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-950">
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-gray-950">
                                             <div>
                                                 <div className="font-semibold">Total Calories:</div>
                                                 <div>{result.bundle_stats.total_calories} kcal</div>
@@ -502,6 +506,10 @@ export default function OARecsLanding() {
                                             <div>
                                                 <div className="font-semibold">Total Fat:</div>
                                                 <div>{result.bundle_stats.total_fat} g</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">Total Electrolytes:</div>
+                                                <div>{result.bundle_stats.total_electrolytes} mg</div>
                                             </div>
                                         </div>
                                     </div>
