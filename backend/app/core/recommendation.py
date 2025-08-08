@@ -340,18 +340,20 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
 
     # --- 5. Vector search on pre-filtered products (Layer 1) ---
     vector_store = get_product_vector_store()
-    
+
+    # Prepare holders to avoid UnboundLocalError regardless of branch
+    vector_results = []
+    candidate_snacks = []
+
     # Check if we have soft preferences (including high-protein from strength activities)
     has_soft_preferences = bool(
         preferences.get("flavor_preferences") or 
         preferences.get("texture_preferences") or
         preferences.get("soft_preferences", {}).get("dietary")
     )
-    
-    # If we have soft preferences, use enhanced embedding system
+
+    # If we have soft preferences and macro targets, use enhanced embedding system
     if has_soft_preferences and macro_target:
-        # Use enhanced embedding system for better matching with soft preferences
-        
         # Prepare soft preferences for enhanced embedding
         soft_preferences = {}
         if preferences.get("flavor_preferences"):
@@ -360,15 +362,15 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             soft_preferences["texture"] = preferences["texture_preferences"]
         if preferences.get("soft_preferences", {}).get("dietary"):
             soft_preferences["dietary"] = preferences["soft_preferences"]["dietary"]
-        
+
         # Prepare macro targets for enhanced embedding
         macro_targets = {
             "target_protein": macro_target.target_protein,
             "target_carbs": macro_target.target_carbs,
             "target_calories": macro_target.target_calories
         }
-        
-        # Use enhanced embedding system
+
+        # Use enhanced embedding system for better matching with soft preferences
         candidate_snacks = _enhanced_vector_search_with_embeddings(
             user_query=vector_query,
             pre_filtered_products=pre_filtered_products,
@@ -377,12 +379,9 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
         )
         reasoning_steps.append(f"Enhanced embedding search returned {len(candidate_snacks)} candidate snacks with soft preferences.")
     else:
-        # Use standard vector search
+        # Use standard vector store search
         # If we have pre-filtered products, we need to do vector search on that subset
         if len(pre_filtered_products) < db.query(Product).count():
-            # We have hard filters applied, so we need to do vector search only on pre-filtered products
-            # Since the vector store contains all products, we'll do the search and then filter results
-            
             # Do vector search on all products first, then filter to our pre-filtered subset
             vector_results = vector_store.query_similar_products(
                 query=vector_query,
@@ -391,18 +390,18 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
                 use_mmr=True,
                 mmr_lambda=0.5
             )
-            
+
             # Filter results to only include pre-filtered products
             pre_filtered_ids = set(p.id for p in pre_filtered_products)
             filtered_vector_results = []
-            seen_product_ids = set()  # Track seen product IDs to avoid duplicates
-            
+            seen_product_ids = set()
+
             for result in vector_results:
                 product_id = result['product_id']
                 if product_id in pre_filtered_ids and product_id not in seen_product_ids:
                     filtered_vector_results.append(result)
                     seen_product_ids.add(product_id)
-            
+
             # Take top results from filtered subset
             vector_results = filtered_vector_results[:50]
             reasoning_steps.append(f"Vector search on pre-filtered products returned {len(vector_results)} candidates.")
@@ -411,25 +410,25 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
             vector_results = vector_store.query_similar_products(
                 query=vector_query,
                 top_k=50,
-                hard_filters=None,  # We already pre-filtered
+                hard_filters=None,
                 use_mmr=True,
                 mmr_lambda=0.5
             )
             reasoning_steps.append(f"Vector search returned {len(vector_results)} candidate snacks with diversity optimization.")
 
-    # --- 6. Convert vector results to Product objects ---
-    candidate_snacks = []
-    for result in vector_results:
-        product = (
-            db.query(Product)
-            .options(load_only(*(getattr(Product, c.name) for c in Product.__table__.columns)))
-            .filter(Product.id == result['product_id'])
-            .first()
-        )
-        if product:
-            candidate_snacks.append(product)
-    
-    reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks.")
+    # --- 6. Convert vector results to Product objects (only if not using enhanced path) ---
+    if not candidate_snacks:
+        for result in vector_results:
+            product = (
+                db.query(Product)
+                .options(load_only(*(getattr(Product, c.name) for c in Product.__table__.columns)))
+                .filter(Product.id == result['product_id'])
+                .first()
+            )
+            if product:
+                candidate_snacks.append(product)
+
+        reasoning_steps.append(f"Vector search returned {len(candidate_snacks)} candidate snacks.")
 
     # --- 7. Apply additional hard filters (ingredient exclusions) ---
     additional_filters = {
@@ -545,13 +544,34 @@ async def get_recommendations(request: RecommendationRequest, db: Session) -> Re
     if preferences.get("soft_preferences", {}).get("dietary"):
         soft_prefs.extend(preferences["soft_preferences"]["dietary"])
     
-    # Extract hard filters
+    # Extract hard filters (from multiple possible sources for robustness)
+    # 1) From normalized fields used during pre-filtering
     if preferences.get("dietary_requirements"):
         hard_filters.extend(preferences["dietary_requirements"])
     if preferences.get("allergen_restrictions"):
         hard_filters.extend([f"no {allergen}" for allergen in preferences["allergen_restrictions"]])
+    
+    # 2) From original request-style fields
+    if preferences.get("dietary_restrictions"):
+        hard_filters.extend(preferences["dietary_restrictions"])
     if preferences.get("ingredient_exclusions"):
         hard_filters.extend([f"no {ingredient}" for ingredient in preferences["ingredient_exclusions"]])
+    
+    # 3) From LLM extraction under preferences["hard_filters"]
+    if preferences.get("hard_filters"):
+        hf = preferences["hard_filters"] or {}
+        if isinstance(hf, dict):
+            if hf.get("dietary"):
+                hard_filters.extend(hf["dietary"])
+            if hf.get("allergens"):
+                hard_filters.extend([f"no {a}" for a in hf["allergens"]])
+
+    # Normalize display: capitalize first character of each entry
+    def _cap_first(text: str) -> str:
+        return text[:1].upper() + text[1:] if isinstance(text, str) and text else text
+
+    soft_prefs = [_cap_first(item) for item in soft_prefs]
+    hard_filters = [_cap_first(item) for item in hard_filters]
     
     preferences_info = PreferenceInfo(
         soft_preferences=soft_prefs,
