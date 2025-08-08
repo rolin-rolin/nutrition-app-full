@@ -83,10 +83,26 @@ export default function OARecsLanding() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8, duration: 1 }}
                     >
-                        <button className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-full font-semibold hover:bg-yellow-300 transition-colors">
+                        <button
+                            className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-full font-semibold hover:bg-yellow-300 transition-colors border-3"
+                            onClick={() => {
+                                document.getElementById("recommendation-section")?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                });
+                            }}
+                        >
                             Get your Recommendation
                         </button>
-                        <button className="border-2 border-white text-white px-12 py-5 rounded-full font-semibold hover:bg-white hover:text-purple-900 transition-colors">
+                        <button
+                            className="border-3 border-white text-white px-12 py-5 rounded-full font-semibold hover:bg-white hover:text-purple-900 transition-color"
+                            onClick={() => {
+                                document.getElementById("how-it-works-section")?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                });
+                            }}
+                        >
                             How it works
                         </button>
                     </motion.div>
@@ -150,7 +166,7 @@ export default function OARecsLanding() {
             </section>
 
             {/* How It Works Section */}
-            <section className="py-20 bg-white">
+            <section id="how-it-works-section" className="py-20 bg-white">
                 <div className="max-w-8xl mx-auto px-12">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">How It Works</h2>
@@ -216,7 +232,7 @@ export default function OARecsLanding() {
             </section>
 
             {/* Get Your Personalized Recommendation Section */}
-            <section className="py-20 bg-gray-50">
+            <section id="recommendation-section" className="py-20 bg-gray-50">
                 <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">
@@ -354,7 +370,7 @@ export default function OARecsLanding() {
                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4 text-gray-950">
                                             <div>
                                                 <div className="font-semibold">Calories:</div>
-                                                <div>{result.macro_targets.target_calories ?? "-"} cal</div>
+                                                <div>{result.macro_targets.target_calories ?? "-"}</div>
                                             </div>
                                             <div>
                                                 <div className="font-semibold">Protein:</div>
@@ -394,7 +410,7 @@ export default function OARecsLanding() {
                                                                 {result.timing_breakdown.pre_workout.fat &&
                                                                     `${result.timing_breakdown.pre_workout.fat}g fat, `}
                                                                 {result.timing_breakdown.pre_workout.calories &&
-                                                                    `${result.timing_breakdown.pre_workout.calories} cal`}
+                                                                    `${result.timing_breakdown.pre_workout.calories} cals`}
                                                             </div>
                                                         </div>
                                                     )}
@@ -411,7 +427,7 @@ export default function OARecsLanding() {
                                                                 {result.timing_breakdown.during_workout.electrolytes &&
                                                                     `${result.timing_breakdown.during_workout.electrolytes}mg electrolytes, `}
                                                                 {result.timing_breakdown.during_workout.calories &&
-                                                                    `${result.timing_breakdown.during_workout.calories} cal`}
+                                                                    `${result.timing_breakdown.during_workout.calories} cals`}
                                                             </div>
                                                         </div>
                                                     )}
@@ -428,7 +444,7 @@ export default function OARecsLanding() {
                                                                 {result.timing_breakdown.post_workout.fat &&
                                                                     `${result.timing_breakdown.post_workout.fat}g fat, `}
                                                                 {result.timing_breakdown.post_workout.calories &&
-                                                                    `${result.timing_breakdown.post_workout.calories} cal`}
+                                                                    `${result.timing_breakdown.post_workout.calories} cals`}
                                                             </div>
                                                         </div>
                                                     )}
@@ -470,10 +486,10 @@ export default function OARecsLanding() {
                                                     )}
 
                                                     <h4 className="font-semibold text-gray-800 mb-2">{product.name}</h4>
-                                                    <div className="text-sm text-gray-600 mb-2">
+                                                    <div className="text-sm text-gray-700 mb-2">
                                                         {product.description}
                                                     </div>
-                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
                                                         <div>
                                                             <span className="font-semibold">Protein:</span>{" "}
                                                             {product.protein}g
@@ -497,12 +513,11 @@ export default function OARecsLanding() {
 
                                                     {/* Product Link */}
                                                     {product.link && (
-                                                        <div className="mt-3">
+                                                        <div className="mt-3 text-blue-600 hover:text-blue-800 text-xs font-semibold underline">
                                                             <a
                                                                 href={product.link}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="text-blue-600 hover:text-blue-800 text-xs font-medium underline"
                                                             >
                                                                 View Product →
                                                             </a>
@@ -521,7 +536,7 @@ export default function OARecsLanding() {
                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-gray-950">
                                             <div>
                                                 <div className="font-semibold">Total Calories:</div>
-                                                <div>{result.bundle_stats.total_calories} kcal</div>
+                                                <div>{result.bundle_stats.total_calories}</div>
                                             </div>
                                             <div>
                                                 <div className="font-semibold">Total Protein:</div>
