@@ -332,13 +332,16 @@ def optimize_macro_combination(products: List[Product],
     Returns:
         CombinationResult with randomly selected optimal snack combination
     """
-    # Convert MacroTarget to MacroTargets
-    targets = MacroTargets(
-        target_protein_g=macro_targets.target_protein or 0.0,
-        target_carbs_g=macro_targets.target_carbs or 0.0,
-        target_fat_g=macro_targets.target_fat or 0.0,
-        target_electrolytes_mg=macro_targets.target_electrolytes or 0.0
-    )
+    # Convert MacroTarget to MacroTargets; accept already-normalized MacroTargets as well
+    if isinstance(macro_targets, MacroTargets):
+        targets = macro_targets
+    else:
+        targets = MacroTargets(
+            target_protein_g=getattr(macro_targets, 'target_protein', 0.0) or 0.0,
+            target_carbs_g=getattr(macro_targets, 'target_carbs', 0.0) or 0.0,
+            target_fat_g=getattr(macro_targets, 'target_fat', 0.0) or 0.0,
+            target_electrolytes_mg=getattr(macro_targets, 'target_electrolytes', 0.0) or 0.0
+        )
     
     # Create optimizer
     optimizer = MacroOptimizer(
