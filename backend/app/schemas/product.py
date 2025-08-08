@@ -11,6 +11,7 @@ class ProductBase(BaseModel):
     protein: float
     carbs: float
     fat: float
+    electrolytes_mg: Optional[float] = None
     fiber: Optional[float] = None
     sugar: Optional[float] = None
     categories: List[str]
