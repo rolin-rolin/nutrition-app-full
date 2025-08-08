@@ -455,6 +455,20 @@ export default function OARecsLanding() {
                                                     key={index}
                                                     className="bg-white p-4 rounded-lg border border-green-300"
                                                 >
+                                                    {/* Product Image */}
+                                                    {product.image_url && (
+                                                        <div className="mb-3">
+                                                            <img
+                                                                src={product.image_url}
+                                                                alt={product.name}
+                                                                className="w-full h-32 object-contain rounded-lg"
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = "none";
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+
                                                     <h4 className="font-semibold text-gray-800 mb-2">{product.name}</h4>
                                                     <div className="text-sm text-gray-600 mb-2">
                                                         {product.description}
@@ -480,6 +494,20 @@ export default function OARecsLanding() {
                                                             {product.electrolytes_mg ?? "-"} mg
                                                         </div>
                                                     </div>
+
+                                                    {/* Product Link */}
+                                                    {product.link && (
+                                                        <div className="mt-3">
+                                                            <a
+                                                                href={product.link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:text-blue-800 text-xs font-medium underline"
+                                                            >
+                                                                View Product →
+                                                            </a>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
