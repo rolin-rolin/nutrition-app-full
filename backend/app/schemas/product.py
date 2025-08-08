@@ -17,6 +17,8 @@ class ProductBase(BaseModel):
     categories: List[str]
     dietary_flags: List[str]
     timing_suitability: List[str]
+    link: Optional[str] = None
+    image_url: Optional[str] = None
 
 class ProductCreate(ProductBase):
     source: str
