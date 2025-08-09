@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { AuroraText } from "@/components/magicui/aurora-text";
+import { Particles } from "@/components/magicui/particles";
 
 export default function OARecsLanding() {
     // State for textarea, loading, error, and result
@@ -45,86 +47,118 @@ export default function OARecsLanding() {
     return (
         <div className="min-h-screen bg-white">
             {/* Hero Section */}
-            <main className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-                <div className="max-w-4xl">
-                    {/* Logo - Centered and Large, with fade-in animation */}
-                    <motion.div
-                        className="flex items-center justify-center mb-2"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 0 }}
-                    >
-                        <img src="/just-lion.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
-                    </motion.div>
 
-                    {/* Animated Hero Text */}
-                    <motion.h1
-                        className="text-5xl md:text-7xl font-bold text-purple-700 mb-8 leading-tight"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 2, delay: 1 }}
-                    >
-                        Fuel Your Workout
-                        <br />
-                        in <em>Seconds</em>
-                    </motion.h1>
+            <div className="min-h-screen bg-white relative">
+                {/* Particles Background */}
+                <Particles className="absolute inset-0 z-0" quantity={100} ease={70} color="#8B5CF6" size={2} refresh />
 
-                    <motion.p
-                        className="text-xl text-purple-600 mb-16 max-w-2xl mx-auto leading-relaxed font-semibold"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 2.5, duration: 0.5 }}
-                    >
-                        Get personalized nutrition box recommendations based on your workout routine, dietary
-                        preferences, and fitness goals.
-                    </motion.p>
-
-                    <motion.div
-                        className="flex flex-col sm:flex-row gap-6 justify-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 2.5, duration: 0.5 }}
-                    >
-                        <button
-                            className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-full font-bold hover:bg-yellow-300 transition-colors border-3"
-                            onClick={() => {
-                                document.getElementById("recommendation-section")?.scrollIntoView({
-                                    behavior: "smooth",
-                                    block: "center",
-                                });
-                            }}
+                {/* Hero Section */}
+                <main className="relative overflow-hidden h-[500px] w-full flex flex-col items-center justify-center min-h-screen px-6 text-center z-10">
+                    <div className="max-w-4xl">
+                        {/* Logo - Centered and Large, with fade-in animation */}
+                        <motion.div
+                            className="flex items-center justify-center mb-2"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0 }}
                         >
-                            Get your Recommendation
-                        </button>
-                        <button
-                            className="border-3 border-purple-700 text-purple-700 px-12 py-5 rounded-full font-bold hover:bg-purple-700 hover:text-white transition-colors"
-                            onClick={() => {
-                                document.getElementById("how-it-works-section")?.scrollIntoView({
-                                    behavior: "smooth",
-                                    block: "center",
-                                });
-                            }}
+                            <img src="/just-lion.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
+                        </motion.div>
+
+                        {/* Animated Hero Text */}
+                        <motion.h1
+                            className="text-5xl md:text-7xl font-bold mb-8 leading-tight"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 1 }}
                         >
-                            How it works
-                        </button>
-                    </motion.div>
-                </div>
-            </main>
+                            Fuel Your Workout
+                            <br />
+                            in{" "}
+                            <em>
+                                <AuroraText>Seconds</AuroraText>
+                            </em>
+                        </motion.h1>
+
+                        <motion.p
+                            className="text-xl text-purple-600 mb-16 max-w-2xl mx-auto leading-relaxed font-semibold"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 2.0, duration: 0.5 }}
+                        >
+                            Get personalized nutrition box recommendations based on your workout routine, dietary
+                            preferences, and fitness goals.
+                        </motion.p>
+
+                        <motion.div
+                            className="flex flex-col sm:flex-row gap-6 justify-center"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 2.0, duration: 0.5 }}
+                        >
+                            <button
+                                className="border-3 border-purple-700 text-purple-700 px-12 py-5 rounded-full font-bold hover:bg-purple-700 hover:text-white transition-colors"
+                                onClick={() => {
+                                    document.getElementById("recommendation-section")?.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "center",
+                                    });
+                                }}
+                            >
+                                Get your Recommendation
+                            </button>
+                            <button
+                                className="border-3 border-purple-700 text-purple-700 px-12 py-5 rounded-full font-bold hover:bg-purple-700 hover:text-white transition-colors"
+                                onClick={() => {
+                                    document.getElementById("how-it-works-section")?.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "center",
+                                    });
+                                }}
+                            >
+                                How it works
+                            </button>
+                        </motion.div>
+                    </div>
+                </main>
+            </div>
 
             {/* Why Choose OA Recs Section */}
             <section className="py-20 bg-gray-50">
                 <div className="max-w-6xl mx-auto px-6">
-                    <div className="text-center mb-16">
+                    <motion.div
+                        className="text-center mb-16"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        viewport={{ once: true }}
+                    >
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">Why Choose OA Recs?</h2>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                             Our AI-powered platform analyzes your workout data and creates nutrition recommendations
                             specifically designed for your body and goals.
                         </p>
-                    </div>
+                    </motion.div>
 
                     <div className="flex flex-col md:flex-row gap-8">
                         {/* AI-Powered Analysis */}
-                        <div className="bg-white rounded-lg p-8 shadow-lg text-center flex-1">
+                        <motion.div
+                            className="bg-white rounded-lg p-8 shadow-lg text-center flex-1"
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.5 }}
+                            viewport={{ once: true }}
+                            whileHover={{
+                                y: -10,
+                                scale: 1.05,
+                                transition: {
+                                    duration: 0.2,
+                                    type: "spring",
+                                    stiffness: 800,
+                                    damping: 40,
+                                },
+                            }}
+                        >
                             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center">
                                     <div className="w-4 h-4 bg-white rounded-full"></div>
@@ -135,10 +169,26 @@ export default function OARecsLanding() {
                                 Our advanced algorithms analyze your workout data to create perfectly balanced nutrition
                                 plans.
                             </p>
-                        </div>
+                        </motion.div>
 
                         {/* Personalized Boxes */}
-                        <div className="bg-white rounded-lg p-8 shadow-lg text-center flex-1">
+                        <motion.div
+                            className="bg-white rounded-lg p-8 shadow-lg text-center flex-1"
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 1 }}
+                            viewport={{ once: true }}
+                            whileHover={{
+                                y: -10,
+                                scale: 1.05,
+                                transition: {
+                                    duration: 0.2,
+                                    type: "spring",
+                                    stiffness: 800,
+                                    damping: 40,
+                                },
+                            }}
+                        >
                             <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
                                     <div className="w-4 h-4 bg-white rounded-full"></div>
@@ -148,10 +198,26 @@ export default function OARecsLanding() {
                             <p className="text-gray-600 leading-relaxed">
                                 Receive curated nutrition boxes with pre-portioned supplements and meal ingredients.
                             </p>
-                        </div>
+                        </motion.div>
 
                         {/* Workout Optimization */}
-                        <div className="bg-white rounded-lg p-8 shadow-lg text-center flex-1">
+                        <motion.div
+                            className="bg-white rounded-lg p-8 shadow-lg text-center flex-1"
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 1.5 }}
+                            viewport={{ once: true }}
+                            whileHover={{
+                                y: -10,
+                                scale: 1.05,
+                                transition: {
+                                    duration: 0.2,
+                                    type: "spring",
+                                    stiffness: 800,
+                                    damping: 40,
+                                },
+                            }}
+                        >
                             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center">
                                     <div className="w-4 h-4 bg-white rounded-full"></div>
@@ -162,7 +228,7 @@ export default function OARecsLanding() {
                                 Maximize your workout results with nutrition that complements your specific exercise
                                 routine.
                             </p>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
@@ -170,16 +236,43 @@ export default function OARecsLanding() {
             {/* How It Works Section */}
             <section id="how-it-works-section" className="py-20 bg-white">
                 <div className="max-w-8xl mx-auto px-12">
-                    <div className="text-center mb-16">
+                    <motion.div
+                        className="text-center mb-16"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, type: "spring", bounce: 0.3 }}
+                        viewport={{ once: true }}
+                    >
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">How It Works</h2>
                         <p className="text-xl text-gray-600">
                             Three simple steps to get your personalized nutrition recommendations
                         </p>
-                    </div>
+                    </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Step 1 */}
-                        <div className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center">
+                        <motion.div
+                            className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.2,
+                                type: "spring",
+                                bounce: 0.3,
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{
+                                y: -10,
+                                scale: 1.05,
+                                transition: {
+                                    duration: 0.3,
+                                    type: "spring",
+                                    stiffness: 700,
+                                    damping: 25,
+                                },
+                            }}
+                        >
                             <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <span className="text-white font-bold text-xl">1</span>
                             </div>
@@ -192,9 +285,31 @@ export default function OARecsLanding() {
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                 </svg>
                             </div>
-                        </div>
+                        </motion.div>
+
                         {/* Step 2 */}
-                        <div className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center">
+                        <motion.div
+                            className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.4,
+                                type: "spring",
+                                bounce: 0.3,
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{
+                                y: -10,
+                                scale: 1.05,
+                                transition: {
+                                    duration: 0.3,
+                                    type: "spring",
+                                    stiffness: 700,
+                                    damping: 25,
+                                },
+                            }}
+                        >
                             <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <span className="text-white font-bold text-xl">2</span>
                             </div>
@@ -212,9 +327,31 @@ export default function OARecsLanding() {
                                     />
                                 </svg>
                             </div>
-                        </div>
+                        </motion.div>
+
                         {/* Step 3 */}
-                        <div className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center">
+                        <motion.div
+                            className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.6,
+                                type: "spring",
+                                bounce: 0.3,
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{
+                                y: -10,
+                                scale: 1.05,
+                                transition: {
+                                    duration: 0.3,
+                                    type: "spring",
+                                    stiffness: 700,
+                                    damping: 25,
+                                },
+                            }}
+                        >
                             <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <span className="text-white font-bold text-xl">3</span>
                             </div>
@@ -228,7 +365,7 @@ export default function OARecsLanding() {
                                     <path d="M5 4a2 2 0 00-2 2v1h14V6a2 2 0 00-2-2H5zM3 9v6a2 2 0 002 2h10a2 2 0 002-2V9H3z" />
                                 </svg>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
