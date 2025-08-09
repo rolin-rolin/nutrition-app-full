@@ -43,35 +43,37 @@ export default function OARecsLanding() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-700 to-purple-900">
+        <div className="min-h-screen bg-white">
             {/* Hero Section */}
             <main className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
                 <div className="max-w-4xl">
-                    {/* Logo */}
-                    <div className="flex items-center justify-center space-x-2 mb-16">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                            <div className="w-4 h-4 bg-purple-700 rounded-full"></div>
-                        </div>
-                        <span className="text-xl font-semibold text-white">OA Recs</span>
-                    </div>
+                    {/* Logo - Centered and Large, with fade-in animation */}
+                    <motion.div
+                        className="flex items-center justify-center mb-2"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0 }}
+                    >
+                        <img src="/just-lion.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
+                    </motion.div>
 
                     {/* Animated Hero Text */}
                     <motion.h1
-                        className="text-5xl md:text-7xl font-bold text-white mb-16 leading-tight"
+                        className="text-5xl md:text-7xl font-bold text-purple-700 mb-8 leading-tight"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1 }}
+                        transition={{ duration: 2, delay: 1 }}
                     >
                         Fuel Your Workout
                         <br />
-                        in Seconds
+                        in <em>Seconds</em>
                     </motion.h1>
 
                     <motion.p
-                        className="text-xl text-purple-100 mb-16 max-w-2xl mx-auto leading-relaxed"
+                        className="text-xl text-purple-600 mb-16 max-w-2xl mx-auto leading-relaxed font-semibold"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, duration: 1 }}
+                        transition={{ delay: 2.5, duration: 0.5 }}
                     >
                         Get personalized nutrition box recommendations based on your workout routine, dietary
                         preferences, and fitness goals.
@@ -81,10 +83,10 @@ export default function OARecsLanding() {
                         className="flex flex-col sm:flex-row gap-6 justify-center"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8, duration: 1 }}
+                        transition={{ delay: 2.5, duration: 0.5 }}
                     >
                         <button
-                            className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-full font-semibold hover:bg-yellow-300 transition-colors border-3"
+                            className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-full font-bold hover:bg-yellow-300 transition-colors border-3"
                             onClick={() => {
                                 document.getElementById("recommendation-section")?.scrollIntoView({
                                     behavior: "smooth",
@@ -95,7 +97,7 @@ export default function OARecsLanding() {
                             Get your Recommendation
                         </button>
                         <button
-                            className="border-3 border-white text-white px-12 py-5 rounded-full font-semibold hover:bg-white hover:text-purple-900 transition-color"
+                            className="border-3 border-purple-700 text-purple-700 px-12 py-5 rounded-full font-bold hover:bg-purple-700 hover:text-white transition-colors"
                             onClick={() => {
                                 document.getElementById("how-it-works-section")?.scrollIntoView({
                                     behavior: "smooth",
