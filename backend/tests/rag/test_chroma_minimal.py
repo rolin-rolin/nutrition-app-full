@@ -19,15 +19,15 @@ if __name__ == "__main__":
     print(f"Loaded {len(documents)} documents from loader.")
 
     # Remove any existing vector store
-    if os.path.exists("rag_store"):
+    if os.path.exists("data/rag_store"):
         import shutil
-        shutil.rmtree("rag_store")
+        shutil.rmtree("data/rag_store")
 
     # Create Chroma vector store
     vectorstore = Chroma.from_documents(
         documents,
         embedding=service._get_embedding_function(),
-        persist_directory="rag_store"
+        persist_directory="data/rag_store"
     )
     # vectorstore.persist()  # Not needed in langchain_chroma
 

@@ -15,7 +15,7 @@ Uses Chroma for vector storage and similarity search with hard filtering and MMR
 """
 
 class ProductVectorStore:
-    def __init__(self, persist_directory: str = "./product_vector_store"):
+    def __init__(self, persist_directory: str = "./data/product_vector_store"):
         """
         Initialize the product vector store.
 

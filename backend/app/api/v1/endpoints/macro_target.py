@@ -18,7 +18,7 @@ def get_macro_targeting_service():
     """Dependency to get macro targeting service"""
     openai_api_key = os.getenv("OPENAI_API_KEY")
     return MacroTargetingServiceLocal(
-        rag_store_path="../rag_store", 
+        rag_store_path="./data/rag_store", 
         openai_api_key=openai_api_key
     )
 

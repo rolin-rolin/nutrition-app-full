@@ -24,7 +24,7 @@ from app.db.session import get_db
 load_dotenv()
 
 class MacroTargetingService:
-    def __init__(self, openai_api_key: Optional[str] = None, rag_store_path: str = "./rag_store"):
+    def __init__(self, openai_api_key: Optional[str] = None, rag_store_path: str = "./data/rag_store"):
         """
         Initialize the macro targeting service with RAG capabilities.
         

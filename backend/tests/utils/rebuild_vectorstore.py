@@ -18,7 +18,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from app.core.macro_targeting_local import MacroTargetingServiceLocal
 
-def rebuild_vectorstore(rag_store_path: str = "../rag_store"):
+def rebuild_vectorstore(rag_store_path: str = "./data/rag_store"):
     """Rebuild the vector store from scratch."""
     
     print(f"Rebuilding vector store at: {rag_store_path}")

@@ -28,7 +28,7 @@ from app.db.session import get_db
 load_dotenv()
 
 class MacroTargetingServiceLocal:
-    def __init__(self, rag_store_path: str = "../rag_store", force_rebuild: bool = False, openai_api_key: Optional[str] = None):
+    def __init__(self, rag_store_path: str = "./data/rag_store", force_rebuild: bool = False, openai_api_key: Optional[str] = None):
         print(f"[DEBUG] MacroTargetingServiceLocal __init__ called with rag_store_path={rag_store_path}, force_rebuild={force_rebuild}")
         """
         Initialize the macro targeting service with local RAG capabilities and LLM field extraction.
