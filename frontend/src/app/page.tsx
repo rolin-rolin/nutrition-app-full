@@ -1,8 +1,32 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Variants } from "framer-motion";
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { Particles } from "@/components/magicui/particles";
+const fadeInUp: Variants = {
+    hidden: {
+        opacity: 0,
+        y: 20,
+    },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.6,
+            ease: "easeOut",
+        },
+    },
+};
+
+const staggerChildren: Variants = {
+    hidden: {},
+    visible: {
+        transition: {
+            staggerChildren: 0.1,
+        },
+    },
+};
 
 export default function OARecsLanding() {
     // State for textarea, loading, error, and result
@@ -50,7 +74,7 @@ export default function OARecsLanding() {
 
             <div className="min-h-screen bg-white relative">
                 {/* Particles Background */}
-                <Particles className="absolute inset-0 z-0" quantity={100} ease={70} color="#8B5CF6" size={2} refresh />
+                <Particles className="absolute inset-0 z-0" quantity={150} ease={75} color="#8B5CF6" size={2} refresh />
 
                 {/* Hero Section */}
                 <main className="relative overflow-hidden h-[500px] w-full flex flex-col items-center justify-center min-h-screen px-6 text-center z-10">
@@ -62,7 +86,7 @@ export default function OARecsLanding() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0 }}
                         >
-                            <img src="/just-lion.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
+                            <img src="/transparent.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
                         </motion.div>
 
                         {/* Animated Hero Text */}
@@ -81,7 +105,7 @@ export default function OARecsLanding() {
                         </motion.h1>
 
                         <motion.p
-                            className="text-xl text-purple-600 mb-16 max-w-2xl mx-auto leading-relaxed font-semibold"
+                            className="text-xl text-black mb-16 max-w-2xl mx-auto leading-relaxed"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 2.0, duration: 0.5 }}
@@ -135,8 +159,8 @@ export default function OARecsLanding() {
                     >
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">Why Choose OA Recs?</h2>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Our AI-powered platform analyzes your workout data and creates nutrition recommendations
-                            specifically designed for your body and goals.
+                            OA Recs uses International Society of Sports Nutrition (ISSN) guidelines (science!) to
+                            calculate <b>exact</b> macronutrient targets that you should hit.
                         </p>
                     </motion.div>
 
@@ -164,10 +188,10 @@ export default function OARecsLanding() {
                                     <div className="w-4 h-4 bg-white rounded-full"></div>
                                 </div>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-4">AI-Powered Analysis</h3>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Macronutrient Analysis</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Our advanced algorithms analyze your workout data to create perfectly balanced nutrition
-                                plans.
+                                Get concrete macronutrient targets you should hit through our research-backed
+                                "macro-targeting" algorithm.
                             </p>
                         </motion.div>
 
@@ -196,7 +220,8 @@ export default function OARecsLanding() {
                             </div>
                             <h3 className="text-2xl font-bold text-gray-800 mb-4">Personalized Boxes</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Receive curated nutrition boxes with pre-portioned supplements and meal ingredients.
+                                Receive curated nutrition boxes that, together, hit your targets and follow your
+                                preferences.
                             </p>
                         </motion.div>
 
@@ -245,14 +270,14 @@ export default function OARecsLanding() {
                     >
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">How It Works</h2>
                         <p className="text-xl text-gray-600">
-                            Three simple steps to get your personalized nutrition recommendations
+                            Four simple steps to get your personalized nutrition recommendations.
                         </p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                         {/* Step 1 */}
                         <motion.div
-                            className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center"
+                            className="bg-gray-50 rounded-lg p-6 shadow-lg border text-center max-w-lg mx-auto"
                             initial={{ opacity: 0, scale: 0.8 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             transition={{
@@ -273,12 +298,13 @@ export default function OARecsLanding() {
                                 },
                             }}
                         >
-                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <span className="text-white font-bold text-xl">1</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Smart Consultation</h3>
-                            <p className="text-gray-600 leading-relaxed mb-6">
-                                Tell us about yourself, your workout routine, and preferences for snacks.
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3">AI-Powered Consultation</h3>
+                            <p className="text-gray-600 leading-relaxed mb-4">
+                                Tell us about yourself, your workout routine, and preferences for snacks just as you
+                                would to a real dietitian.
                             </p>
                             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
                                 <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
@@ -289,7 +315,7 @@ export default function OARecsLanding() {
 
                         {/* Step 2 */}
                         <motion.div
-                            className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center"
+                            className="bg-gray-50 rounded-lg p-6 shadow-lg border text-center max-w-lg mx-auto"
                             initial={{ opacity: 0, scale: 0.8 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             transition={{
@@ -310,12 +336,13 @@ export default function OARecsLanding() {
                                 },
                             }}
                         >
-                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <span className="text-white font-bold text-xl">2</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Macronutrient Targets</h3>
-                            <p className="text-gray-600 leading-relaxed mb-6">
-                                Our AI analyzes your input and generates Macronutrient Targets for you to hit.
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3">Macronutrient Targets</h3>
+                            <p className="text-gray-600 leading-relaxed mb-4">
+                                Our algorithm calculates your exact macronutrient targets based on your age, weight,
+                                exercise, and snack preferences.
                             </p>
                             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
                                 <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
@@ -331,7 +358,7 @@ export default function OARecsLanding() {
 
                         {/* Step 3 */}
                         <motion.div
-                            className="bg-gray-50 rounded-lg p-8 shadow-lg border text-center"
+                            className="bg-gray-50 rounded-lg p-6 shadow-lg border text-center max-w-lg mx-auto"
                             initial={{ opacity: 0, scale: 0.8 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             transition={{
@@ -352,17 +379,59 @@ export default function OARecsLanding() {
                                 },
                             }}
                         >
-                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <span className="text-white font-bold text-xl">3</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Get Your Snack Recommendations</h3>
-                            <p className="text-gray-600 leading-relaxed mb-6">
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3">Recommendation Engine</h3>
+                            <p className="text-gray-600 leading-relaxed mb-4">
+                                The engine takes in your targets and preferences and does a similarity search against
+                                its product database.
+                            </p>
+                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
+                                <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5 4a2 2 0 00-2 2v1h14V6a2 2 0 00-2-2H5zM3 9v6a2 2 0 002 2h10a2 2 0 002-2V9H3z" />
+                                </svg>
+                            </div>
+                        </motion.div>
+
+                        {/* Step 4 */}
+                        <motion.div
+                            className="bg-gray-50 rounded-lg p-6 shadow-lg border text-center max-w-lg mx-auto"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.8,
+                                type: "spring",
+                                bounce: 0.3,
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{
+                                y: -10,
+                                scale: 1.05,
+                                transition: {
+                                    duration: 0.3,
+                                    type: "spring",
+                                    stiffness: 700,
+                                    damping: 25,
+                                },
+                            }}
+                        >
+                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-white font-bold text-xl">4</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3">Enjoy Your Personalized Nutrition</h3>
+                            <p className="text-gray-600 leading-relaxed mb-4">
                                 Get an assortment of snacks that hit your macronutrient targets and fit your
                                 preferences!
                             </p>
                             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
                                 <svg className="w-6 h-6 text-purple-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M5 4a2 2 0 00-2 2v1h14V6a2 2 0 00-2-2H5zM3 9v6a2 2 0 002 2h10a2 2 0 002-2V9H3z" />
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                    />
                                 </svg>
                             </div>
                         </motion.div>
@@ -371,14 +440,14 @@ export default function OARecsLanding() {
             </section>
 
             {/* Get Your Personalized Recommendation Section */}
-            <section id="recommendation-section" className="py-20 bg-gray-50">
-                <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
+            <section id="recommendation-section" className="min-h-screen bg-gray-50 flex items-center">
+                <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
                     <div className="text-center mb-12">
                         <h2 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6">
                             Get Your Personalized Recommendation
                         </h2>
                         <p className="text-xl text-gray-600 mb-8">
-                            Tell me about you and your next workout! Include information about:
+                            Tell me about you and your next workout! Be sure to enter:
                         </p>
 
                         <div className="flex flex-col items-center text-center gap-4 md:grid md:grid-cols-2 md:text-left md:items-start max-w-2xl mx-auto mb-12">
@@ -420,7 +489,7 @@ export default function OARecsLanding() {
                                         clipRule="evenodd"
                                     />
                                 </svg>
-                                <span className="text-gray-700">Dietary restrictions or taste preferences</span>
+                                <span className="text-gray-700">Dietary restrictions and/or taste preferences</span>
                             </div>
                         </div>
                     </div>
@@ -468,37 +537,66 @@ export default function OARecsLanding() {
 
                         {/* Result Display */}
                         {result && (
-                            <div className="mt-10 space-y-6">
+                            <motion.div
+                                className="mt-10 space-y-6"
+                                initial="hidden"
+                                animate="visible"
+                                variants={staggerChildren}
+                            >
                                 {/* User Profile */}
                                 {result.user_profile ? (
-                                    <div className="p-6 rounded-lg bg-blue-50 border border-blue-200">
-                                        <h3 className="text-xl font-bold text-blue-700 mb-4">Your Profile</h3>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-950">
-                                            <div>
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">Your Profile</h3>
+                                        <motion.div
+                                            className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-950"
+                                            variants={staggerChildren}
+                                            initial="hidden"
+                                            whileInView="visible"
+                                            viewport={{ once: true }}
+                                        >
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold text-sm">Age:</div>
                                                 <div>{result.user_profile.age_display}</div>
-                                            </div>
-                                            <div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold text-sm">Weight:</div>
                                                 <div>{result.user_profile.weight_display}</div>
-                                            </div>
-                                            <div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold text-sm">Exercise:</div>
                                                 <div>{result.user_profile.exercise_display}</div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                            </motion.div>
+                                        </motion.div>
+                                    </motion.div>
                                 ) : (
-                                    <div className="p-6 rounded-lg bg-blue-50 border border-blue-200">
-                                        <h3 className="text-xl font-bold text-blue-700 mb-4">Your Profile</h3>
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">Your Profile</h3>
                                         <div className="text-sm text-gray-600">No profile data available</div>
-                                    </div>
+                                    </motion.div>
                                 )}
 
                                 {/* Macro Targets */}
                                 {result.macro_targets ? (
-                                    <div className="p-6 rounded-lg bg-purple-50 border border-purple-200">
-                                        <h3 className="text-xl font-bold text-purple-700 mb-4">
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">
                                             Your Macro Targets
                                             {result.timing_breakdown && (
                                                 <span className="ml-2 text-sm font-normal text-purple-600">
@@ -506,38 +604,56 @@ export default function OARecsLanding() {
                                                 </span>
                                             )}
                                         </h3>
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4 text-gray-950">
-                                            <div>
+                                        <motion.div
+                                            className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4 text-gray-950"
+                                            variants={staggerChildren}
+                                            initial="hidden"
+                                            whileInView="visible"
+                                            viewport={{ once: true }}
+                                        >
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold">Calories:</div>
                                                 <div>{result.macro_targets.target_calories ?? "-"}</div>
-                                            </div>
-                                            <div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold">Protein:</div>
                                                 <div>{result.macro_targets.target_protein ?? "-"} g</div>
-                                            </div>
-                                            <div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold">Carbs:</div>
                                                 <div>{result.macro_targets.target_carbs ?? "-"} g</div>
-                                            </div>
-                                            <div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold">Fat:</div>
                                                 <div>{result.macro_targets.target_fat ?? "-"} g</div>
-                                            </div>
-                                            <div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
                                                 <div className="font-semibold">Electrolytes:</div>
                                                 <div>{result.macro_targets.target_electrolytes ?? "-"} mg</div>
-                                            </div>
-                                        </div>
+                                            </motion.div>
+                                        </motion.div>
 
                                         {/* Timing Breakdown Tooltip */}
                                         {result.timing_breakdown && (
-                                            <div className="mt-4 p-4 bg-white rounded-lg border border-purple-300">
+                                            <motion.div
+                                                className="mt-4 p-4 bg-white rounded-lg border border-purple-300"
+                                                initial={{ opacity: 0 }}
+                                                whileInView={{ opacity: 1 }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 0.5, delay: 0.2 }}
+                                            >
                                                 <h4 className="font-semibold text-purple-700 mb-2">
                                                     Timing Breakdown:
                                                 </h4>
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                                <motion.div
+                                                    className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm"
+                                                    variants={staggerChildren}
+                                                    initial="hidden"
+                                                    whileInView="visible"
+                                                    viewport={{ once: true }}
+                                                >
                                                     {result.timing_breakdown.pre_workout && (
-                                                        <div>
+                                                        <motion.div variants={fadeInUp}>
                                                             <div className="font-semibold text-green-700">
                                                                 Pre-workout:
                                                             </div>
@@ -551,10 +667,10 @@ export default function OARecsLanding() {
                                                                 {result.timing_breakdown.pre_workout.calories &&
                                                                     `${result.timing_breakdown.pre_workout.calories} cals`}
                                                             </div>
-                                                        </div>
+                                                        </motion.div>
                                                     )}
                                                     {result.timing_breakdown.during_workout && (
-                                                        <div>
+                                                        <motion.div variants={fadeInUp}>
                                                             <div className="font-semibold text-blue-700">
                                                                 During workout:
                                                             </div>
@@ -568,10 +684,10 @@ export default function OARecsLanding() {
                                                                 {result.timing_breakdown.during_workout.calories &&
                                                                     `${result.timing_breakdown.during_workout.calories} cals`}
                                                             </div>
-                                                        </div>
+                                                        </motion.div>
                                                     )}
                                                     {result.timing_breakdown.post_workout && (
-                                                        <div>
+                                                        <motion.div variants={fadeInUp}>
                                                             <div className="font-semibold text-orange-700">
                                                                 Post-workout:
                                                             </div>
@@ -585,30 +701,101 @@ export default function OARecsLanding() {
                                                                 {result.timing_breakdown.post_workout.calories &&
                                                                     `${result.timing_breakdown.post_workout.calories} cals`}
                                                             </div>
-                                                        </div>
+                                                        </motion.div>
                                                     )}
-                                                </div>
-                                            </div>
+                                                </motion.div>
+                                            </motion.div>
                                         )}
-                                    </div>
+                                    </motion.div>
                                 ) : (
-                                    <div className="p-6 rounded-lg bg-purple-50 border border-purple-200">
-                                        <h3 className="text-xl font-bold text-purple-700 mb-4">Your Macro Targets</h3>
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">Your Macro Targets</h3>
                                         <div className="text-sm text-gray-600">No macro targets available</div>
-                                    </div>
+                                    </motion.div>
+                                )}
+
+                                {/* Bundle Stats */}
+                                {result.bundle_stats ? (
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">Bundle Summary</h3>
+                                        <motion.div
+                                            className="grid grid-cols-2 md:grid-cols-5 gap-4 text-gray-950"
+                                            variants={staggerChildren}
+                                            initial="hidden"
+                                            whileInView="visible"
+                                            viewport={{ once: true }}
+                                        >
+                                            <motion.div variants={fadeInUp}>
+                                                <div className="font-semibold">Total Calories:</div>
+                                                <div>{result.bundle_stats.total_calories}</div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
+                                                <div className="font-semibold">Total Protein:</div>
+                                                <div>{result.bundle_stats.total_protein} g</div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
+                                                <div className="font-semibold">Total Carbs:</div>
+                                                <div>{result.bundle_stats.total_carbs} g</div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
+                                                <div className="font-semibold">Total Fat:</div>
+                                                <div>{result.bundle_stats.total_fat} g</div>
+                                            </motion.div>
+                                            <motion.div variants={fadeInUp}>
+                                                <div className="font-semibold">Total Electrolytes:</div>
+                                                <div>{result.bundle_stats.total_electrolytes} mg</div>
+                                            </motion.div>
+                                        </motion.div>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">Bundle Summary</h3>
+                                        <div className="text-sm text-gray-600">No bundle stats available</div>
+                                    </motion.div>
                                 )}
 
                                 {/* Recommended Products */}
                                 {result.recommended_products && result.recommended_products.length > 0 && (
-                                    <div className="p-6 rounded-lg bg-green-50 border border-green-200">
-                                        <h3 className="text-xl font-bold text-green-700 mb-4">
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">
                                             Recommended Products ({result.recommended_products.length})
                                         </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {result.recommended_products.map((product: any, index: number) => (
-                                                <div
+                                        <motion.div
+                                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                                            variants={staggerChildren}
+                                            initial="hidden"
+                                            whileInView="visible"
+                                            viewport={{ once: true }}
+                                        >
+                                            {result.recommended_products.map((product, index) => (
+                                                <motion.div
                                                     key={index}
-                                                    className="bg-white p-4 rounded-lg border border-green-300"
+                                                    className="bg-white p-4 rounded-lg border border-gray-200"
+                                                    variants={fadeInUp}
                                                 >
                                                     {/* Product Image */}
                                                     {product.image_url && (
@@ -662,50 +849,22 @@ export default function OARecsLanding() {
                                                             </a>
                                                         </div>
                                                     )}
-                                                </div>
+                                                </motion.div>
                                             ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Bundle Stats */}
-                                {result.bundle_stats ? (
-                                    <div className="p-6 rounded-lg bg-yellow-50 border border-yellow-200">
-                                        <h3 className="text-xl font-bold text-yellow-700 mb-4">Bundle Summary</h3>
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-gray-950">
-                                            <div>
-                                                <div className="font-semibold">Total Calories:</div>
-                                                <div>{result.bundle_stats.total_calories}</div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold">Total Protein:</div>
-                                                <div>{result.bundle_stats.total_protein} g</div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold">Total Carbs:</div>
-                                                <div>{result.bundle_stats.total_carbs} g</div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold">Total Fat:</div>
-                                                <div>{result.bundle_stats.total_fat} g</div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold">Total Electrolytes:</div>
-                                                <div>{result.bundle_stats.total_electrolytes} mg</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="p-6 rounded-lg bg-yellow-50 border border-yellow-200">
-                                        <h3 className="text-xl font-bold text-yellow-700 mb-4">Bundle Summary</h3>
-                                        <div className="text-sm text-gray-600">No bundle stats available</div>
-                                    </div>
+                                        </motion.div>
+                                    </motion.div>
                                 )}
 
                                 {/* Preferences */}
                                 {result.preferences ? (
-                                    <div className="p-6 rounded-lg bg-indigo-50 border border-indigo-200">
-                                        <h3 className="text-xl font-bold text-indigo-700 mb-4">Applied Preferences</h3>
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">Applied Preferences</h3>
                                         <div className="space-y-2">
                                             {result.preferences.soft_preferences &&
                                             result.preferences.soft_preferences.length > 0 ? (
@@ -734,72 +893,102 @@ export default function OARecsLanding() {
                                                 <div className="text-sm text-gray-600">No hard filters applied</div>
                                             )}
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 ) : (
-                                    <div className="p-6 rounded-lg bg-indigo-50 border border-indigo-200">
-                                        <h3 className="text-xl font-bold text-indigo-700 mb-4">Applied Preferences</h3>
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">Applied Preferences</h3>
                                         <div className="text-sm text-gray-600">No preferences data available</div>
-                                    </div>
+                                    </motion.div>
                                 )}
 
                                 {/* Key Principles */}
                                 {result.key_principles && result.key_principles.length > 0 ? (
-                                    <div className="p-6 rounded-lg bg-pink-50 border border-pink-200">
-                                        <h3 className="text-xl font-bold text-pink-700 mb-4">
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">
                                             Key Nutrition Principles
                                         </h3>
-                                        <div className="space-y-2">
-                                            {result.key_principles.map((principle: any, index: number) => (
-                                                <div key={index} className="flex items-start space-x-2">
+                                        <motion.div
+                                            className="space-y-2"
+                                            variants={staggerChildren}
+                                            initial="hidden"
+                                            whileInView="visible"
+                                            viewport={{ once: true }}
+                                        >
+                                            {result.key_principles.map((principle, index) => (
+                                                <motion.div
+                                                    key={index}
+                                                    className="flex items-start space-x-2"
+                                                    variants={fadeInUp}
+                                                >
                                                     <div className="w-2 h-2 bg-pink-400 rounded-full mt-2 flex-shrink-0"></div>
                                                     <div className="text-sm text-gray-700">{principle.principle}</div>
-                                                </div>
+                                                </motion.div>
                                             ))}
-                                        </div>
-                                    </div>
+                                        </motion.div>
+                                    </motion.div>
                                 ) : (
-                                    <div className="p-6 rounded-lg bg-pink-50 border border-pink-200">
-                                        <h3 className="text-xl font-bold text-pink-700 mb-4">
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">
                                             Key Nutrition Principles
                                         </h3>
                                         <div className="text-sm text-gray-600">
                                             No key principles available for this recommendation.
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )}
 
                                 {/* Reasoning */}
                                 {result.reasoning && (
-                                    <div className="p-6 rounded-lg bg-gray-50 border border-gray-200">
-                                        <h3 className="text-xl font-bold text-gray-700 mb-4">
+                                    <motion.div
+                                        className="p-6 rounded-lg bg-white border border-gray-200"
+                                        variants={fadeInUp}
+                                        whileInView="visible"
+                                        initial="hidden"
+                                        viewport={{ once: true, margin: "-50px" }}
+                                    >
+                                        <h3 className="text-xl font-bold text-gray-800 mb-4">
                                             Recommendation Reasoning
                                         </h3>
                                         <div className="text-gray-700 whitespace-pre-line">{result.reasoning}</div>
-                                    </div>
+                                    </motion.div>
                                 )}
-                            </div>
+                            </motion.div>
                         )}
                     </div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="bg-gray-800 text-white py-12">
+            <footer className="bg-gray-800 text-white py-6">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="text-center">
-                        <div className="flex items-center justify-center space-x-2 mb-4">
-                            <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center">
-                                <div className="w-4 h-4 bg-white rounded-full"></div>
+                        <div className="flex items-center justify-center space-x-2 mb-2">
+                            <div className="w-20 h-20 flex items-center justify-center">
+                                <img src="/transparent.png" alt="OA Recs Logo" className="w-20 h-20 object-contain" />
                             </div>
-                            <span className="text-xl font-semibold">OA Recs</span>
                         </div>
-                        <p className="text-gray-400 mb-8">
-                            AI-powered nutrition recommendations for your fitness goals.
+                        <p className="text-gray-400 text-sm mb-3">
+                            Personalized nutrition recommendations for your fitness goals.
                         </p>
-                    </div>
-
-                    <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
-                        <p>&copy; 2025 OA Recs. All rights reserved.</p>
+                        <p className="text-gray-400 text-sm">&copy; 2025 OA Packs. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
