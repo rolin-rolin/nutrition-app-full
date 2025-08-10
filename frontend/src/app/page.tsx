@@ -41,7 +41,9 @@ export default function OARecsLanding() {
         setError(null);
         setResult(null);
         try {
-            const response = await fetch("http://localhost:8000/api/v1/recommend/", {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+            const response = await fetch(`${backendUrl}/api/v1/recommend/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ user_query: userQuery }),
