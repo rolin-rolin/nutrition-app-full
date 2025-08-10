@@ -2,8 +2,98 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Variants } from "framer-motion";
+import Image from "next/image";
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { Particles } from "@/components/magicui/particles";
+
+// TypeScript interfaces for type safety
+interface MacroTargets {
+    target_calories?: number;
+    target_protein?: number;
+    target_carbs?: number;
+    target_fat?: number;
+    target_electrolytes?: number;
+}
+
+interface Product {
+    id: number;
+    name: string;
+    brand: string;
+    flavor?: string;
+    texture?: string;
+    form?: string;
+    price_usd?: number;
+    protein_g?: number;
+    carbs_g?: number;
+    fat_g?: number;
+    calories?: number;
+    electrolytes_mg?: number;
+    image_url?: string;
+    link?: string;
+    description?: string;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+}
+
+interface BundleStats {
+    total_protein: number;
+    total_carbs: number;
+    total_fat: number;
+    total_calories: number;
+    total_electrolytes: number;
+}
+
+interface PreferenceInfo {
+    soft_prefs: string[];
+    hard_filters: string[];
+}
+
+interface RecommendationResult {
+    macro_targets?: MacroTargets;
+    user_profile?: {
+        age?: number;
+        weight_kg?: number;
+        height_cm?: number;
+        activity_level?: string;
+        fitness_goal?: string;
+        age_display?: string;
+        weight_display?: string;
+        exercise_display?: string;
+    };
+    recommended_products: Product[];
+    bundle_stats: BundleStats;
+    applied_preferences: PreferenceInfo;
+    key_principles: string[];
+    recommendation_reasoning: string;
+    preferences?: {
+        soft_preferences?: string[];
+        hard_filters?: string[];
+    };
+    reasoning?: string;
+    timing_breakdown?: {
+        pre_workout?: {
+            carbs?: number;
+            protein?: number;
+            fat?: number;
+            calories?: number;
+        };
+        during_workout?: {
+            carbs?: number;
+            protein?: number;
+            electrolytes?: number;
+            calories?: number;
+        };
+        post_workout?: {
+            carbs?: number;
+            protein?: number;
+            fat?: number;
+            calories?: number;
+        };
+        general?: string[];
+    };
+}
+
 const fadeInUp: Variants = {
     hidden: {
         opacity: 0,
@@ -33,7 +123,7 @@ export default function OARecsLanding() {
     const [userQuery, setUserQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<RecommendationResult | null>(null);
 
     // Handler for Generate Recommendation
     const handleGenerate = async () => {
@@ -54,10 +144,11 @@ export default function OARecsLanding() {
                 throw new Error(err.detail || "Failed to get recommendation");
             }
 
-            const data = await response.json();
+            const data: RecommendationResult = await response.json();
             setResult(data);
-        } catch (err: any) {
-            setError(err.message || "Unknown error");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Unknown error";
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -88,7 +179,7 @@ export default function OARecsLanding() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0 }}
                         >
-                            <img src="/transparent.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
+                            <Image src="/transparent.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
                         </motion.div>
 
                         {/* Animated Hero Text */}
@@ -193,7 +284,7 @@ export default function OARecsLanding() {
                             <h3 className="text-2xl font-bold text-gray-800 mb-4">Macronutrient Analysis</h3>
                             <p className="text-gray-600 leading-relaxed">
                                 Get concrete macronutrient targets you should hit through our research-backed
-                                "macro-targeting" algorithm.
+                                &quot;macro-targeting&quot; algorithm.
                             </p>
                         </motion.div>
 
@@ -461,7 +552,7 @@ export default function OARecsLanding() {
                                         clipRule="evenodd"
                                     />
                                 </svg>
-                                <span className="text-gray-700">What workout/exercise you're doing</span>
+                                <span className="text-gray-700">What workout/exercise you&apos;re doing</span>
                             </div>
                             <div className="flex items-center space-x-3">
                                 <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -802,7 +893,7 @@ export default function OARecsLanding() {
                                                     {/* Product Image */}
                                                     {product.image_url && (
                                                         <div className="mb-3">
-                                                            <img
+                                                            <Image
                                                                 src={product.image_url}
                                                                 alt={product.name}
                                                                 className="w-full h-32 object-contain rounded-lg"
@@ -935,7 +1026,7 @@ export default function OARecsLanding() {
                                                     variants={fadeInUp}
                                                 >
                                                     <div className="w-2 h-2 bg-pink-400 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <div className="text-sm text-gray-700">{principle.principle}</div>
+                                                    <div className="text-sm text-gray-700">{principle}</div>
                                                 </motion.div>
                                             ))}
                                         </motion.div>
@@ -984,7 +1075,7 @@ export default function OARecsLanding() {
                     <div className="text-center">
                         <div className="flex items-center justify-center space-x-2 mb-2">
                             <div className="w-20 h-20 flex items-center justify-center">
-                                <img src="/transparent.png" alt="OA Recs Logo" className="w-20 h-20 object-contain" />
+                                <Image src="/transparent.png" alt="OA Recs Logo" className="w-20 h-20 object-contain" />
                             </div>
                         </div>
                         <p className="text-gray-400 text-sm mb-3">
