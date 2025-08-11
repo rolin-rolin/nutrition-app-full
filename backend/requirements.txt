@@ -3,7 +3,8 @@ fastapi>=0.115.12,<0.116.0
 uvicorn[standard]==0.24.0
 
 # AI and ML libraries (installed separately in Dockerfile for compatibility)
-sentence-transformers==3.0.0
+# Using sentence-transformers 2.2.2 for compatibility with NumPy 1.x and PyTorch
+sentence-transformers==2.2.2
 openai>=1.79.0,<2.0.0
 
 # LangChain (only what we actually use)

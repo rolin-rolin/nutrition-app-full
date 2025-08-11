@@ -24,18 +24,17 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies in specific order for compatibility
-# This order ensures NumPy 2.0.0 is installed first, then PyTorch CPU-only versions,
-# then sentence-transformers and other dependencies that depend on them
-RUN pip install --no-cache-dir --upgrade pip && \
-    # Install NumPy first to ensure compatibility
-    pip install --no-cache-dir "numpy==2.0.0" && \
-    # Install CPU-only PyTorch
-    pip install --no-cache-dir --find-links https://download.pytorch.org/whl/torch_stable.html \
-        torch==2.1.0+cpu \
-        torchvision==0.16.0+cpu \
-        torchaudio==2.1.0+cpu && \
-    # Install remaining dependencies
-    pip install --no-cache-dir -r requirements.txt
+# This order ensures NumPy 1.x is installed first (more compatible with older ML libraries),
+# then PyTorch CPU-only versions, then sentence-transformers and other dependencies
+RUN set -e && \
+    pip install --no-cache-dir --upgrade pip && \
+    echo "Installing NumPy 1.x for compatibility..." && \
+    pip install --no-cache-dir "numpy>=1.24.0,<2.0.0" && \
+    echo "Installing PyTorch CPU-only..." && \
+    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+    echo "Installing remaining dependencies..." && \
+    pip install --no-cache-dir -r requirements.txt && \
+    echo "All dependencies installed successfully!"
 
 # Copy backend code and data
 COPY . .
