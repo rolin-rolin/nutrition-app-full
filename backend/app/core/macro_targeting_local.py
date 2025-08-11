@@ -52,9 +52,6 @@ class MacroTargetingServiceLocal:
             print("Warning: No OpenAI API key provided. Field extraction will use fallback parsing.")
             self.llm = None
         
-        # Initialize local embeddings
-        self.embeddings = SentenceTransformer('all-MiniLM-L6-v2')
-        
         # Initialize vector store
         if force_rebuild:
             print("[DEBUG] Forcing rebuild of vector store...")
@@ -66,7 +63,7 @@ class MacroTargetingServiceLocal:
         """Initialize the vector store with nutrition guidelines."""
         try:
             print("[DEBUG] Attempting to load existing Chroma vector store...")
-            # Try to load existing vector store
+            # Try to load existing vector store with memory optimization
             self.vectorstore = Chroma(
                 persist_directory=self.rag_store_path,
                 embedding_function=self._get_embedding_function()
@@ -83,18 +80,43 @@ class MacroTargetingServiceLocal:
         from langchain.embeddings.base import Embeddings
         
         class SentenceTransformerEmbeddings(Embeddings):
-            def __init__(self, model):
-                self.model = model
+            def __init__(self, model_name):
+                self.model_name = model_name
+                self._model = None
+            
+            @property
+            def model(self):
+                """Lazy load the model only when needed."""
+                if self._model is None:
+                    from sentence_transformers import SentenceTransformer
+                    self._model = SentenceTransformer(self.model_name)
+                return self._model
             
             def embed_documents(self, texts):
-                embeddings = self.model.encode(texts)
-                return embeddings.tolist()
+                # This should rarely be called since we're loading pre-computed embeddings
+                # But if it is, process in smaller batches
+                batch_size = 5  # Smaller batch size for memory
+                all_embeddings = []
+                for i in range(0, len(texts), batch_size):
+                    batch = texts[i:i + batch_size]
+                    batch_embeddings = self.model.encode(batch)
+                    all_embeddings.extend(batch_embeddings.tolist())
+                return all_embeddings
             
             def embed_query(self, text):
+                # This is the main use case - embedding user queries
+                # Only load model when actually needed
                 embedding = self.model.encode([text])
                 return embedding.tolist()[0]
+            
+            def __del__(self):
+                """Cleanup to free memory."""
+                if hasattr(self, '_model') and self._model is not None:
+                    del self._model
+                    self._model = None
         
-        return SentenceTransformerEmbeddings(self.embeddings)
+        # Pass model name instead of loaded model
+        return SentenceTransformerEmbeddings('all-MiniLM-L6-v2')
     
     def _load_documents(self):
         """Load nutrition guideline documents with enhanced metadata."""
@@ -107,43 +129,57 @@ class MacroTargetingServiceLocal:
         
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         
+        # Process files in smaller batches to reduce memory usage
+        batch_size = 5
+        
         for age_group in age_groups:
             age_group_path = os.path.join(guidelines_dir, age_group)
             if not os.path.exists(age_group_path):
                 print(f"Warning: Age group directory {age_group_path} does not exist")
                 continue
+            
+            # Get all markdown files first
+            md_files = [f for f in os.listdir(age_group_path) if f.endswith('.md')]
+            
+            # Process in batches
+            for i in range(0, len(md_files), batch_size):
+                batch_files = md_files[i:i + batch_size]
+                batch_docs = []
                 
-            # Load all .md files in the age group directory
-            try:
-                for filename in os.listdir(age_group_path):
-                    if filename.endswith('.md'):
-                        filepath = os.path.join(age_group_path, filename)
-                        try:
-                            # Load and parse frontmatter
-                            frontmatter, content = self._parse_markdown_with_frontmatter(filepath)
-                            
-                            # Create document with enhanced metadata
-                            doc_metadata = {
-                                'age_group': age_group,
-                                'filename': filename,
-                                'filepath': filepath,
-                                'content': content,  # Store full content for exact retrieval
-                                **frontmatter  # Include all frontmatter fields
-                            }
-                            
-                            # Create a single document per file (no chunking for exact matches)
-                            from langchain.schema import Document
-                            doc = Document(
-                                page_content=content,
-                                metadata=doc_metadata
-                            )
-                            documents.append(doc)
-                            print(f"Loaded: {filepath} (metadata: {frontmatter})")
-                            
-                        except Exception as e:
-                            print(f"Warning: Could not load {filepath}: {e}")
-            except Exception as e:
-                print(f"Warning: Could not access directory {age_group_path}: {e}")
+                for filename in batch_files:
+                    filepath = os.path.join(age_group_path, filename)
+                    try:
+                        # Load and parse frontmatter
+                        frontmatter, content = self._parse_markdown_with_frontmatter(filepath)
+                        
+                        # Create document with enhanced metadata
+                        doc_metadata = {
+                            'age_group': age_group,
+                            'filename': filename,
+                            'filepath': filepath,
+                            'content': content,  # Store full content for exact retrieval
+                            **frontmatter  # Include all frontmatter fields
+                        }
+                        
+                        # Create a single document per file (no chunking for exact matches)
+                        from langchain.schema import Document
+                        doc = Document(
+                            page_content=content,
+                            metadata=doc_metadata
+                        )
+                        batch_docs.append(doc)
+                        print(f"Loaded: {filepath} (metadata: {frontmatter})")
+                        
+                    except Exception as e:
+                        print(f"Warning: Could not load {filepath}: {e}")
+                
+                # Add batch to documents and clear batch to free memory
+                documents.extend(batch_docs)
+                batch_docs.clear()
+                
+                # Small delay to allow garbage collection
+                import time
+                time.sleep(0.1)
         
         print(f"Total documents loaded: {len(documents)}")
         for i, doc in enumerate(documents):

@@ -23,8 +23,16 @@ class ProductVectorStore:
             persist_directory: Path to store Chroma vector database
         """
         self.persist_directory = persist_directory
-        self.embeddings = SentenceTransformer('all-MiniLM-L6-v2')
+        # Lazy load embeddings only when needed
+        self._embeddings = None
         self._initialize_vectorstore()
+    
+    @property
+    def embeddings(self):
+        """Lazy load embeddings only when needed."""
+        if self._embeddings is None:
+            self._embeddings = SentenceTransformer('all-MiniLM-L6-v2')
+        return self._embeddings
 
     def _get_embedding_function(self):
         """

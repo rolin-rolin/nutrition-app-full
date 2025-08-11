@@ -5,6 +5,11 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
+# Memory optimization for ML models
+ENV PYTHONHASHSEED=0
+ENV PYTHONMALLOC=malloc
+ENV PYTHONDEVMODE=0
+
 # Install system dependencies needed for some Python packages
 RUN apt-get update && apt-get install -y \
     gcc \
