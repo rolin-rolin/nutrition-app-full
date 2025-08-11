@@ -14,6 +14,7 @@ ENV PYTHONDEVMODE=0
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -25,6 +26,11 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
+
+# Remove build tools after pip install to reduce image size
+RUN apt-get remove -y gcc g++ && \
+    apt-get autoremove -y && \
+    apt-get clean
 
 # Copy backend code and data
 COPY . .
