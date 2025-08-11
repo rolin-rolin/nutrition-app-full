@@ -20,20 +20,25 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first for better Docker layer caching
-COPY requirements.txt .
+# Install Poetry for dependency management
+# Poetry provides better dependency resolution and uses poetry.lock for exact versions
+RUN pip install poetry
 
-# Install Python dependencies in specific order for compatibility
-# This order ensures NumPy 2.x is installed first (compatible with newer ML libraries),
-# then PyTorch CPU-only versions, then sentence-transformers and other dependencies
+# Configure Poetry to not create virtual environment in container
+RUN poetry config virtualenvs.create false
+
+# Copy Poetry files first for better Docker layer caching
+# poetry.lock contains the exact versions that work together locally
+COPY pyproject.toml poetry.lock ./
+
+# Install Python dependencies using Poetry
+# This will use the exact versions from poetry.lock for reproducible builds
+# --no-dev excludes development dependencies like pytest
 RUN set -e && \
-    pip install --no-cache-dir --upgrade pip && \
-    echo "Installing NumPy 2.x for compatibility..." && \
-    pip install --no-cache-dir "numpy>=2.0.0,<3.0.0" && \
-    echo "Installing PyTorch CPU-only..." && \
-    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
-    echo "Installing remaining dependencies..." && \
-    pip install --no-cache-dir -r requirements.txt && \
+    echo "Installing dependencies with Poetry..." && \
+    poetry install --no-dev --no-interaction --no-ansi && \
+    echo "Installing CPU-only PyTorch..." && \
+    poetry run pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
     echo "All dependencies installed successfully!"
 
 # Copy backend code and data
@@ -52,5 +57,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Start server with production settings
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Start server with production settings using Poetry
+CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
