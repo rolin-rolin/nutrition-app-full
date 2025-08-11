@@ -20,26 +20,25 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Install Poetry for dependency management
-# Poetry provides better dependency resolution and uses poetry.lock for exact versions
-RUN pip install poetry
-
-# Configure Poetry to not create virtual environment in container
-RUN poetry config virtualenvs.create false
+# Install Poetry for dependency management (pinned version for stability)
+RUN pip install poetry==1.7.1
 
 # Copy Poetry files first for better Docker layer caching
-# poetry.lock contains the exact versions that work together locally
 COPY pyproject.toml poetry.lock ./
 
-# Install Python dependencies using Poetry
-# This will use the exact versions from poetry.lock for reproducible builds
-# --no-dev excludes development dependencies like pytest
+# Export exact dependencies from Poetry and install with pip
 RUN set -e && \
-    echo "Installing dependencies with Poetry..." && \
-    poetry install --no-dev --no-interaction --no-ansi && \
-    echo "Installing CPU-only PyTorch..." && \
-    poetry run pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
-    echo "All dependencies installed successfully!"
+    echo "Step 1: Exporting dependencies from Poetry..." && \
+    poetry --version && \
+    poetry export -f requirements.txt --output requirements.txt --without-hashes --no-dev && \
+    echo "Step 2: Installing dependencies with pip..." && \
+    pip install --no-cache-dir -r requirements.txt
+
+RUN set -e && \
+    echo "Step 3: Installing CPU-only PyTorch..." && \
+    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+RUN echo "All dependencies installed successfully!"
 
 # Copy backend code and data
 COPY . .
@@ -57,5 +56,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Start server with production settings using Poetry
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Start server with production settings
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
