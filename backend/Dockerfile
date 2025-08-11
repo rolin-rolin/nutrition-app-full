@@ -5,10 +5,10 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Memory optimization for ML models
-ENV PYTHONHASHSEED=0
-ENV PYTHONMALLOC=malloc
-ENV PYTHONDEVMODE=0
+# Force CPU-only versions for ML libraries
+ENV TORCH_CUDA_VERSION="cpu"
+ENV CUDA_VISIBLE_DEVICES=""
+ENV USE_CUDA="0"
 
 # Install system dependencies needed for some Python packages
 RUN apt-get update && apt-get install -y \
@@ -23,14 +23,19 @@ WORKDIR /app
 # Copy requirements first for better Docker layer caching
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install Python dependencies in specific order for compatibility
+# This order ensures NumPy 2.0.0 is installed first, then PyTorch CPU-only versions,
+# then sentence-transformers and other dependencies that depend on them
 RUN pip install --no-cache-dir --upgrade pip && \
+    # Install NumPy first to ensure compatibility
+    pip install --no-cache-dir "numpy==2.0.0" && \
+    # Install CPU-only PyTorch
+    pip install --no-cache-dir --find-links https://download.pytorch.org/whl/torch_stable.html \
+        torch==2.1.0+cpu \
+        torchvision==0.16.0+cpu \
+        torchaudio==2.1.0+cpu && \
+    # Install remaining dependencies
     pip install --no-cache-dir -r requirements.txt
-
-# Remove build tools after pip install to reduce image size
-RUN apt-get remove -y gcc g++ && \
-    apt-get autoremove -y && \
-    apt-get clean
 
 # Copy backend code and data
 COPY . .
