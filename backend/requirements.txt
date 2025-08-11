@@ -3,8 +3,10 @@ fastapi>=0.115.12,<0.116.0
 uvicorn[standard]==0.24.0
 
 # AI and ML libraries (installed separately in Dockerfile for compatibility)
-# Using sentence-transformers 2.2.2 for compatibility with NumPy 1.x and PyTorch
-sentence-transformers==2.2.2
+# Using sentence-transformers 3.0.0+ for compatibility with newer huggingface_hub
+# Pinning huggingface_hub to 0.19.4 to avoid the 'cached_download' import error
+sentence-transformers>=3.0.0,<4.0.0
+huggingface-hub==0.19.4
 openai>=1.79.0,<2.0.0
 
 # LangChain (only what we actually use)
