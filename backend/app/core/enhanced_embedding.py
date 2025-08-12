@@ -7,7 +7,8 @@ for matching user queries (with soft preferences and macro targets) to product s
 
 from typing import List, Dict, Any, Optional
 from app.db.models import Product as ProductModel
-from app.core.embedding import _get_embedding_model, calculate_cosine_similarity
+from app.core.global_embeddings import get_embedding_model
+from app.core.embedding import calculate_cosine_similarity
 
 def generate_user_query_embedding_text(user_query: str, soft_preferences: dict = None, macro_targets: dict = None) -> str:
     """
@@ -64,7 +65,7 @@ def generate_user_query_embedding(user_query: str, soft_preferences: dict = None
     Returns:
         Embedding vector
     """
-    model = _get_embedding_model()
+    model = get_embedding_model()
     embedding_text = generate_user_query_embedding_text(user_query, soft_preferences, macro_targets)
     embedding = model.encode([embedding_text])
     return embedding.tolist()[0]
@@ -116,7 +117,7 @@ def generate_enhanced_product_embedding_text(product: ProductModel) -> str:
 
 def generate_enhanced_product_embedding(product: ProductModel) -> List[float]:
     """Generate enhanced embedding for product using improved text representation."""
-    model = _get_embedding_model()
+    model = get_embedding_model()
     embedding_text = generate_enhanced_product_embedding_text(product)
     embedding = model.encode([embedding_text])
     return embedding.tolist()[0]

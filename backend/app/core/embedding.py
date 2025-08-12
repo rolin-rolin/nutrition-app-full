@@ -1,17 +1,7 @@
 from typing import List
 from app.db.models import Product as ProductModel
-from sentence_transformers import SentenceTransformer
 import numpy as np
-
-# Singleton for the embedding model
-_embedding_model = None
-
-def _get_embedding_model():
-    """Get or create the embedding model singleton."""
-    global _embedding_model
-    if _embedding_model is None:
-        _embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-    return _embedding_model
+from app.core.global_embeddings import get_embedding_model
 
 def generate_product_embedding_text(product: ProductModel) -> str:
     """
@@ -56,14 +46,14 @@ def generate_product_embedding_text(product: ProductModel) -> str:
 
 def generate_product_embedding(product: ProductModel) -> List[float]:
     """Use sentence-transformers to convert product data to a vector."""
-    model = _get_embedding_model()
+    model = get_embedding_model()
     embedding_text = generate_product_embedding_text(product)
     embedding = model.encode([embedding_text])
     return embedding.tolist()[0]
 
 def generate_query_embedding(query: str) -> List[float]:
     """Use the same embedding model for user queries."""
-    model = _get_embedding_model()
+    model = get_embedding_model()
     embedding = model.encode([query])
     return embedding.tolist()[0]
 

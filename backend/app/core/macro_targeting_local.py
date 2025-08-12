@@ -13,9 +13,11 @@ import json
 import yaml
 from typing import Dict, Optional, Tuple, Any, List
 import random
-from sentence_transformers import SentenceTransformer
+import gc
 from langchain_chroma import Chroma
 from langchain.schema import SystemMessage, HumanMessage
+from app.core.global_embeddings import get_embedding_model
+from app.core.optimized_chroma import OptimizedChromaStore
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
@@ -63,12 +65,33 @@ class MacroTargetingServiceLocal:
         """Initialize the vector store with nutrition guidelines."""
         try:
             print("[DEBUG] Attempting to load existing Chroma vector store...")
-            # Try to load existing vector store with memory optimization
-            self.vectorstore = Chroma(
-                persist_directory=self.rag_store_path,
-                embedding_function=self._get_embedding_function()
-            )
-            print("[DEBUG] Loaded existing Chroma vector store.")
+            # Create embedding function
+            embedding_fn = self._get_embedding_function()
+            
+            # Check if vector store exists and has content
+            store_path = Path(self.rag_store_path)
+            has_content = store_path.exists() and any(store_path.iterdir())
+            
+            if not has_content:
+                print("[DEBUG] Vector store is empty, initializing from documents...")
+                self._create_vectorstore()
+                return
+            
+            # Initialize optimized store
+            self._store = OptimizedChromaStore(self.rag_store_path, embedding_fn)
+            
+            # Verify store has documents
+            try:
+                doc_count = len(self._store.store.get()['documents'])
+                if doc_count == 0:
+                    print("[DEBUG] Vector store exists but is empty, rebuilding...")
+                    self._create_vectorstore()
+                else:
+                    print(f"[DEBUG] Loaded existing Chroma vector store with {doc_count} documents.")
+            except Exception as e:
+                print(f"[DEBUG] Error checking vector store content: {e}")
+                self._create_vectorstore()
+                
         except Exception as e:
             print(f"[DEBUG] Failed to load existing Chroma vector store: {e}")
             print("[DEBUG] Creating new vector store from documents...")
