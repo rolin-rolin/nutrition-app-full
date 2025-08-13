@@ -21,7 +21,8 @@ class GlobalEmbeddings:
         """Lazy load the model only when needed."""
         if self._model is None:
             print("[DEBUG] Loading SentenceTransformer model...")
-            self._model = SentenceTransformer('all-MiniLM-L6-v2')
+            # Use device='cpu' to ensure CPU-only usage and reduce memory
+            self._model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
             # Create a weakref to help with garbage collection
             weakref.finalize(self._model, self._cleanup_model)
         return self._model
@@ -31,6 +32,15 @@ class GlobalEmbeddings:
         """Cleanup function called when model is garbage collected."""
         print("[DEBUG] Cleaning up SentenceTransformer model...")
         if cls._model is not None:
+            del cls._model
+            cls._model = None
+            gc.collect()
+    
+    @classmethod
+    def clear_model(cls):
+        """Explicitly clear the model to free memory."""
+        if cls._model is not None:
+            print("[DEBUG] Explicitly clearing SentenceTransformer model...")
             del cls._model
             cls._model = None
             gc.collect()

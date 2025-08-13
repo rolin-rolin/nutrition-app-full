@@ -64,7 +64,7 @@ interface RecommendationResult {
     recommended_products: Product[];
     bundle_stats: BundleStats;
     applied_preferences: PreferenceInfo;
-    key_principles: string[];
+    key_principles: (string | { principle: string })[];
     recommendation_reasoning: string;
     preferences?: {
         soft_preferences?: string[];
@@ -179,7 +179,13 @@ export default function OARecsLanding() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0 }}
                         >
-                            <Image src="/transparent.png" alt="OA Recs Logo" className="w-90 h-60 object-contain" />
+                            <Image
+                                src="/transparent.png"
+                                alt="OA Recs Logo"
+                                width={90}
+                                height={60}
+                                className="w-90 h-60 object-contain"
+                            />
                         </motion.div>
 
                         {/* Animated Hero Text */}
@@ -896,6 +902,8 @@ export default function OARecsLanding() {
                                                             <Image
                                                                 src={product.image_url}
                                                                 alt={product.name}
+                                                                width={400}
+                                                                height={128}
                                                                 className="w-full h-32 object-contain rounded-lg"
                                                                 onError={(e) => {
                                                                     e.currentTarget.style.display = "none";
@@ -1026,7 +1034,11 @@ export default function OARecsLanding() {
                                                     variants={fadeInUp}
                                                 >
                                                     <div className="w-2 h-2 bg-pink-400 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <div className="text-sm text-gray-700">{principle}</div>
+                                                    <div className="text-sm text-gray-700">
+                                                        {typeof principle === "string"
+                                                            ? principle
+                                                            : principle.principle || JSON.stringify(principle)}
+                                                    </div>
                                                 </motion.div>
                                             ))}
                                         </motion.div>
@@ -1075,7 +1087,13 @@ export default function OARecsLanding() {
                     <div className="text-center">
                         <div className="flex items-center justify-center space-x-2 mb-2">
                             <div className="w-20 h-20 flex items-center justify-center">
-                                <Image src="/transparent.png" alt="OA Recs Logo" className="w-20 h-20 object-contain" />
+                                <Image
+                                    src="/transparent.png"
+                                    alt="OA Recs Logo"
+                                    width={80}
+                                    height={80}
+                                    className="w-20 h-20 object-contain"
+                                />
                             </div>
                         </div>
                         <p className="text-gray-400 text-sm mb-3">

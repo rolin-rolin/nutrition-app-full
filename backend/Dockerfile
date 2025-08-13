@@ -1,16 +1,15 @@
-# Use official Python image (matching your pyproject.toml requirement)
-FROM python:3.12-slim
+# Multi-stage build for optimized production image
+# Build stage
+FROM python:3.12-slim AS builder
 
-# Set environment variables
+# Set environment variables for build
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
-
-# Force CPU-only versions for ML libraries
 ENV TORCH_CUDA_VERSION="cpu"
 ENV CUDA_VISIBLE_DEVICES=""
 ENV USE_CUDA="0"
 
-# Install system dependencies needed for some Python packages
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
@@ -20,25 +19,46 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Install Poetry for dependency management (pinned version for stability)
+# Install Poetry for dependency management
 RUN pip install poetry==1.7.1
 
-# Copy Poetry files first for better Docker layer caching
+# Copy Poetry files
 COPY pyproject.toml poetry.lock ./
 
-# Export exact dependencies from Poetry and install with pip
+# Export dependencies and install with pip
 RUN set -e && \
     echo "Step 1: Exporting dependencies from Poetry..." && \
     poetry --version && \
-    poetry export -f requirements.txt --output requirements.txt --without-hashes --no-dev && \
+    poetry export -f requirements.txt --output requirements.txt --without-hashes --only main && \
     echo "Step 2: Installing dependencies with pip..." && \
     pip install --no-cache-dir -r requirements.txt
 
+# Install CPU-only PyTorch
 RUN set -e && \
     echo "Step 3: Installing CPU-only PyTorch..." && \
     pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-RUN echo "All dependencies installed successfully!"
+# Production stage
+FROM python:3.12-slim
+
+# Set environment variables for production
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV TORCH_CUDA_VERSION="cpu"
+ENV CUDA_VISIBLE_DEVICES=""
+ENV USE_CUDA="0"
+
+# Install only runtime system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy Python packages from builder stage
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy backend code and data
 COPY . .

@@ -19,7 +19,7 @@ from langchain.schema import SystemMessage, HumanMessage
 from app.core.global_embeddings import get_embedding_model
 from app.core.optimized_chroma import OptimizedChromaStore
 from langchain_community.document_loaders import TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 from langchain_openai import ChatOpenAI
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
@@ -100,46 +100,47 @@ class MacroTargetingServiceLocal:
     
     def _get_embedding_function(self):
         """Create a LangChain-compatible embedding function from sentence-transformers."""
+
+        
+        # Use global singleton instead of creating new instance
+        from app.core.global_embeddings import get_embedding_model
         from langchain.embeddings.base import Embeddings
         
-        class SentenceTransformerEmbeddings(Embeddings):
-            def __init__(self, model_name):
-                self.model_name = model_name
-                self._model = None
-            
-            @property
-            def model(self):
-                """Lazy load the model only when needed."""
-                if self._model is None:
-                    from sentence_transformers import SentenceTransformer
-                    self._model = SentenceTransformer(self.model_name)
-                return self._model
-            
+        class GlobalSentenceTransformerEmbeddings(Embeddings):
+            def __init__(self):
+                self.model = None
+
+            def _get_model(self):
+                """Lazy load model only when needed."""
+                if self.model is None:
+                    self.model = get_embedding_model()
+                return self.model
+
             def embed_documents(self, texts):
-                # This should rarely be called since we're loading pre-computed embeddings
-                # But if it is, process in smaller batches
-                batch_size = 5  # Smaller batch size for memory
+                model = self._get_model()
+                # Process in smaller batches for memory efficiency
+                batch_size = 5
                 all_embeddings = []
                 for i in range(0, len(texts), batch_size):
                     batch = texts[i:i + batch_size]
-                    batch_embeddings = self.model.encode(batch)
+                    batch_embeddings = model.encode(batch)
                     all_embeddings.extend(batch_embeddings.tolist())
+                # Clear model reference to help with memory management
+                self.model = None
+                import gc
+                gc.collect()
                 return all_embeddings
-            
+
             def embed_query(self, text):
-                # This is the main use case - embedding user queries
-                # Only load model when actually needed
-                embedding = self.model.encode([text])
+                model = self._get_model()
+                embedding = model.encode([text])
+                # Clear model reference to help with memory management
+                self.model = None
+                import gc
+                gc.collect()
                 return embedding.tolist()[0]
-            
-            def __del__(self):
-                """Cleanup to free memory."""
-                if hasattr(self, '_model') and self._model is not None:
-                    del self._model
-                    self._model = None
-        
-        # Pass model name instead of loaded model
-        return SentenceTransformerEmbeddings('all-MiniLM-L6-v2')
+
+        return GlobalSentenceTransformerEmbeddings()
     
     def _load_documents(self):
         """Load nutrition guideline documents with enhanced metadata."""
@@ -149,8 +150,6 @@ class MacroTargetingServiceLocal:
         
         # Age groups and their corresponding directories
         age_groups = ["age6-11", "age12-18", "age19-59"]
-        
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         
         # Process files in smaller batches to reduce memory usage
         batch_size = 5
@@ -214,13 +213,54 @@ class MacroTargetingServiceLocal:
         # Load documents from guidelines directory
         documents = self._load_documents()
         
-        # Create and persist vector store
-        self.vectorstore = Chroma.from_documents(
-            documents, 
-            embedding=self._get_embedding_function(), 
-            persist_directory=self.rag_store_path
+        # Create Chroma collection manually to prevent automatic chunking
+        import chromadb
+        from chromadb.config import Settings
+        
+        # Create client with persistence
+        client = chromadb.PersistentClient(
+            path=self.rag_store_path,
+            settings=Settings(anonymized_telemetry=False)
         )
-        # self.vectorstore.persist()  # No longer needed
+        
+        # Create or get collection
+        collection_name = "nutrition_guidelines"
+        try:
+            collection = client.get_collection(name=collection_name)
+            print(f"[DEBUG] Using existing collection: {collection_name}")
+        except:
+            collection = client.create_collection(
+                name=collection_name,
+                metadata={"hnsw:space": "cosine"}
+            )
+            print(f"[DEBUG] Created new collection: {collection_name}")
+        
+        # Add documents without chunking
+        texts = [doc.page_content for doc in documents]
+        metadatas = [doc.metadata for doc in documents]
+        ids = [f"doc_{i}" for i in range(len(documents))]
+        
+        # Add documents in batches to avoid memory issues
+        batch_size = 5
+        for i in range(0, len(documents), batch_size):
+            batch_texts = texts[i:i+batch_size]
+            batch_metadatas = metadatas[i:i+batch_size]
+            batch_ids = ids[i:i+batch_size]
+            
+            collection.add(
+                documents=batch_texts,
+                metadatas=batch_metadatas,
+                ids=batch_ids
+            )
+            print(f"[DEBUG] Added batch {i//batch_size + 1}: {len(batch_texts)} documents")
+        
+        # Create LangChain Chroma wrapper
+        self.vectorstore = Chroma(
+            client=client,
+            collection_name=collection_name,
+            embedding_function=self._get_embedding_function()
+        )
+        
         # Debug: Check what is in the vector store after creation
         try:
             all_results = self.vectorstore.get(include=["documents", "metadatas"])

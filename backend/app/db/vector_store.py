@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from langchain_chroma import Chroma
 from langchain.embeddings.base import Embeddings
 import numpy as np
-from sentence_transformers import SentenceTransformer
-
 from app.db.models import Product
 from app.core.embedding import generate_product_embedding_text, generate_query_embedding
+from app.core.global_embeddings import get_embedding_model
+import gc
 
 """
 Responsible for storing and retrieving embeddings from a vector database
@@ -23,34 +23,39 @@ class ProductVectorStore:
             persist_directory: Path to store Chroma vector database
         """
         self.persist_directory = persist_directory
-        # Lazy load embeddings only when needed
-        self._embeddings = None
         self._initialize_vectorstore()
     
-    @property
-    def embeddings(self):
-        """Lazy load embeddings only when needed."""
-        if self._embeddings is None:
-            self._embeddings = SentenceTransformer('all-MiniLM-L6-v2')
-        return self._embeddings
-
     def _get_embedding_function(self):
         """
-        Create a LangChain-compatible embedding function from sentence-transformers.
+        Create a LangChain-compatible embedding function using global singleton.
         """
         class SentenceTransformerEmbeddings(Embeddings):
-            def __init__(self, model):
-                self.model = model
+            def __init__(self):
+                self.model = None
+
+            def _get_model(self):
+                """Lazy load model only when needed."""
+                if self.model is None:
+                    self.model = get_embedding_model()
+                return self.model
 
             def embed_documents(self, texts):
-                embeddings = self.model.encode(texts)
+                model = self._get_model()
+                embeddings = model.encode(texts)
+                # Clear model reference to help with memory management
+                self.model = None
+                gc.collect()
                 return embeddings.tolist()
 
             def embed_query(self, text):
-                embedding = self.model.encode([text])
+                model = self._get_model()
+                embedding = model.encode([text])
+                # Clear model reference to help with memory management
+                self.model = None
+                gc.collect()
                 return embedding.tolist()[0]
 
-        return SentenceTransformerEmbeddings(self.embeddings)
+        return SentenceTransformerEmbeddings()
 
     def _initialize_vectorstore(self):
         """
@@ -89,8 +94,8 @@ class ProductVectorStore:
         # Generate embedding text
         embedding_text = generate_product_embedding_text(product)
 
-        # Generate embedding
-        embedding = self.embeddings.encode([embedding_text])
+        # Generate embedding using global singleton
+        embedding = get_embedding_model().encode([embedding_text])
 
         # Create metadata for filtering (convert lists to strings for Chroma compatibility)
         metadata = {
