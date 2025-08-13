@@ -161,6 +161,11 @@ class ProductVectorStore:
                 'text': doc.page_content
             })
         
+        # Clear results object to free memory
+        del results
+        import gc
+        gc.collect()
+        
         # Apply hard filters in Python if specified
         if hard_filters:
             filtered_candidates = []
@@ -203,7 +208,13 @@ class ProductVectorStore:
             candidates = top_candidates + remaining_candidates
 
         # Return top_k results
-        return candidates[:top_k]
+        # Clear candidates to free memory
+        final_results = candidates[:top_k]
+        del candidates
+        import gc
+        gc.collect()
+        
+        return final_results
 
     def _apply_mmr(self, candidates: List[Dict], query: str, lambda_param: float) -> List[Dict]:
         """

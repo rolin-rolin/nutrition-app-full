@@ -98,6 +98,11 @@ class MacroTargetingServiceLocal:
             # If it doesn't exist, create it from documents
             self._create_vectorstore()
     
+    def _ensure_vectorstore_loaded(self):
+        """Lazy load vector store only when needed."""
+        if not hasattr(self, '_store') or self._store is None:
+            self._initialize_vectorstore()
+    
     def _get_embedding_function(self):
         """Create a LangChain-compatible embedding function from sentence-transformers."""
 
@@ -152,7 +157,7 @@ class MacroTargetingServiceLocal:
         age_groups = ["age6-11", "age12-18", "age19-59"]
         
         # Process files in smaller batches to reduce memory usage
-        batch_size = 5
+        batch_size = 3  # Reduced from 5 for better memory management
         
         for age_group in age_groups:
             age_group_path = os.path.join(guidelines_dir, age_group)
@@ -199,9 +204,13 @@ class MacroTargetingServiceLocal:
                 documents.extend(batch_docs)
                 batch_docs.clear()
                 
-                # Small delay to allow garbage collection
+                # Force garbage collection after each batch
+                import gc
+                gc.collect()
+                
+                # Small delay to allow memory cleanup
                 import time
-                time.sleep(0.1)
+                time.sleep(0.05)  # Reduced delay since we're doing explicit GC
         
         print(f"Total documents loaded: {len(documents)}")
         for i, doc in enumerate(documents):
@@ -241,7 +250,7 @@ class MacroTargetingServiceLocal:
         ids = [f"doc_{i}" for i in range(len(documents))]
         
         # Add documents in batches to avoid memory issues
-        batch_size = 5
+        batch_size = 3  # Reduced from 5 for better memory management
         for i in range(0, len(documents), batch_size):
             batch_texts = texts[i:i+batch_size]
             batch_metadatas = metadatas[i:i+batch_size]
@@ -253,6 +262,9 @@ class MacroTargetingServiceLocal:
                 ids=batch_ids
             )
             print(f"[DEBUG] Added batch {i//batch_size + 1}: {len(batch_texts)} documents")
+            
+            # Clear batch variables to free memory immediately
+            del batch_texts, batch_metadatas, batch_ids
         
         # Create LangChain Chroma wrapper
         self.vectorstore = Chroma(
@@ -268,6 +280,11 @@ class MacroTargetingServiceLocal:
             print("[After creation] Available metadata:")
             for i, metadata in enumerate(all_results['metadatas']):
                 print(f"  Doc {i}: {metadata}")
+            
+            # Clear debug results to free memory
+            del all_results
+            import gc
+            gc.collect()
         except Exception as e:
             print(f"Error getting all documents after creation: {e}")
     
@@ -341,13 +358,18 @@ class MacroTargetingServiceLocal:
         
         # Try exact metadata match first
         if where_clause:
-            # Debug: Check what's in the vector store
+            # Debug: Check what's in the vector store (with memory management)
             try:
                 all_results = self.vectorstore.get(include=["documents", "metadatas"])
                 print(f"Total documents in vector store: {len(all_results['documents'])}")
                 print("Available metadata:")
                 for i, metadata in enumerate(all_results['metadatas']):
                     print(f"  Doc {i}: {metadata}")
+                
+                # Clear debug results to free memory
+                del all_results
+                import gc
+                gc.collect()
             except Exception as e:
                 print(f"Error getting all documents: {e}")
             
@@ -370,8 +392,11 @@ class MacroTargetingServiceLocal:
                 
                 if results['documents']:
                     print(f"Found {len(results['documents'])} exact metadata matches")
-                    # Return the full content of the first match
-                    return results['documents'][0]
+                    # Store result and clear results object to free memory
+                    result_content = results['documents'][0]
+                    del results
+                    gc.collect()
+                    return result_content
             except Exception as e:
                 print(f"Error in metadata-based retrieval: {e}")
         
@@ -402,7 +427,12 @@ class MacroTargetingServiceLocal:
         results = retriever.invoke(query)
         
         if results:
-            return results[0].page_content
+            # Store result and clear results object to free memory
+            result_content = results[0].page_content
+            del results
+            import gc
+            gc.collect()
+            return result_content
         else:
             return "No relevant nutrition guidelines found."
     
@@ -416,6 +446,11 @@ class MacroTargetingServiceLocal:
         for doc in results:
             metadata_info = f"[Source: {doc.metadata.get('age_group', 'Unknown')} - {doc.metadata.get('filename', 'Unknown')}]"
             formatted_results.append(f"{metadata_info}\n{doc.page_content}")
+        
+        # Clear results object to free memory
+        del results
+        import gc
+        gc.collect()
         
         return "\n\n".join(formatted_results)
     

@@ -48,3 +48,7 @@ class GlobalEmbeddings:
 def get_embedding_model() -> SentenceTransformer:
     """Get the global embedding model instance."""
     return GlobalEmbeddings.get_instance().model
+
+def clear_embedding_model():
+    """Clear the global embedding model to free memory."""
+    GlobalEmbeddings.clear_model()
