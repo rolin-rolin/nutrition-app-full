@@ -94,8 +94,8 @@ class ProductVectorStore:
         # Generate embedding text
         embedding_text = generate_product_embedding_text(product)
 
-        # Generate embedding using global singleton
-        embedding = get_embedding_model().encode([embedding_text])
+        # Generate embedding using global singleton with PyTorch optimizations
+        embedding = get_optimized_encoder()([embedding_text])
 
         # Create metadata for filtering (convert lists to strings for Chroma compatibility)
         metadata = {

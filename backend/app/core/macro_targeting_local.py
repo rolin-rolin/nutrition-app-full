@@ -42,6 +42,11 @@ class MacroTargetingServiceLocal:
         """
         self.rag_store_path = rag_store_path
         
+        # Initialize PyTorch memory management
+        import torch
+        if hasattr(torch, 'set_num_threads'):
+            torch.set_num_threads(1)  # Limit CPU threads for memory efficiency
+        
         # Initialize OpenAI for field extraction
         if openai_api_key is None:
             openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -124,25 +129,49 @@ class MacroTargetingServiceLocal:
             def embed_documents(self, texts):
                 model = self._get_model()
                 # Process in smaller batches for memory efficiency
-                batch_size = 5
+                batch_size = 3  # Reduced for better memory management
                 all_embeddings = []
+                
+                import torch
                 for i in range(0, len(texts), batch_size):
                     batch = texts[i:i + batch_size]
-                    batch_embeddings = model.encode(batch)
-                    all_embeddings.extend(batch_embeddings.tolist())
-                # Clear model reference to help with memory management
+                    
+                    # Use PyTorch optimizations
+                    with torch.no_grad():
+                        batch_embeddings = model.encode(batch)
+                        all_embeddings.extend(batch_embeddings.tolist())
+                    
+                    # Clear batch variables to free memory
+                    del batch_embeddings
+                
+                # Clear model reference and force cleanup
                 self.model = None
                 import gc
                 gc.collect()
+                
+                # Clear CUDA cache if available
+                if hasattr(torch.cuda, 'empty_cache'):
+                    torch.cuda.empty_cache()
+                
                 return all_embeddings
 
             def embed_query(self, text):
                 model = self._get_model()
-                embedding = model.encode([text])
-                # Clear model reference to help with memory management
+                
+                import torch
+                # Use PyTorch optimizations
+                with torch.no_grad():
+                    embedding = model.encode([text])
+                
+                # Clear model reference and force cleanup
                 self.model = None
                 import gc
                 gc.collect()
+                
+                # Clear CUDA cache if available
+                if hasattr(torch.cuda, 'empty_cache'):
+                    torch.cuda.empty_cache()
+                
                 return embedding.tolist()[0]
 
         return GlobalSentenceTransformerEmbeddings()
@@ -396,6 +425,12 @@ class MacroTargetingServiceLocal:
                     result_content = results['documents'][0]
                     del results
                     gc.collect()
+                    
+                    # Clear PyTorch memory
+                    import torch
+                    if hasattr(torch.cuda, 'empty_cache'):
+                        torch.cuda.empty_cache()
+                    
                     return result_content
             except Exception as e:
                 print(f"Error in metadata-based retrieval: {e}")
@@ -432,6 +467,12 @@ class MacroTargetingServiceLocal:
             del results
             import gc
             gc.collect()
+            
+            # Clear PyTorch memory
+            import torch
+            if hasattr(torch.cuda, 'empty_cache'):
+                torch.cuda.empty_cache()
+            
             return result_content
         else:
             return "No relevant nutrition guidelines found."

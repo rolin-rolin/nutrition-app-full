@@ -27,6 +27,28 @@ class GlobalEmbeddings:
             weakref.finalize(self._model, self._cleanup_model)
         return self._model
     
+    def encode_with_optimization(self, texts, **kwargs):
+        """Encode texts with PyTorch memory optimizations."""
+        import torch
+        
+        # Use no_grad context to prevent gradient computation and save memory
+        with torch.no_grad():
+            # Ensure we're using CPU
+            if hasattr(self._model, 'device'):
+                self._model.to('cpu')
+            
+            # Encode with memory-efficient settings
+            embeddings = self._model.encode(texts, **kwargs)
+            
+            # Convert to CPU if needed and clear CUDA cache
+            if hasattr(torch.cuda, 'empty_cache'):
+                torch.cuda.empty_cache()
+            
+            # Force garbage collection
+            gc.collect()
+            
+            return embeddings
+    
     @classmethod
     def _cleanup_model(cls):
         """Cleanup function called when model is garbage collected."""
@@ -48,6 +70,10 @@ class GlobalEmbeddings:
 def get_embedding_model() -> SentenceTransformer:
     """Get the global embedding model instance."""
     return GlobalEmbeddings.get_instance().model
+
+def get_optimized_encoder():
+    """Get the global embedding model with PyTorch optimizations."""
+    return GlobalEmbeddings.get_instance().encode_with_optimization
 
 def clear_embedding_model():
     """Clear the global embedding model to free memory."""
