@@ -33,12 +33,15 @@ class GlobalEmbeddings:
         
         # Use no_grad context to prevent gradient computation and save memory
         with torch.no_grad():
+            # Get the model (this will lazy load if needed)
+            model = self.model
+            
             # Ensure we're using CPU
-            if hasattr(self._model, 'device'):
-                self._model.to('cpu')
+            if hasattr(model, 'device'):
+                model.to('cpu')
             
             # Encode with memory-efficient settings
-            embeddings = self._model.encode(texts, **kwargs)
+            embeddings = model.encode(texts, **kwargs)
             
             # Convert to CPU if needed and clear CUDA cache
             if hasattr(torch.cuda, 'empty_cache'):

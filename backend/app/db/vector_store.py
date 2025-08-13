@@ -5,7 +5,7 @@ from langchain.embeddings.base import Embeddings
 import numpy as np
 from app.db.models import Product
 from app.core.embedding import generate_product_embedding_text, generate_query_embedding
-from app.core.global_embeddings import get_embedding_model
+from app.core.global_embeddings import get_embedding_model, get_optimized_encoder
 import gc
 
 """
@@ -95,7 +95,8 @@ class ProductVectorStore:
         embedding_text = generate_product_embedding_text(product)
 
         # Generate embedding using global singleton with PyTorch optimizations
-        embedding = get_optimized_encoder()([embedding_text])
+        encoder = get_optimized_encoder()
+        embedding = encoder([embedding_text])
 
         # Create metadata for filtering (convert lists to strings for Chroma compatibility)
         metadata = {
