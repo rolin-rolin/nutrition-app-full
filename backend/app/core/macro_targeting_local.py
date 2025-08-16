@@ -14,10 +14,9 @@ import yaml
 from typing import Dict, Optional, Tuple, Any, List
 import random
 import gc
+from pathlib import Path
 from langchain_chroma import Chroma
 from langchain.schema import SystemMessage, HumanMessage
-from app.core.global_embeddings import get_embedding_model
-from app.core.optimized_chroma import OptimizedChromaStore
 from langchain_community.document_loaders import TextLoader
 
 from langchain_openai import ChatOpenAI
@@ -25,7 +24,6 @@ from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 
 from app.db.models import UserInput, MacroTarget
-from app.db.session import get_db
 
 load_dotenv()
 
@@ -69,39 +67,31 @@ class MacroTargetingServiceLocal:
     def _initialize_vectorstore(self):
         """Initialize the vector store with nutrition guidelines."""
         try:
-            print("[DEBUG] Attempting to load existing Chroma vector store...")
+            print("[DEBUG] Loading frozen Chroma vector store...")
             # Create embedding function
             embedding_fn = self._get_embedding_function()
             
-            # Check if vector store exists and has content
-            store_path = Path(self.rag_store_path)
-            has_content = store_path.exists() and any(store_path.iterdir())
+            # Load existing vector store using the same method as creation
+            import chromadb
+            from chromadb.config import Settings
             
-            if not has_content:
-                print("[DEBUG] Vector store is empty, initializing from documents...")
-                self._create_vectorstore()
-                return
+            client = chromadb.PersistentClient(
+                path=self.rag_store_path,
+                settings=Settings(anonymized_telemetry=False)
+            )
             
-            # Initialize optimized store
-            self._store = OptimizedChromaStore(self.rag_store_path, embedding_fn)
+            collection_name = "nutrition_guidelines"
+            self._store = Chroma(
+                client=client,
+                collection_name=collection_name,
+                embedding_function=embedding_fn
+            )
             
-            # Verify store has documents
-            try:
-                doc_count = len(self._store.store.get()['documents'])
-                if doc_count == 0:
-                    print("[DEBUG] Vector store exists but is empty, rebuilding...")
-                    self._create_vectorstore()
-                else:
-                    print(f"[DEBUG] Loaded existing Chroma vector store with {doc_count} documents.")
-            except Exception as e:
-                print(f"[DEBUG] Error checking vector store content: {e}")
-                self._create_vectorstore()
+            print(f"[DEBUG] Successfully loaded frozen Chroma vector store from {self.rag_store_path}")
                 
         except Exception as e:
-            print(f"[DEBUG] Failed to load existing Chroma vector store: {e}")
-            print("[DEBUG] Creating new vector store from documents...")
-            # If it doesn't exist, create it from documents
-            self._create_vectorstore()
+            print(f"[DEBUG] CRITICAL ERROR: Failed to load frozen vector store: {e}")
+            raise RuntimeError(f"Cannot load pre-built vector store. This should not happen in production with frozen embeddings: {e}")
     
     def _ensure_vectorstore_loaded(self):
         """Lazy load vector store only when needed."""
@@ -110,7 +100,6 @@ class MacroTargetingServiceLocal:
     
     def _get_embedding_function(self):
         """Create a LangChain-compatible embedding function from sentence-transformers."""
-
         
         # Use global singleton instead of creating new instance
         from app.core.global_embeddings import get_embedding_model
@@ -154,7 +143,7 @@ class MacroTargetingServiceLocal:
                     torch.cuda.empty_cache()
                 
                 return all_embeddings
-
+            
             def embed_query(self, text):
                 model = self._get_model()
                 
@@ -173,7 +162,7 @@ class MacroTargetingServiceLocal:
                     torch.cuda.empty_cache()
                 
                 return embedding.tolist()[0]
-
+        
         return GlobalSentenceTransformerEmbeddings()
     
     def _load_documents(self):
@@ -193,7 +182,7 @@ class MacroTargetingServiceLocal:
             if not os.path.exists(age_group_path):
                 print(f"Warning: Age group directory {age_group_path} does not exist")
                 continue
-            
+                
             # Get all markdown files first
             md_files = [f for f in os.listdir(age_group_path) if f.endswith('.md')]
             
@@ -203,31 +192,31 @@ class MacroTargetingServiceLocal:
                 batch_docs = []
                 
                 for filename in batch_files:
-                    filepath = os.path.join(age_group_path, filename)
-                    try:
-                        # Load and parse frontmatter
-                        frontmatter, content = self._parse_markdown_with_frontmatter(filepath)
-                        
+                        filepath = os.path.join(age_group_path, filename)
+                        try:
+                            # Load and parse frontmatter
+                            frontmatter, content = self._parse_markdown_with_frontmatter(filepath)
+                            
                         # Create document with enhanced metadata
-                        doc_metadata = {
-                            'age_group': age_group,
-                            'filename': filename,
-                            'filepath': filepath,
+                            doc_metadata = {
+                                'age_group': age_group,
+                                'filename': filename,
+                                'filepath': filepath,
                             'content': content,  # Store full content for exact retrieval
                             **frontmatter  # Include all frontmatter fields
-                        }
-                        
-                        # Create a single document per file (no chunking for exact matches)
-                        from langchain.schema import Document
-                        doc = Document(
+                            }
+                            
+                            # Create a single document per file (no chunking for exact matches)
+                            from langchain.schema import Document
+                            doc = Document(
                             page_content=content,
-                            metadata=doc_metadata
-                        )
-                        batch_docs.append(doc)
-                        print(f"Loaded: {filepath} (metadata: {frontmatter})")
-                        
-                    except Exception as e:
-                        print(f"Warning: Could not load {filepath}: {e}")
+                                metadata=doc_metadata
+                            )
+                            batch_docs.append(doc)
+                            print(f"Loaded: {filepath} (metadata: {frontmatter})")
+                            
+                        except Exception as e:
+                            print(f"Warning: Could not load {filepath}: {e}")
                 
                 # Add batch to documents and clear batch to free memory
                 documents.extend(batch_docs)
@@ -296,7 +285,7 @@ class MacroTargetingServiceLocal:
             del batch_texts, batch_metadatas, batch_ids
         
         # Create LangChain Chroma wrapper
-        self.vectorstore = Chroma(
+        self._store = Chroma(
             client=client,
             collection_name=collection_name,
             embedding_function=self._get_embedding_function()
@@ -304,7 +293,7 @@ class MacroTargetingServiceLocal:
         
         # Debug: Check what is in the vector store after creation
         try:
-            all_results = self.vectorstore.get(include=["documents", "metadatas"])
+            all_results = self._store.get(include=["documents", "metadatas"])
             print(f"[After creation] Total documents in vector store: {len(all_results['documents'])}")
             print("[After creation] Available metadata:")
             for i, metadata in enumerate(all_results['metadatas']):
@@ -389,7 +378,7 @@ class MacroTargetingServiceLocal:
         if where_clause:
             # Debug: Check what's in the vector store (with memory management)
             try:
-                all_results = self.vectorstore.get(include=["documents", "metadatas"])
+                all_results = self._store.get(include=["documents", "metadatas"])
                 print(f"Total documents in vector store: {len(all_results['documents'])}")
                 print("Available metadata:")
                 for i, metadata in enumerate(all_results['metadatas']):
@@ -414,7 +403,7 @@ class MacroTargetingServiceLocal:
                 
                 print(f"Chroma where clause: {chroma_where}")
                 
-                results = self.vectorstore.get(
+                results = self._store.get(
                     where=chroma_where,
                     include=["documents", "metadatas"]
                 )
@@ -458,7 +447,7 @@ class MacroTargetingServiceLocal:
         query = " ".join(query_parts) if query_parts else user_input.user_query
         
         # Use vector search
-        retriever = self.vectorstore.as_retriever(search_kwargs={"k": 1})
+        retriever = self._store.as_retriever(search_kwargs={"k": 1})
         results = retriever.invoke(query)
         
         if results:
@@ -479,7 +468,7 @@ class MacroTargetingServiceLocal:
     
     def retrieve_context(self, user_query: str, k: int = 3) -> str:
         """Legacy method for backward compatibility."""
-        retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
+        retriever = self._store.as_retriever(search_kwargs={"k": k})
         results = retriever.invoke(user_query)
         
         # Format results with metadata information
@@ -512,8 +501,6 @@ class MacroTargetingServiceLocal:
             import re
             cleaned_context = re.sub(r'!!\w+', '', context)
             
-            # Parse the original content line by line to extract the correct values
-            # This handles the flat YAML structure properly
             lines = context.split('\n')
             pre = {}
             during = {}
@@ -527,13 +514,14 @@ class MacroTargetingServiceLocal:
                 line = line.strip()
                 if not line or line.startswith('#'):
                     continue
-                    
                 if line == 'pre:':
                     current_section = 'pre'
                 elif line == 'during:':
                     current_section = 'during'
                 elif line == 'post:':
                     current_section = 'post'
+                elif line in ['overall_targets:', 'key_principles:', 'avoid:']:
+                    current_section = None  # Ignore these sections
                 elif ':' in line and current_section:
                     key, value = line.split(':', 1)
                     key = key.strip()
@@ -690,6 +678,11 @@ class MacroTargetingServiceLocal:
             # Estimate calories (4 cal/g for carbs and protein, 9 cal/g for fat)
             total_calories = (total_carbs * 4) + (total_protein * 4) + (total_fat * 9)
             
+            # Success - line-by-line parser worked
+            print(f"✅ MACRO CALCULATION SUCCESS: Calculated personalized macros (line-by-line parser)")
+            print(f"   User context: {user_input.age}y, {user_input.weight_kg}kg, {user_input.exercise_duration_minutes}min {user_input.exercise_type}")
+            print(f"   Calculated: {round(total_calories, 1)} cal, {round(total_protein, 1)}g protein, {round(total_carbs, 1)}g carbs")
+            
             return {
                 'target_calories': round(total_calories, 1),
                 'target_protein': round(total_protein, 1),
@@ -718,10 +711,12 @@ class MacroTargetingServiceLocal:
             }
             
         except Exception as e:
-            print(f"Error calculating macros from YAML: {e}")
-            # Fallback to default values
+            print(f"YAML PARSING FAILED: {e}")
+            print("Falling back to hardcoded default macro values")
+            print(f"   User context: {user_input.age}y, {user_input.weight_kg}kg, {user_input.exercise_duration_minutes}min {user_input.exercise_type}")
+            # Fallback to default values when YAML parsing fails
             return self._get_default_macro_values(user_input)
-    
+            
     def _calculate_range(self, range_values: List[float], multiplier: float) -> float:
         """
         Calculate the average of a range and multiply by the given factor.
@@ -743,15 +738,18 @@ class MacroTargetingServiceLocal:
     
     def _get_default_macro_values(self, user_input: UserInput) -> Dict[str, Any]:
         """
-        Fallback method that provides default macro values using the old rule-based approach.
-        This is used when YAML parsing fails or when the context doesn't contain structured data.
+        Fallback method that provides hardcoded default macro values.
+        This is ONLY used when YAML parsing fails, not for missing user fields.
+        Missing user fields get defaults applied BEFORE the normal YAML calculation pipeline.
         
         Args:
             user_input: User input with age, weight, duration, etc.
         
         Returns:
-            Dict with default macro targets
+            Dict with hardcoded default macro targets
         """
+        print(f"🔧 USING HARDCODED DEFAULT MACRO VALUES (YAML parsing failed)")
+        
         macro_values = {
             'target_calories': 500.0,  # Default values
             'target_protein': 25.0,
@@ -1172,7 +1170,7 @@ class MacroTargetingServiceLocal:
         if where_clause:
             # Debug: Check what's in the vector store
             try:
-                all_results = self.vectorstore.get(include=["documents", "metadatas"])
+                all_results = self._store.get(include=["documents", "metadatas"])
                 print(f"Total documents in vector store: {len(all_results['documents'])}")
                 print("Available metadata:")
                 for i, metadata in enumerate(all_results['metadatas']):
@@ -1192,7 +1190,7 @@ class MacroTargetingServiceLocal:
                 
                 print(f"Chroma where clause: {chroma_where}")
                 
-                results = self.vectorstore.get(
+                results = self._store.get(
                     where=chroma_where,
                     include=["documents", "metadatas"]
                 )
@@ -1476,6 +1474,7 @@ Normalization rules / notes:
     def _convert_extracted_fields_to_user_input(self, extracted_fields: Dict[str, Any], original_query: str) -> Dict[str, Any]:
         """
         Convert LLM-extracted fields to UserInput model format.
+        Apply defaults for missing fields so the normal pipeline can run with complete data.
         
         Args:
             extracted_fields: Fields extracted by LLM
@@ -1484,17 +1483,20 @@ Normalization rules / notes:
         Returns:
             Dict suitable for UserInput model creation
         """
+        # Apply defaults for missing fields (your vision: defaults should flow through normal pipeline)
         user_input_data = {
             "user_query": original_query,
-            "age": extracted_fields.get("age"),
-            "exercise_type": extracted_fields.get("activity_type"),
-            "exercise_duration_minutes": extracted_fields.get("duration_minutes"),
+            "age": extracted_fields.get("age") or 21,  # Default age: 21
+            "exercise_type": extracted_fields.get("activity_type") or "cardio",  # Default exercise: cardio
+            "exercise_duration_minutes": extracted_fields.get("duration_minutes") or 60,  # Default duration: 60 minutes (long cardio)
         }
         
-        # Convert weight from pounds to kg
+        # Convert weight from pounds to kg, with default if not provided
         weight_lb = extracted_fields.get("weight_lb")
         if weight_lb:
             user_input_data["weight_kg"] = round(weight_lb * 0.453592, 1)
+        else:
+            user_input_data["weight_kg"] = 70.0  # Default weight: 70kg
         
         # Store additional preferences in the preferences JSON field
         preferences = {

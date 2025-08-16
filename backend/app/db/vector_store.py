@@ -59,24 +59,27 @@ class ProductVectorStore:
 
     def _initialize_vectorstore(self):
         """
-        Initialize the vector store.
+        Initialize the vector store - trust frozen embeddings in production.
         """
         try:
-            # Try to load existing vector store
+            # Lazy import to avoid loading heavy dependencies at startup
+            from langchain_chroma import Chroma
+            # Load frozen vector store directly (trust pre-built embeddings)
             self.vectorstore = Chroma(
                 persist_directory=self.persist_directory,
                 embedding_function=self._get_embedding_function()
             )
-            print(f"Loaded existing product vector store from {self.persist_directory}")
+            print(f"Successfully loaded frozen product vector store from {self.persist_directory}")
         except Exception as e:
-            print(f"Failed to load existing vector store: {e}")
-            print("Creating new product vector store...")
-            self._create_vectorstore()
+            print(f"CRITICAL ERROR: Failed to load frozen product vector store: {e}")
+            raise RuntimeError(f"Cannot load pre-built product vector store. This should not happen in production with frozen embeddings: {e}")
 
     def _create_vectorstore(self):
         """
         Create a new vector store.
         """
+        # Lazy import to avoid loading heavy dependencies at startup
+        from langchain_chroma import Chroma
         # Create empty vector store
         self.vectorstore = Chroma(
             persist_directory=self.persist_directory,
@@ -94,8 +97,8 @@ class ProductVectorStore:
         # Generate embedding text
         embedding_text = generate_product_embedding_text(product)
 
-        # Generate embedding using global singleton with PyTorch optimizations
-        embedding = get_optimized_encoder()([embedding_text])
+        # Generate embedding using global singleton
+        embedding = get_embedding_model().encode([embedding_text])
 
         # Create metadata for filtering (convert lists to strings for Chroma compatibility)
         metadata = {

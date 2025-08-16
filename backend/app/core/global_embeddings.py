@@ -2,13 +2,12 @@
 Global singleton for SentenceTransformer model to ensure only one instance is loaded.
 """
 from typing import Optional
-from sentence_transformers import SentenceTransformer
 import gc
 import weakref
 
 class GlobalEmbeddings:
     _instance = None
-    _model: Optional[SentenceTransformer] = None
+    _model: Optional[object] = None  # Using object to avoid import at module level
     
     @classmethod
     def get_instance(cls):
@@ -17,10 +16,12 @@ class GlobalEmbeddings:
         return cls._instance
     
     @property
-    def model(self) -> SentenceTransformer:
+    def model(self):
         """Lazy load the model only when needed."""
         if self._model is None:
             print("[DEBUG] Loading SentenceTransformer model...")
+            # Lazy import to avoid loading heavy dependencies at startup
+            from sentence_transformers import SentenceTransformer
             # Use device='cpu' to ensure CPU-only usage and reduce memory
             self._model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
             # Create a weakref to help with garbage collection
@@ -67,7 +68,7 @@ class GlobalEmbeddings:
             cls._model = None
             gc.collect()
 
-def get_embedding_model() -> SentenceTransformer:
+def get_embedding_model():
     """Get the global embedding model instance."""
     return GlobalEmbeddings.get_instance().model
 
