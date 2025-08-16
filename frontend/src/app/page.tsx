@@ -606,7 +606,9 @@ export default function OARecsLanding() {
 
                         <div className="flex flex-col sm:flex-row gap-4 mt-6">
                             <button
-                                className="bg-purple-700 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-800 transition-colors flex items-center justify-center disabled:opacity-60"
+                                className={`text-white px-8 py-3 rounded-full font-semibold flex items-center justify-center disabled:opacity-60 ${
+                                    loading ? "bg-purple-700 animate-pulse-purple" : "bg-purple-700 hover:bg-purple-800"
+                                }`}
                                 onClick={handleGenerate}
                                 disabled={loading || !userQuery.trim()}
                             >
@@ -630,6 +632,22 @@ export default function OARecsLanding() {
                                 Clear
                             </button>
                         </div>
+
+                        <style jsx>{`
+                            @keyframes pulse-purple {
+                                0%,
+                                100% {
+                                    background-color: rgb(147 51 234); /* purple-600 - lighter */
+                                }
+                                50% {
+                                    background-color: rgb(88 28 135); /* purple-800 - darker */
+                                }
+                            }
+
+                            .animate-pulse-purple {
+                                animation: pulse-purple 3s ease-in-out infinite;
+                            }
+                        `}</style>
 
                         {/* Error Message */}
                         {error && <div className="mt-6 text-red-600 font-semibold text-center">{error}</div>}
@@ -1033,11 +1051,13 @@ export default function OARecsLanding() {
                                                     className="flex items-start space-x-2"
                                                     variants={fadeInUp}
                                                 >
-                                                    <div className="w-2 h-2 bg-pink-400 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <div className="text-sm text-gray-700">
-                                                        {typeof principle === "string"
-                                                            ? principle
-                                                            : principle.principle || JSON.stringify(principle)}
+                                                    <div className="flex items-start">
+                                                        <span className="text-black mr-3 flex-shrink-0">•</span>
+                                                        <div className="text-sm text-gray-700">
+                                                            {typeof principle === "string"
+                                                                ? principle
+                                                                : principle.principle || JSON.stringify(principle)}
+                                                        </div>
                                                     </div>
                                                 </motion.div>
                                             ))}
@@ -1072,7 +1092,17 @@ export default function OARecsLanding() {
                                         <h3 className="text-xl font-bold text-gray-800 mb-4">
                                             Recommendation Reasoning
                                         </h3>
-                                        <div className="text-gray-700 whitespace-pre-line">{result.reasoning}</div>
+                                        <div className="text-gray-700">
+                                            {result.reasoning
+                                                .split("\n")
+                                                .filter((line) => line.trim().length > 0)
+                                                .map((line, index) => (
+                                                    <div key={index} className="flex items-start mb-2">
+                                                        <span className="text-black mr-3 flex-shrink-0">•</span>
+                                                        <span className="flex-1">{line.trim()}</span>
+                                                    </div>
+                                                ))}
+                                        </div>
                                     </motion.div>
                                 )}
                             </motion.div>
