@@ -539,7 +539,7 @@ class MacroTargetingServiceLocal:
                     except:
                         # Skip if we can't parse the value
                         continue
-            
+                
             # If we successfully parsed some values with line-by-line parser, use them
             if pre or during or post:
                 # Continue with the line-by-line parsing results
