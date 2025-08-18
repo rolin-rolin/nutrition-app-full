@@ -1,20 +1,23 @@
-# OA Recs - AI-Powered Snack Recommendation System
+# OA Recs - Nutrition Pack Recommendation System
 
-A nutrition recommendation system that provides personalized snack suggestions based on user demographics, workout type, and dietary preferences! Built with AI-powered field extraction, RAG-based nutrition guidelines, and multi-layer optimization algorithms.
+A recommendation system that generates personalized macronutrient targets and optimized nutritious snack packs (combinations) based on user context (age, weight, exercise type/duration) and preferences! Features LLM-powered natural language processing, RAG-based nutrition guidelines, vector search product matching, and dynamic programming optimization to get you precise nutritional recommendations with timing breakdowns.
+
+This is a part of a bigger project I'm working on called OA Packs, the all-in-one platform that'll be your portable personal nutritionist. More to come!
+
+<img width="1700" height="902" alt="Screenshot 2025-08-17 at 9 20 32 PM" src="https://github.com/user-attachments/assets/63b93bb5-9bab-485b-80ad-c056084485f4" />
 
 ## Table of Contents
 
--   [What This App Does](#-what-this-app-does)
--   [Tech Stack](#️-tech-stack)
--   [System Flow Overview](#-system-flow-overview)
--   [Detailed Implementation](#️-detailed-implementation)
--   [Getting Started](#-getting-started)
-
+-  [What This App Does](#what-this-app-does)
+-  [Tech Stack](#tech-stack)
+-  [System Flow Overview](#system-flow-overview)
+-  [Detailed Implementation](#detailed-implementation)
+-  [My Thoughts Doc!](#my-thoughts)
 ---
 
 ## What This App Does
 
-OA Recs uses an intelligent recommendation system that:
+OA Recs uses a recommendation system that:
 
 -   **Analyzes user context** (age, weight, exercise type, duration) to generate personalized macronutrient targets to hit
 -   **Extracts preferences** from natural language using OpenAI's LLM
@@ -151,9 +154,13 @@ pre:
     carbs_g_per_kg: [0.5, 0.8]
     protein_g_per_kg: [0.1, 0.15]
 
+(some guidelines)
+
 key_principles:
     - Post-workout carb + protein combination supports muscle repair
     - Hydration and electrolyte replacement important in long sessions
+
+(some more guidelines)
 ```
 
 **Component Interactions**:
@@ -283,11 +290,16 @@ return EnhancedRecommendationResponse(
 -   **Nutrition Principles** - Expert guidance from RAG
 
 ---
+## My Thoughts
 
-## 📄 License
+I wrote all my thoughts down on this Google Doc as I built this out. For future reference so I remember why I chose to do some things!
+- [MoneyTalkThoughtDoc](https://docs.google.com/document/d/16FcZZDRr4RWbPYkHIZYYw92WXlWxlM06KXrVtuZG3M4/edit?tab=t.0)
+
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Built with ❤️ for personalized nutrition optimization**
+**Built with ❤️ for food**
